@@ -1,0 +1,9 @@
+The OBJECT ORIENTED COMMUNICATION LIBRARY  (oocl)
+is intended to be a platform independent and easy to use c++ library for network communication.
+
+It has no other dependencies.
+
+There are project files for following IDEs:
+- Microsoft Visual Studio 2008 (./msvc/2008)
+- Microsoft Visual Studio 2010 (./msvc/2010)
+- Code::Blocks (./cb)

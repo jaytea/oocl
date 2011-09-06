@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_layout_file>
+	<ActiveTarget name="" />
+	<File name="../include/DirectConNetwork.h" open="1" top="0" tabpos="2">
+		<Cursor position="1411" topLine="35" />
+	</File>
+	<File name="../include/Thread.h" open="1" top="0" tabpos="4">
+		<Cursor position="0" topLine="10" />
+	</File>
+	<File name="../src/DirectConNetwork.cpp" open="1" top="1" tabpos="1">
+		<Cursor position="1411" topLine="34" />
+	</File>
+	<File name="../src/Thread.cpp" open="1" top="0" tabpos="3">
+		<Cursor position="1709" topLine="35" />
+	</File>
+</CodeBlocks_layout_file>
