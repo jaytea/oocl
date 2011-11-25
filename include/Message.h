@@ -42,9 +42,9 @@ namespace oocl
 		// *********** getter *************
 		/**
 		 * @brief return a ready-to-send string representation of the message
-		 *  | Type  | Length| Messagebody
-		 *  |   |   |   |   |   |   ....
-		 * => Length = length of the messageBody
+		 *  | Type  |Length | Messagebody
+		 *  |2 byte |2 byte |   |   ....
+		 * => Length = length of the messageBody in byte
 		 */
 		virtual std::string       getMsgString() = 0;
 
@@ -86,11 +86,12 @@ namespace oocl
 			Message::registerMsg( sm_type, StandardMessage::create );
 		}
 
-		/**
-		 * @brief constructor for creating the message intra client and for create
+		/** @brief constructor for creating the message intra client and for create
+		 *
+		 *  @note must be present in every implementation of Message!
 		 */
 		StandardMessage( const char * cMsgBody, unsigned short length  );
-		StandardMessage( std::string strMsgBody  );
+		StandardMessage( std::string strMsgBody );
 
 		virtual std::string getMsgString();
 

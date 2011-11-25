@@ -23,15 +23,67 @@ subject to the following restrictions:
 
 namespace oocl
 {
-
+	/**
+	 * @class	MessageListener
+	 *
+	 * @brief	Message listener.
+	 *
+	 * @author	Jörn Teuber
+	 * @date	11/25/2011
+	 */
 	class OOCL_EXPORTIMPORT MessageListener
 	{
 	public:
+
+		/**
+		 * @fn	MessageListener::MessageListener(void)
+		 *
+		 * @brief	Default constructor.
+		 *
+		 * @author	Jörn Teuber
+		 * @date	11/25/2011
+		 */
 		MessageListener(void) {}
+
+		/**
+		 * @fn	virtual MessageListener::~MessageListener(void)
+		 *
+		 * @brief	Destructor.
+		 *
+		 * @author	Jörn Teuber
+		 * @date	11/25/2011
+		 */
 		virtual ~MessageListener(void) {};
 
+		/**
+		 * @fn	virtual bool MessageListener::cbMessage( Message* pMessage ) = 0;
+		 *
+		 * @brief	This is the callback method for the messages.
+		 * 			
+		 * @note	in the standard implementation this method will be called at the same time to be thread-safe. 
+		 * 			If you do not want this behaviour see the notes at requestMutex().
+		 *
+		 * @author	Jörn Teuber
+		 * @date	11/25/2011
+		 *
+		 * @param [in,out]	pMessage	If non-null, the message.
+		 *
+		 * @return	true if it succeeds, false if it fails.
+		 */
 		virtual bool cbMessage( Message* pMessage ) = 0;
 
+		/**
+		 * @fn	virtual bool MessageListener::requestMutex()
+		 *
+		 * @brief	will always be called before cbMessage() to be thread-safe.
+		 * 			
+		 * @note	you can implement this for your listeners if you do not need this strikt thread safety.
+		 *
+		 * @author	Jörn Teuber
+		 * @date	11/25/2011
+		 *
+		 * @return	true if cbMessage can be called safely, false if not
+		 */
 		virtual bool requestMutex() 
 		{ 
 			if( m_bMutex )
@@ -43,6 +95,14 @@ namespace oocl
 			return false;
 		}
 
+		/**
+		 * @fn	virtual void MessageListener::returnMutex()
+		 *
+		 * @brief	Returns the mutex.
+		 *
+		 * @author	Jörn Teuber
+		 * @date	11/25/2011
+		 */
 		virtual void returnMutex()
 		{
 			m_bMutex = true;
@@ -50,7 +110,8 @@ namespace oocl
 
 	protected:
 
-		bool m_bMutex; // true if Mutex free
+		///< true if the mutex is free
+		bool m_bMutex; 
 	};
 
 }

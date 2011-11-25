@@ -41,6 +41,8 @@ namespace oocl
 		~Socket();
 
 		bool connect( std::string host, unsigned short port );
+		bool connect( unsigned int uiHostIP, unsigned short port );
+		bool bind( unsigned short usPort );
 
 		bool isValid();
 		bool isConnected();
@@ -73,7 +75,7 @@ namespace oocl
 		static int iSocketCounter;
 
 	private:
-		long getAddrFromString( const char* hostnameOrIp );
+		unsigned int getAddrFromString( const char* hostnameOrIp );
 
 		int bufferSize;
 	};

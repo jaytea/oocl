@@ -22,14 +22,19 @@ subject to the following restrictions:
 #include "oocl_import_export.h"
 
 #include "MessageListener.h"
+#include "ServerSocket.h"
 #include "Socket.h"
 #include "Thread.h"
 
 namespace oocl
 {
-	/// class for connecting with one other process and sending and receiving messages.
 	/**
-	 * this can be the client side of a client-server-network
+	 * @class	DirectConNetwork
+	 *
+	 * @brief	class for connecting with one other process and sending and receiving messages.
+	 *
+	 * @author	Jörn Teuber
+	 * @date	9/14/2011
 	 */
 	class OOCL_EXPORTIMPORT DirectConNetwork : public Thread
 	{
@@ -37,7 +42,8 @@ namespace oocl
 		DirectConNetwork();
 		~DirectConNetwork();
 
-		bool connect( std::string strHostname, unsigned short usPort, int iProtocoll = 0 );
+		bool connect( std::string strHostname, unsigned short usPort, int iProtocoll );
+		bool listen( unsigned short usPort, int iProtocoll );
 		bool disconnect();
 
 		bool sendMsg( Message* pMessage );
@@ -48,12 +54,15 @@ namespace oocl
 		// getter
 		bool isConnected() { return m_bConnected; }
 
+	protected:
+		virtual void run();
+
 	private:
-		Socket* m_pUDPSocket;
-		Socket* m_pTCPSocket;
 		Socket* m_pStdSocket;
+		ServerSocket* m_pServerSocket;
 
 		int     m_iStdProtocoll;
+		unsigned short	m_usPort;
 		std::list<MessageListener*> m_lListeners;
 
 		bool m_bConnected;

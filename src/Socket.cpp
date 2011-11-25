@@ -41,7 +41,8 @@ namespace oocl
 
 		sockfd = socket(AF_INET, iSockType, 0);
 #ifdef linux
-		if (sockfd < 0){
+		if (sockfd < 0)
+		{
     		bValid = false;
 			perror("ERROR opening socket");
 		}
@@ -56,9 +57,14 @@ namespace oocl
 
 	bool Socket::connect( std::string host, unsigned short port )
 	{
+		return connect( getAddrFromString( host.c_str() ), port );
+	}
+
+	bool Socket::connect( unsigned int uiHostIP, unsigned short port )
+	{
 		if( bValid && !bConnected )
 		{
-			getAddrFromString( host.c_str() );
+			addr.sin_addr.s_addr = uiHostIP;
 			addr.sin_family = AF_INET;
 			addr.sin_port = htons(port);
 
@@ -78,6 +84,37 @@ namespace oocl
 			}
 #endif
 
+			bConnected = true;
+
+			return true;
+		}
+
+		return false;
+	}
+
+	bool Socket::bind( unsigned short usPort )
+	{
+		if( bValid && !bConnected )
+		{
+			addr.sin_family = AF_INET;
+			addr.sin_port = htons(usPort);
+			addr.sin_addr.s_addr = INADDR_ANY;
+
+			int result = ::bind(sockfd, (struct sockaddr *)&addr, sizeof(addr));
+#ifdef linux
+			if( result < 0){
+    			perror("ERROR binding socket!");
+    			close();
+				return false;
+			}
+#else
+			if( result == SOCKET_ERROR )
+			{
+				printf("ERROR binding socket! Error code: %d\n", WSAGetLastError() );
+    			close();
+				return false;
+			}
+#endif
 			bConnected = true;
 
 			return true;
@@ -228,7 +265,7 @@ namespace oocl
 #endif
 	}
 
-	long Socket::getAddrFromString(const char* hostnameOrIp)
+	unsigned int Socket::getAddrFromString(const char* hostnameOrIp)
 	{
 		long rc;
 		unsigned long ip;
@@ -244,8 +281,7 @@ namespace oocl
 		/* bei einem fehler liefert inet_addr den Rückgabewert INADDR_NONE */
 		if(ip!=INADDR_NONE)
 		{
-			addr.sin_addr.s_addr=ip;
-			return 0;
+			return ip;
 		}
 		else
 		{
@@ -261,7 +297,7 @@ namespace oocl
 				memcpy(&(addr.sin_addr),he->h_addr_list[0],4);
 			}
 
-			return 0;
+			return addr.sin_addr.s_addr;
 		}
 	}
 

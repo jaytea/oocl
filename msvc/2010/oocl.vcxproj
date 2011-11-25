@@ -93,6 +93,8 @@
     <ClInclude Include="..\..\include\Socket.h" />
     <ClInclude Include="..\..\include\SocketStub.h" />
     <ClInclude Include="..\..\include\Thread.h" />
+    <ClInclude Include="Log.h" />
+    <ClInclude Include="Peer2PeerNetwork.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\DirectConNetwork.cpp" />
@@ -105,6 +107,8 @@
     <ClCompile Include="..\..\src\Socket.cpp" />
     <ClCompile Include="..\..\src\SocketStub.cpp" />
     <ClCompile Include="..\..\src\Thread.cpp" />
+    <ClCompile Include="Log.cpp" />
+    <ClCompile Include="Peer2PeerNetwork.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

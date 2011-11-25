@@ -18,13 +18,27 @@ subject to the following restrictions:
 
 namespace oocl
 {
-
 	int Thread::sm_iThreadCount = 0;
 
+	/**
+	 * @fn	Thread::Thread()
+	 *
+	 * @brief	Default constructor.
+	 *
+	 * @author	Jörn Teuber
+	 * @date	11/23/2011
+	 */
 	Thread::Thread(){
-		m_bRuns = false;
 	}
 
+	/**
+	 * @fn	void Thread::join()
+	 *
+	 * @brief	blocks until the thread has finished
+	 *
+	 * @author	Jörn Teuber
+	 * @date	11/23/2011
+	 */
 	void Thread::join()
 	{
 #ifdef linux
@@ -34,14 +48,48 @@ namespace oocl
 #endif
 	}
 
+	/**
+	 * @fn	void Thread::sleep( int iMilliseconds )
+	 *
+	 * @brief	Blocks the thread for a specified time.
+	 *
+	 * @author	Jörn Teuber
+	 * @date	11/23/2011
+	 *
+	 * @param	iMilliseconds	milliseconds to sleep or 0 to pass the current timeslot to the next thread.
+	 */
+	void Thread::sleep( int iMilliseconds )
+	{
+#ifdef linux
+		usleep(iMilliseconds*1000);
+#else
+		Sleep(iMilliseconds);
+#endif
+	}
+
+	/**
+	 * @fn	bool Thread::isAlive()
+	 *
+	 * @brief	Query if this thread is alive.
+	 *
+	 * @author	Jörn Teuber
+	 * @date	11/23/2011
+	 *
+	 * @return	true if alive, false if not.
+	 */
 	bool Thread::isAlive(){
-		return m_bRuns;
 	}
 
-	int Thread::activeCount(){
-		return sm_iThreadCount;
-	}
-
+	/**
+	 * @fn	bool Thread::start()
+	 *
+	 * @brief	Starts the thread.
+	 *
+	 * @author	Jörn Teuber
+	 * @date	11/23/2011
+	 *
+	 * @return	true if it succeeds, false if it fails.
+	 */
 	bool Thread::start()
 	{
 #ifdef linux
@@ -62,6 +110,16 @@ namespace oocl
 		return 0;
 	}
 
+	/**
+	 * @fn	void Thread::setPriority( EPriority iPriority )
+	 *
+	 * @brief	Sets a new thread priority.
+	 *
+	 * @author	Jörn Teuber
+	 * @date	11/23/2011
+	 *
+	 * @param	iPriority	the new priority.
+	 */
 	void Thread::setPriority( EPriority iPriority )
 	{
 		m_iThreadPriority = iPriority;

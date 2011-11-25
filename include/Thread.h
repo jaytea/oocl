@@ -27,11 +27,23 @@ subject to the following restrictions:
 
 namespace oocl
 {
-
+	/**
+	 * @class	Thread
+	 *
+	 * @brief	Thread.
+	 *
+	 * @author	Jörn Teuber
+	 * @date	11/23/2011
+	 */
 	class OOCL_EXPORTIMPORT Thread
 	{
 	public:
-	
+
+		/**
+		 * @enum	EPriority
+		 *
+		 * @brief	Values that represent the thread priority.
+		 */
 		enum EPriority
 		{
 			TP_Lowest = -2,
@@ -44,7 +56,9 @@ namespace oocl
 		Thread();
 
 		bool start();
+
 		void join();
+		void sleep( int iMilliseconds );
 
 		// setter
 		void setPriority( EPriority iPriority );
@@ -52,7 +66,6 @@ namespace oocl
 		// getter
 		EPriority  getPriority() { return m_iThreadPriority;}
 		bool isAlive();
-		int activeCount();
 
 	protected:
 		virtual void run() = 0;
@@ -66,14 +79,18 @@ namespace oocl
 	private:
 
 #ifdef linux
+		///< Identifier for the thread
 		pthread_t m_iThreadID;
 #else
+		///< Identifier for the thread
 		DWORD m_iThreadID;
+		///< Handle of the thread
 		HANDLE m_hThread;
 #endif
 
-		bool m_bRuns;
+		///< The thread priority
 		EPriority m_iThreadPriority;
+		///< Number of threads
 		static int sm_iThreadCount;
 
 	};
