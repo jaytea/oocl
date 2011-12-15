@@ -35,6 +35,7 @@ namespace oocl
 		Socket * accept();
 
 		bool isValid() { return bValid; }
+		int getCSocket() { return sockfd; }
 		
 	private:
 		struct sockaddr_in addr;

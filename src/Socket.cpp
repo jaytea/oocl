@@ -24,70 +24,75 @@ namespace oocl
 
 	Socket::Socket(int socket, struct sockaddr_in sock_addr)
 		: SocketStub(),
-		bValid( true )
+		bValid( true ),
+		bConnected( true ),
+		bufferSize( 1024 ),
+		sockfd( socket ),
+		m_addrData( sock_addr )
 	{
-		bConnected = true;
-		bufferSize = 1024;
-		sockfd = socket;
-		addr = sock_addr;
 	}
 
 	Socket::Socket( int iSockType )
 		: SocketStub(),
-		bConnected( false )
+		bConnected( false ),
+		bValid( true ),
+		bufferSize( 1024 )
 	{
-		bValid = true;
-		bufferSize = 1024;
+
+		if( iSockType != SOCK_STREAM && iSockType != SOCK_DGRAM )
+		{
+			Log::getLog("oocl")->logMessage("Socket gets invalid protocoll type; defaults to TCP", Log::EL_WARNING );
+			iSockType = SOCK_STREAM;
+		}
 
 		sockfd = socket(AF_INET, iSockType, 0);
 #ifdef linux
 		if (sockfd < 0)
-		{
-    		bValid = false;
-			perror("ERROR opening socket");
-		}
 #else
 		if( sockfd == INVALID_SOCKET )
+#endif
 		{
     		bValid = false;
-			printf("ERROR opening socket! Error code: %d\n", WSAGetLastError() );
+			Log::getLog("oocl")->logMessage("Creating socket failed", Log::EL_ERROR);
 		}
-#endif
 	}
 
-	bool Socket::connect( std::string host, unsigned short port )
+	bool Socket::connect( std::string host, unsigned short usPort )
 	{
-		return connect( getAddrFromString( host.c_str() ), port );
+		return connect( getAddrFromString( host.c_str() ), usPort );
 	}
 
-	bool Socket::connect( unsigned int uiHostIP, unsigned short port )
+	bool Socket::connect( unsigned int uiHostIP, unsigned short usPort )
 	{
 		if( bValid && !bConnected )
 		{
-			addr.sin_addr.s_addr = uiHostIP;
-			addr.sin_family = AF_INET;
-			addr.sin_port = htons(port);
+			m_addrData.sin_addr.s_addr = uiHostIP;
+			m_addrData.sin_family = AF_INET;
+			m_addrData.sin_port = htons(usPort);
 
-			int result = ::connect(sockfd,(struct sockaddr *) &addr,sizeof(addr));
+			int result = ::connect(sockfd,(struct sockaddr *) &m_addrData, sizeof(m_addrData));
 #ifdef linux
-			if( result < 0){
-    			perror("ERROR connecting");
-    			close();
-				return false;
-			}
+			if( result < 0)
 #else
 			if( result == SOCKET_ERROR )
+#endif
 			{
-				printf("ERROR connecting! Error code: %d\n", WSAGetLastError() );
+				std::ostringstream os;
+				os << "Connecting socket to " << m_addrData.sin_addr.s_net << "." << m_addrData.sin_addr.s_host << "." << m_addrData.sin_addr.s_lh << "." << m_addrData.sin_addr.s_impno << ":" << usPort << " failed";
+				Log::getLog("oocl")->logMessage( os.str(), Log::EL_ERROR );
+
     			close();
 				return false;
 			}
-#endif
 
 			bConnected = true;
 
 			return true;
 		}
+		
+		std::ostringstream os;
+		os << "Connecting to " << m_addrData.sin_addr.s_net << "." << m_addrData.sin_addr.s_host << "." << m_addrData.sin_addr.s_lh << "." << m_addrData.sin_addr.s_impno << ":" << usPort << " failed due to invalid socket";
+		Log::getLog("oocl")->logMessage( os.str(), Log::EL_ERROR );
 
 		return false;
 	}
@@ -96,26 +101,24 @@ namespace oocl
 	{
 		if( bValid && !bConnected )
 		{
-			addr.sin_family = AF_INET;
-			addr.sin_port = htons(usPort);
-			addr.sin_addr.s_addr = INADDR_ANY;
+			m_addrData.sin_family = AF_INET;
+			m_addrData.sin_port = htons(usPort);
+			m_addrData.sin_addr.s_addr = INADDR_ANY;
 
-			int result = ::bind(sockfd, (struct sockaddr *)&addr, sizeof(addr));
+			int result = ::bind(sockfd, (struct sockaddr *)&m_addrData, sizeof(m_addrData));
 #ifdef linux
-			if( result < 0){
-    			perror("ERROR binding socket!");
-    			close();
-				return false;
-			}
+			if( result < 0)
 #else
 			if( result == SOCKET_ERROR )
+#endif
 			{
-				printf("ERROR binding socket! Error code: %d\n", WSAGetLastError() );
+				std::ostringstream os;
+				os << "Binding socket to port " << usPort << " failed";
+				Log::getLog("oocl")->logMessage( os.str(), Log::EL_ERROR );
+
     			close();
 				return false;
 			}
-#endif
-			bConnected = true;
 
 			return true;
 		}
@@ -126,6 +129,7 @@ namespace oocl
 	Socket::~Socket()
 	{
 		close();
+		SocketStub::~SocketStub();
 	}
 
 	bool Socket::isValid()
@@ -165,23 +169,22 @@ namespace oocl
 
 	char * Socket::readCA(int count, int * readCount)
 	{
-		if(bConnected && count>0){
+		if(bConnected && count>0)
+		{
     		char * buffer = new char[count];
 			int rc = ::recv(sockfd,buffer,count,0);
-			if(readCount != NULL){
+			if(readCount != NULL)
+			{
 				*readCount = rc;
 			}
 
-			if(rc > 0){
+			if(rc > 0)
+			{
 				return buffer;
 			}
-			else if(rc < 0){
-				//printf("recv:%d:%s\n", rc, buffer); ?? du gibts einen Buffer aus, der nur Müll enthält!
-#ifdef linux
-				perror("ERROR receiving");
-#else
-				printf("ERROR receiving! Error code: %d\n", WSAGetLastError() );
-#endif
+			else if(rc < 0)
+			{
+				Log::getLog("oocl")->logMessage( "receiving on connected socket failed", Log::EL_ERROR );
 				close();
 			}
 		}
@@ -197,7 +200,9 @@ namespace oocl
 			}
 
 			char * buffer = new char[count];
-			int fromlen;
+			int fromlen = sizeof( sockaddr_in );
+			struct sockaddr_in addr;
+
 			int rc = ::recvfrom( sockfd,buffer,count,0, (sockaddr*)&addr, &fromlen);
 
 			if(rc > 0)
@@ -208,50 +213,59 @@ namespace oocl
 			}
 			else if(rc < 0)
 			{
-#ifdef linux
-				perror("ERROR receiving");
-#else
-				printf("ERROR receiving! Error code: %d\n", WSAGetLastError() );
-#endif
+				rc = WSAGetLastError();
+				Log::getLog("oocl")->logMessage( "receiving on connectionless socket failed", Log::EL_ERROR );
 				close();
+				return std::string();
 			}
 		}
+
+		return std::string();
 	}
 
 
-	void Socket::write(std::string in)
+	bool Socket::write(std::string in)
 	{
-		writeCA(in.c_str(),in.length());
+		return writeCA(in.c_str(),in.length());
 	}
 
-	void Socket::writeC(char in)
+	bool Socket::writeC(char in)
 	{
-		writeCA(&in,1);
+		return writeCA(&in,1);
 	}
 
-	void Socket::writeCA(const char * in, int count)
+	bool Socket::writeCA(const char * in, int count)
 	{
-		if( bConnected && count>0 ){
-			int rc = ::send(sockfd,in,count,0);
-			if(rc < 0){
-				printf("send:%d:%d:%s\n",count, rc, in);
-#ifdef linux
-				perror("ERROR sending");
-#else
-				printf("ERROR sending! Error code: %d\n", WSAGetLastError() );
-#endif
-				close();
-			}
-		}
-	}
-
-	void Socket::writeTo( std::string in, std::string host, unsigned short port )
-	{
-		if( bValid && !bConnected )
+		if( bConnected && count>0 )
 		{
-			connect( host, port );
-			write( in );
+			int rc = ::send(sockfd,in,count,0);
+			if(rc < 0)
+			{
+				std::ostringstream os;
+				os << "Sending failed: " << count << ":" << rc << ":" << in;
+				Log::getLog("oocl")->logMessage( os.str(), Log::EL_ERROR );
+				close();
+				// TODO: implement failcount, close connection after n failed sendings
+
+				return false;
+			}
+
+			return true;
 		}
+
+		Log::getLog("oocl")->logMessage( "Sending failed due to unconnected socket", Log::EL_WARNING );
+
+		return false;
+	}
+
+	bool Socket::writeTo( std::string in, std::string host, unsigned short port )
+	{
+		if( connect( host, port ) )
+		{
+			return write( in );
+		}
+
+		return false;
 	}
 
 
@@ -267,7 +281,6 @@ namespace oocl
 
 	unsigned int Socket::getAddrFromString(const char* hostnameOrIp)
 	{
-		long rc;
 		unsigned long ip;
 		HOSTENT* he;
 
@@ -285,6 +298,8 @@ namespace oocl
 		}
 		else
 		{
+			struct sockaddr_in addr;
+
 			/* Hostname in hostnameOrIp auflösen */
 			he = gethostbyname(hostnameOrIp);
 			if(he==NULL)

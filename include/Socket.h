@@ -19,10 +19,12 @@ subject to the following restrictions:
 
 #include <string>
 #include <stdio.h>
+#include <sstream>
 
 #include "oocl_import_export.h"
 
 #include "SocketStub.h"
+#include "Log.h"
 
 namespace oocl
 {
@@ -40,8 +42,8 @@ namespace oocl
 		Socket( int iSockType = SOCK_STREAM );
 		~Socket();
 
-		bool connect( std::string host, unsigned short port );
-		bool connect( unsigned int uiHostIP, unsigned short port );
+		bool connect( std::string host, unsigned short usPort );
+		bool connect( unsigned int uiHostIP, unsigned short usPort );
 		bool bind( unsigned short usPort );
 
 		bool isValid();
@@ -54,18 +56,21 @@ namespace oocl
 		std::string readFrom( int count = 0, unsigned int* hostIP = NULL );
 
 
-		void write(std::string in);
-		void writeC(char in);
-		void writeCA(const char * in, int count);
+		bool write(std::string in);
+		bool writeC(char in);
+		bool writeCA(const char * in, int count);
 
-		void writeTo( std::string in, std::string host, unsigned short port );
+		bool writeTo( std::string in, std::string host, unsigned short port );
 
 		void close();
+
+		int getCSocket() { return sockfd; }
+		unsigned int getConnectedIP() { return m_addrData.sin_addr.S_un.S_addr; }
 
 	protected:
 		Socket(int socket, struct sockaddr_in sock_addr);
 
-		struct sockaddr_in addr;
+		struct sockaddr_in m_addrData;
 		//struct sockaddr_in6 addr6;
 		int sockfd;
 

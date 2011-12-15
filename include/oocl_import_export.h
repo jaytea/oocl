@@ -18,9 +18,12 @@ subject to the following restrictions:
 #if defined(_WIN32)
 #	ifdef OOCL_EXPORT
 #   	define OOCL_EXPORTIMPORT __declspec(dllexport)
+#		define EXPIMP_TEMPLATE
 #	else
 #   	define OOCL_EXPORTIMPORT __declspec(dllimport)
+#		define EXPIMP_TEMPLATE extern
 #	endif
 #else
 #   define OOCL_EXPORTIMPORT
+#	define EXPIMP_TEMPLATE
 #endif

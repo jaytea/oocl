@@ -19,7 +19,7 @@ subject to the following restrictions:
 namespace oocl
 {
 
-	std::map< unsigned short, MessageBroker* > MessageBroker::sm_mapBroker;
+	std::vector< MessageBroker* > MessageBroker::sm_vBroker;
 
 
 	MessageBroker::MessageBroker(void)
@@ -37,15 +37,22 @@ namespace oocl
 
 	MessageBroker* MessageBroker::getBrokerFor( unsigned short usMessageType )
 	{
-		std::map< unsigned short, MessageBroker* >::iterator it = sm_mapBroker.find( usMessageType );
-		if( it == sm_mapBroker.end() )
+		if( usMessageType > sm_vBroker.size() )
+		{
+			sm_vBroker.resize( usMessageType+1, NULL );
+
+			MessageBroker* pBroker = new MessageBroker();
+			sm_vBroker[usMessageType] = pBroker;
+			return pBroker;
+		}
+		else if( sm_vBroker[usMessageType] == NULL )
 		{
 			MessageBroker* pBroker = new MessageBroker();
-			sm_mapBroker.insert( std::pair< unsigned short, MessageBroker* >( usMessageType, pBroker ) );
+			sm_vBroker[usMessageType] = pBroker;
 			return pBroker;
 		}
 		else
-			return it->second;
+			return sm_vBroker[usMessageType];
 	}
 
 	bool MessageBroker::registerListener( MessageListener* pListener )

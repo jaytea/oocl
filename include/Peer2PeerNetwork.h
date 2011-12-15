@@ -14,62 +14,48 @@ subject to the following restrictions:
 */
 /// This file was written by Jörn Teuber
 
-#ifndef DIRECTCONNETWORK_H
-#define DIRECTCONNETWORK_H
+#ifndef PEER2PEERNETWORK_H
+#define PEER2PEERNETWORK_H
 
 #include <list>
 
-#include "oocl_import_export.h"
-
-#include "MessageListener.h"
-#include "ServerSocket.h"
-#include "Socket.h"
 #include "Thread.h"
+#include "MessageBroker.h"
 #include "ExplicitMessages.h"
+#include "Peer.h"
+#include "ServerSocket.h"
 
 namespace oocl
 {
 	/**
-	 * @class	DirectConNetwork
+	 * @class	Peer2PeerNetwork
 	 *
-	 * @brief	class for connecting with one other process and sending and receiving messages.
+	 * @brief	Peer 2 peer network.
+	 * 			
+	 * @note	sends message: NewPeerMessage
 	 *
 	 * @author	Jörn Teuber
-	 * @date	9/14/2011
+	 * @date	12/8/2011
 	 */
-	class OOCL_EXPORTIMPORT DirectConNetwork : public Thread
+	class OOCL_EXPORTIMPORT Peer2PeerNetwork : public Thread
 	{
 	public:
-		DirectConNetwork();
-		~DirectConNetwork();
+		Peer2PeerNetwork( unsigned short usListeningPort ); 
+		~Peer2PeerNetwork(void);
 
-		bool connect( std::string strHostname, unsigned short usPort, int iProtocoll );
-		bool listen( unsigned short usPort, int iProtocoll );
-		bool disconnect();
-
-		bool sendMsg( Message* pMessage );
-
-		bool registerListener( MessageListener* pListener );
-		bool unregisterListener( MessageListener* pListener );
-
-		// getter
-		bool isConnected() { return m_bConnected; }
-
+		bool addPeer( Peer* pPeer );
+		
 	protected:
 		virtual void run();
 
 	private:
-		Socket* m_pSocketIn;
-		Socket* m_pSocketOut;
-		ServerSocket* m_pServerSocket;
+		std::list<Peer*> m_lpPeers;
+		std::list<Socket*> m_lpSocketsWithoutPeers;
 
-		int     m_iProtocoll;
-		unsigned short	m_usPort;
-		std::list<MessageListener*> m_lListeners;
-
-		bool m_bConnected;
+		bool m_bActive;
+		unsigned short m_usListeningPort;
 	};
 
 }
 
-#endif // DIRECTCONNETWORK_H
+#endif // PEER2PEERNETWORK_H

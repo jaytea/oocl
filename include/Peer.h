@@ -14,62 +14,62 @@ subject to the following restrictions:
 */
 /// This file was written by Jörn Teuber
 
-#ifndef DIRECTCONNETWORK_H
-#define DIRECTCONNETWORK_H
+#ifndef PEER
+#define PEER
 
-#include <list>
+#include <time.h>
+#include <stdlib.h>
 
-#include "oocl_import_export.h"
-
-#include "MessageListener.h"
-#include "ServerSocket.h"
-#include "Socket.h"
-#include "Thread.h"
+#include "MessageBroker.h"
 #include "ExplicitMessages.h"
+#include "Socket.h"
 
 namespace oocl
 {
 	/**
-	 * @class	DirectConNetwork
+	 * @class	Peer
 	 *
-	 * @brief	class for connecting with one other process and sending and receiving messages.
+	 * @brief	this class manages one peer in the peer 2 peer network.
+	 * 			
+	 * 
 	 *
 	 * @author	Jörn Teuber
-	 * @date	9/14/2011
+	 * @date	12/9/2011
 	 */
-	class OOCL_EXPORTIMPORT DirectConNetwork : public Thread
+	class OOCL_EXPORTIMPORT Peer : public MessageListener
 	{
+		friend class Peer2PeerNetwork;
+
 	public:
-		DirectConNetwork();
-		~DirectConNetwork();
+		Peer( unsigned int uiIP, unsigned short usPort );
+		virtual ~Peer(void);
 
-		bool connect( std::string strHostname, unsigned short usPort, int iProtocoll );
-		bool listen( unsigned short usPort, int iProtocoll );
-		bool disconnect();
+		bool connect( unsigned short usMyPort );
+		bool setExistingSockets( Socket* pTCPSocket, Socket* pUDPSocket );
 
-		bool sendMsg( Message* pMessage );
+		virtual bool cbMessage( Message* pMessage );
 
-		bool registerListener( MessageListener* pListener );
-		bool unregisterListener( MessageListener* pListener );
+		// will be send to the peer
+		bool sendMessage( Message* pMessage );
+		bool subscribe( unsigned short usType );
 
-		// getter
+		// was sent by the peer
+		bool receiveMessage( Message* pMessage );
+
 		bool isConnected() { return m_bConnected; }
 
-	protected:
-		virtual void run();
-
 	private:
-		Socket* m_pSocketIn;
-		Socket* m_pSocketOut;
-		ServerSocket* m_pServerSocket;
-
-		int     m_iProtocoll;
-		unsigned short	m_usPort;
-		std::list<MessageListener*> m_lListeners;
-
 		bool m_bConnected;
+
+		std::list<unsigned short> m_lusSubscribedMsgTypes;
+
+		Socket* m_pTCPSocket;
+		Socket* m_pUDPSocket;
+
+		unsigned int	m_uiIP;
+		unsigned short	m_usPort;
 	};
 
 }
 
-#endif // DIRECTCONNETWORK_H
+#endif // PEER

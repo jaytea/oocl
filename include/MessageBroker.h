@@ -17,7 +17,7 @@ subject to the following restrictions:
 #ifndef MESSAGEBROKER_H_INCLUDED
 #define MESSAGEBROKER_H_INCLUDED
 
-#include <map>
+#include <vector>
 #include <list>
 
 #include "oocl_import_export.h"
@@ -55,7 +55,7 @@ namespace oocl
 
 		bool m_bRunThread;
 
-		static std::map< unsigned short, MessageBroker* > sm_mapBroker;
+		static std::vector< MessageBroker* > sm_vBroker;
 	};
 
 }

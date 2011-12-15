@@ -35,6 +35,8 @@ namespace oocl
 	 * @fn	void Thread::join()
 	 *
 	 * @brief	blocks until the thread has finished
+	 * 			
+	 * @note	only call this from inside the thread!
 	 *
 	 * @author	Jörn Teuber
 	 * @date	11/23/2011
@@ -52,6 +54,8 @@ namespace oocl
 	 * @fn	void Thread::sleep( int iMilliseconds )
 	 *
 	 * @brief	Blocks the thread for a specified time.
+	 * 			
+	 * @note	only call this from inside the thread!
 	 *
 	 * @author	Jörn Teuber
 	 * @date	11/23/2011
@@ -77,7 +81,9 @@ namespace oocl
 	 *
 	 * @return	true if alive, false if not.
 	 */
-	bool Thread::isAlive(){
+	bool Thread::isAlive()
+	{
+		return m_bActive;
 	}
 
 	/**
@@ -96,7 +102,7 @@ namespace oocl
 		return !pthread_create(&m_iThreadID, NULL, Thread::entryPoint, this);
 #else
 		m_hThread = CreateThread( NULL, 0, Thread::entryPoint, this, 0, &m_iThreadID);
-		return m_hThread;
+		return (m_hThread != NULL);
 #endif
 	}
 
@@ -106,7 +112,9 @@ namespace oocl
 	DWORD WINAPI Thread::entryPoint(LPVOID pthis)
 #endif
 	{
+		((Thread*)pthis)->m_bActive = true;
 		((Thread*)pthis)->run();
+		((Thread*)pthis)->m_bActive = false;
 		return 0;
 	}
 

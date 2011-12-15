@@ -18,8 +18,9 @@ subject to the following restrictions:
 #define MESSAGE_H_INCLUDED
 
 #include <string>
-#include <map>
+#include <vector>
 #include <iostream>
+#include <sstream>
 
 #ifdef linux
 	#include <sys/types.h>
@@ -31,9 +32,12 @@ subject to the following restrictions:
 
 #include "oocl_import_export.h"
 
+#include "Log.h"
+
 namespace oocl
 {
 
+#define MT_InvalidMessage 0
 	class OOCL_EXPORTIMPORT Message
 	{
 	public:
@@ -46,13 +50,11 @@ namespace oocl
 		 *  |2 byte |2 byte |   |   ....
 		 * => Length = length of the messageBody in byte
 		 */
-		virtual std::string       getMsgString() = 0;
+		virtual std::string		getMsgString() = 0;
 
 		/// @brief return the type id of the message object
 		virtual unsigned short  getType() { return m_type; }
 		virtual int             getProtocoll() { return m_iProtocoll; }
-
-		virtual void    setProtocoll( int iProtocoll ) { m_iProtocoll = iProtocoll; }
 
 	protected:
 		Message() {}
@@ -66,47 +68,13 @@ namespace oocl
 		static void registerMsg( unsigned short type, Message* (*create)(const char*) );
 
 	protected:
-		static unsigned short 	sm_type;
-		unsigned short  m_type;
+		//static unsigned short 	sm_type;
+		unsigned short 	m_type;
 		int             m_iProtocoll;
 
 	private:
-		static std::map<unsigned short, Message* (*)(const char*)> sm_msgTypeMap;
+		static std::vector<Message* (*)(const char*)> sm_msgTypeList;
 	};
-
-
-	class OOCL_EXPORTIMPORT StandardMessage : public Message
-	{
-	public:
-		/** @brief registers the message type with the message system
-		 *
-		 *  @note must be present in every implementation of Message!
-		 */
-		static void registerMsg(){
-			Message::registerMsg( sm_type, StandardMessage::create );
-		}
-
-		/** @brief constructor for creating the message intra client and for create
-		 *
-		 *  @note must be present in every implementation of Message!
-		 */
-		StandardMessage( const char * cMsgBody, unsigned short length  );
-		StandardMessage( std::string strMsgBody );
-
-		virtual std::string getMsgString();
-
-	protected:
-		static Message* create(const char * in);
-
-	protected:
-		static unsigned short 	sm_type;
-		unsigned short  m_type;
-		int             m_iProtocoll;
-
-	private:
-		std::string m_strMsgBody;
-	};
-
 }
 
 #endif

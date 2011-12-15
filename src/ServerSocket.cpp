@@ -80,6 +80,7 @@ namespace oocl
 #else
 		::closesocket(sockfd);
 #endif
+		SocketStub::~SocketStub();
 	}
 
 	Socket * ServerSocket::accept()

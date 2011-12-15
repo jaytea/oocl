@@ -20,62 +20,53 @@ namespace oocl
 {
 
 	// ******************** Message *********************
-
-	unsigned short Message::sm_type = 0;
-	std::map<unsigned short, Message* (*)(const char*)> Message::sm_msgTypeMap;
+	
+	//unsigned short Message::sm_type = MT_InvalidMessage; // this is an invalid type
+	std::vector<Message* (*)(const char*)> Message::sm_msgTypeList;
 
 	Message* Message::createFromString( const char* cMsg )
 	{
-		unsigned short iType = ((unsigned short*)cMsg)[0];
+		unsigned short usType = ((unsigned short*)cMsg)[0];
 
-		std::map<unsigned short, Message* (*)(const char*)>::iterator it = sm_msgTypeMap.find( iType );
-		if( it != sm_msgTypeMap.end() )
+		if( usType < sm_msgTypeList.size() && sm_msgTypeList[usType] != NULL )
 		{
-			return (*it).second( cMsg );
+			return sm_msgTypeList[usType]( cMsg );
 		}
 		else
 		{
-			std::cout << "MessageType with id " << iType << " not found!" << std::endl;
+			std::ostringstream os;
+			os << "No message class for message type " << usType << " registered";
+			Log::getLog("oocl")->logMessage( os.str(), Log::EL_ERROR );
 		}
 
 		return NULL;
 	}
 
-	void Message::registerMsg( unsigned short type, Message* (*create)(const char*)  )
+	void Message::registerMsg( unsigned short usType, Message* (*create)(const char*)  )
 	{
-		sm_msgTypeMap.insert( std::pair<unsigned short, Message* (*)(const char*)>(type, create) );
-	}
+		if( usType >= sm_msgTypeList.size() )
+		{
+			std::ostringstream os;
+			os << "The message with ID " << usType << " was successfully registered.";
+			Log::getLog("oocl")->logMessage( os.str(), Log::EL_INFO );
 
+			sm_msgTypeList.resize( usType+1, NULL );
+			sm_msgTypeList[usType] = create;
+		}
+		else if( sm_msgTypeList[usType] == NULL )
+		{
+			std::ostringstream os;
+			os << "The message with ID " << usType << " was successfully registered.";
+			Log::getLog("oocl")->logMessage( os.str(), Log::EL_INFO );
 
-	// ******************** StandardMessage *********************
-
-	unsigned short StandardMessage::sm_type = 1;
-
-	StandardMessage::StandardMessage( const char * cMsgBody, unsigned short length  )
-	{
-		StandardMessage( std::string(cMsgBody, length) );
-	}
-
-	StandardMessage::StandardMessage( std::string strMsgBody  ) :
-		m_type( 0 ),
-		m_strMsgBody( strMsgBody ),
-		m_iProtocoll( SOCK_STREAM )
-	{
-	}
-
-	std::string StandardMessage::getMsgString()
-	{
-		unsigned short usTemp[2];
-		usTemp[0] = m_type;
-		usTemp[1] = m_strMsgBody.length();
-		std::string strHeader( (char*)usTemp, 4 );
-
-		return strHeader + m_strMsgBody;
-	}
-
-	Message* StandardMessage::create(const char * in)
-	{
-		return &StandardMessage(  &(in[4]), ((unsigned short*)in)[1] );
+			sm_msgTypeList[usType] = create;
+		}
+		else
+		{
+			std::ostringstream os;
+			os << "You tried to register the message with ID " << usType << ", but it is already registered";
+			Log::getLog("oocl")->logMessage( os.str(), Log::EL_INFO );
+		}
 	}
 
 }

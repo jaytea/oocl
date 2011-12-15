@@ -37,7 +37,9 @@ namespace oocl
 	{
 	public:
 		SocketStub();
-		~SocketStub();
+		virtual ~SocketStub();
+
+		virtual int getCSocket() = 0;
 		
 	private:
 		static int iSocketCounter;

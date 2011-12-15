@@ -57,6 +57,7 @@ namespace oocl
 
 		bool start();
 
+		// for calling from inside the thread
 		void join();
 		void sleep( int iMilliseconds );
 
@@ -93,6 +94,7 @@ namespace oocl
 		///< Number of threads
 		static int sm_iThreadCount;
 
+		bool m_bActive;
 	};
 
 }

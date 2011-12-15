@@ -3,6 +3,8 @@ Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "oocl", "oocl.vcxproj", "{98AB0C37-E7BC-45E5-A121-5FEBAACE4565}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DirectConTest", "DirectConTest\DirectConTest.vcxproj", "{7C92D68C-78FE-45F4-BB5C-4405A64EE7CB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -13,6 +15,10 @@ Global
 		{98AB0C37-E7BC-45E5-A121-5FEBAACE4565}.Debug|Win32.Build.0 = Debug|Win32
 		{98AB0C37-E7BC-45E5-A121-5FEBAACE4565}.Release|Win32.ActiveCfg = Release|Win32
 		{98AB0C37-E7BC-45E5-A121-5FEBAACE4565}.Release|Win32.Build.0 = Release|Win32
+		{7C92D68C-78FE-45F4-BB5C-4405A64EE7CB}.Debug|Win32.ActiveCfg = Debug|Win32
+		{7C92D68C-78FE-45F4-BB5C-4405A64EE7CB}.Debug|Win32.Build.0 = Debug|Win32
+		{7C92D68C-78FE-45F4-BB5C-4405A64EE7CB}.Release|Win32.ActiveCfg = Release|Win32
+		{7C92D68C-78FE-45F4-BB5C-4405A64EE7CB}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

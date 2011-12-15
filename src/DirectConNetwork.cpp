@@ -43,8 +43,10 @@ namespace oocl
 	{
 		disconnect();
 
-		delete m_pStdSocket;
-		m_pStdSocket = NULL;
+		delete m_pSocketIn;
+		m_pSocketIn = NULL;
+		delete m_pSocketOut;
+		m_pSocketOut = NULL;
 	}
 
 	/**
@@ -68,8 +70,8 @@ namespace oocl
 		{
 			m_usPort = usPort;
 			
-			m_pStdSocket = new Socket( iProtocoll );
-			m_pStdSocket->connect( strHostname, usPort );
+			m_pSocketOut = new Socket( iProtocoll );
+			m_pSocketOut->connect( strHostname, usPort );
 
 			m_bConnected = true;
 
@@ -85,7 +87,7 @@ namespace oocl
 	{
 		if( !m_bConnected )
 		{
-			m_iStdProtocoll = iProtocoll;
+			m_iProtocoll = iProtocoll;
 			m_usPort = usPort;
 
 			start();
@@ -110,7 +112,7 @@ namespace oocl
 	{
 		m_bConnected = false;
 
-		join();
+		sendMsg( new DisconnectMessage() );
 
 		m_pStdSocket->close();
 
@@ -217,15 +219,17 @@ namespace oocl
 			}
 			else
 			{
+				m_pStdSocket = new Socket( SOCK_DGRAM );
+
 				m_pStdSocket->bind( m_usPort );
 				unsigned int uiIP = 0;
 
-				std::string strHeader = m_pStdSocket->readFrom( 4, &uiIP );
+				std::string strHeader = m_pStdSocket->readFrom( 0, &uiIP );
 
 				m_pStdSocket->connect( uiIP, m_usPort );
 
-				unsigned short usMsgLength = ((unsigned short*)strHeader.c_str())[1];
-				strHeader.append( m_pStdSocket->read( usMsgLength ) );
+				/*unsigned short usMsgLength = ((unsigned short*)strHeader.c_str())[1];
+				strHeader.append( m_pStdSocket->read( usMsgLength ) );*/
 
 				Message* pMsg = Message::createFromString( strHeader.c_str() );
 
@@ -244,10 +248,18 @@ namespace oocl
 
 		while( m_bConnected )
 		{
-			std::string strHeader = m_pStdSocket->read( 4 );
+			std::string strHeader = m_pStdSocket->read( 0 );
 
-			unsigned short usMsgLength = ((unsigned short*)strHeader.c_str())[1];
-			strHeader.append( m_pStdSocket->read( usMsgLength ) );
+			if( ((unsigned short*)strHeader.c_str())[0] == MT_DisconnectMessage )
+			{
+				if( m_bConnected )
+					disconnect();
+			}
+
+			//unsigned short usMsgLength = ((unsigned short*)strHeader.c_str())[1];
+
+			/*if( usMsgLength > 0 )
+				strHeader.append( m_pStdSocket->read( usMsgLength ) );*/
 
 			Message* pMsg = Message::createFromString( strHeader.c_str() );
 
