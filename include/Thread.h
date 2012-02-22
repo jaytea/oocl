@@ -56,10 +56,7 @@ namespace oocl
 		Thread();
 
 		bool start();
-
-		// for calling from inside the thread
 		void join();
-		void sleep( int iMilliseconds );
 
 		// setter
 		void setPriority( EPriority iPriority );
@@ -69,6 +66,10 @@ namespace oocl
 		bool isAlive();
 
 	protected:
+		
+		// for calling from inside the thread
+		void sleep( int iMilliseconds = 0 );
+
 		virtual void run() = 0;
 
 #ifdef linux
@@ -78,7 +79,6 @@ namespace oocl
 #endif
 
 	private:
-
 #ifdef linux
 		///< Identifier for the thread
 		pthread_t m_iThreadID;

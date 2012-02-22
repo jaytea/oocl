@@ -28,15 +28,16 @@ namespace oocl
 	 * @author	Jörn Teuber
 	 * @date	11/23/2011
 	 */
-	Thread::Thread(){
+	Thread::Thread() :
+		m_bActive( false )
+	{
 	}
+
 
 	/**
 	 * @fn	void Thread::join()
 	 *
 	 * @brief	blocks until the thread has finished
-	 * 			
-	 * @note	only call this from inside the thread!
 	 *
 	 * @author	Jörn Teuber
 	 * @date	11/23/2011
@@ -50,17 +51,18 @@ namespace oocl
 #endif
 	}
 
+
 	/**
 	 * @fn	void Thread::sleep( int iMilliseconds )
 	 *
 	 * @brief	Blocks the thread for a specified time.
 	 * 			
-	 * @note	only call this from inside the thread!
+	 * @note	Only call this from _inside_ the thread method!
 	 *
 	 * @author	Jörn Teuber
 	 * @date	11/23/2011
 	 *
-	 * @param	iMilliseconds	milliseconds to sleep or 0 to pass the current timeslot to the next thread.
+	 * @param	iMilliseconds	milliseconds to sleep or 0 to pass the current CPU timeslot to the next thread or process.
 	 */
 	void Thread::sleep( int iMilliseconds )
 	{
@@ -71,10 +73,11 @@ namespace oocl
 #endif
 	}
 
+
 	/**
 	 * @fn	bool Thread::isAlive()
 	 *
-	 * @brief	Query if this thread is alive.
+	 * @brief	Query whether this thread is alive.
 	 *
 	 * @author	Jörn Teuber
 	 * @date	11/23/2011
@@ -85,6 +88,7 @@ namespace oocl
 	{
 		return m_bActive;
 	}
+
 
 	/**
 	 * @fn	bool Thread::start()
@@ -115,6 +119,7 @@ namespace oocl
 		((Thread*)pthis)->m_bActive = true;
 		((Thread*)pthis)->run();
 		((Thread*)pthis)->m_bActive = false;
+
 		return 0;
 	}
 

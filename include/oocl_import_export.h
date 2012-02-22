@@ -12,7 +12,7 @@ subject to the following restrictions:
 2. Altered source versions must be plainly marked as such, and must not be misrepresented as being the original software.
 3. This notice may not be removed or altered from any source distribution.
 */
-/// This file was written by Jörn Teuber and copied from http://www.c-plusplus.de/forum/245780
+/// This file was mainly copied from http://www.c-plusplus.de/forum/245780 and modified by Jörn Teuber
 
 
 // @see http://gcc.gnu.org/wiki/Visibility
@@ -74,8 +74,8 @@ subject to the following restrictions:
 
 // disable some nasty MSVC Warnings
 #ifdef _MSC_VER   // Windows && MS Visual C
-#        pragma warning( disable : 4996 )     // disable deprecation warnings
-#        pragma warning( disable : 4275 )    // non &#8211; DLL-interface classkey 'identifier' used as base for DLL-interface classkey 'identifier'
+//#        pragma warning( disable : 4996 )     // disable deprecation warnings
+//#        pragma warning( disable : 4275 )    // non &#8211; DLL-interface classkey 'identifier' used as base for DLL-interface classkey 'identifier'
 #        pragma warning( disable : 4251 )    // like warning above but for templates (like std::string)
 #endif 
 
