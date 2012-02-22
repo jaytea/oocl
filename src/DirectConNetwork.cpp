@@ -29,6 +29,8 @@ namespace oocl
 	DirectConNetwork::DirectConNetwork() :
 		m_bConnected(false)
 	{
+		oocl::ConnectMessage::registerMsg();
+		oocl::DisconnectMessage::registerMsg();
 	}
 
 	/**
@@ -43,37 +45,48 @@ namespace oocl
 	{
 		disconnect();
 
-		delete m_pSocketIn;
-		m_pSocketIn = NULL;
-		delete m_pSocketOut;
-		m_pSocketOut = NULL;
+		delete m_pSocketUDPIn;
+		m_pSocketUDPIn = NULL;
+		delete m_pSocketUDPOut;
+		m_pSocketUDPOut = NULL;
+		delete m_pSocketTCP;
+		m_pSocketTCP = NULL;
 	}
 
 	/**
 	 * @fn	bool DirectConNetwork::connect( std::string strHostname, unsigned short usPort,
 	 * 		int iProtocoll )
 	 *
-	 * @brief	Connects with the other process.
+	 * @brief	Connects with another process.
 	 *
 	 * @author	Jörn Teuber
 	 * @date	9/14/2011
 	 *
-	 * @param	strHostname	The hostname as string (URL or IP).
-	 * @param	usPort	   	The port.
-	 * @param	iProtocoll 	The protocoll (SOCK_DGRAM=UDP | SOCK_STREAM=TCP).
+	 * @param	strHostname		The hostname as string (URL or IP).
+	 * @param	usHostPort	   	The port to connect to.
+	 * @param	usListeningPort The port on which the udp socket listens.
 	 *
 	 * @return	true if it succeeds, false if it fails.
 	 */
-	bool DirectConNetwork::connect( std::string strHostname, unsigned short usPort, int iProtocoll )
+	bool DirectConNetwork::connect( std::string strHostname, unsigned short usHostPort, unsigned short usListeningPort )
 	{
-		if( !m_bConnected && ( iProtocoll == SOCK_DGRAM || iProtocoll == SOCK_STREAM ) )
+		if( !m_bConnected )
 		{
-			m_usPort = usPort;
+			m_usHostPort = usHostPort;
+			m_usListeningPort = usListeningPort;
 			
-			m_pSocketOut = new Socket( iProtocoll );
-			m_pSocketOut->connect( strHostname, usPort );
+			m_pSocketUDPIn = new Socket( SOCK_DGRAM );
+			m_pSocketUDPIn->bind( m_usListeningPort );
 
+			m_pSocketUDPOut = new Socket( SOCK_DGRAM );
+			m_pSocketUDPOut->connect( strHostname, m_usHostPort );
+
+			m_pSocketTCP = new Socket( SOCK_STREAM );
+			m_pSocketTCP->connect( strHostname, m_usHostPort );
+			
 			m_bConnected = true;
+
+			sendMessage( new ConnectMessage( m_usListeningPort ) );
 
 			start();
 
@@ -83,12 +96,51 @@ namespace oocl
 		return false;
 	}
 
-	bool DirectConNetwork::listen( unsigned short usPort, int iProtocoll )
+	/**
+	 * @fn	bool DirectConNetwork::listen( unsigned short usListeningPort )
+	 *
+	 * @brief	Waits for a client to connect.
+	 *
+	 * @author	Jörn Teuber
+	 * @date	12/15/2011
+	 *
+	 * @param	usListeningPort	The listening port.
+	 * @param	bBlocking		If true, a call of this method will be blocking.
+	 *
+	 * @return	true if it succeeds, false if it fails.
+	 */
+	bool DirectConNetwork::listen( unsigned short usListeningPort, bool bBlocking )
 	{
 		if( !m_bConnected )
 		{
-			m_iProtocoll = iProtocoll;
-			m_usPort = usPort;
+			m_usListeningPort = usListeningPort;
+
+			m_pServerSocket = new ServerSocket();
+			m_pSocketUDPIn = new Socket( SOCK_DGRAM );
+			m_pSocketUDPOut = new Socket( SOCK_DGRAM );
+
+			m_pServerSocket->bind( usListeningPort );
+			m_pSocketUDPIn->bind( usListeningPort );
+
+			if( bBlocking )
+			{
+				m_pSocketTCP = m_pServerSocket->accept();
+
+				std::string strMsg = m_pSocketTCP->read();
+
+				Message* pMsg = Message::createFromString( strMsg.c_str() );
+
+				if( pMsg->getType() != MT_ConnectMessage )
+				{
+					Log::getLog("oocl")->logMessage("the first received message was not a connectMessage!", Log::EL_ERROR );
+					return false;
+				}
+
+				m_usHostPort = ((ConnectMessage*)pMsg)->getPort();
+				m_pSocketUDPOut->connect( m_pSocketTCP->getConnectedIP(), m_usHostPort );
+
+				m_bConnected = true;
+			}
 
 			start();
 
@@ -110,17 +162,19 @@ namespace oocl
 	 */
 	bool DirectConNetwork::disconnect()
 	{
+		sendMessage( new DisconnectMessage() );
+
+		m_pSocketUDPIn->close();
+		m_pSocketUDPOut->close();
+		m_pSocketTCP->close();
+		
 		m_bConnected = false;
-
-		sendMsg( new DisconnectMessage() );
-
-		m_pStdSocket->close();
 
 		return true;
 	}
 
 	/**
-	 * @fn	bool DirectConNetwork::sendMsg( Message* pMessage )
+	 * @fn	bool DirectConNetwork::sendMessage( Message* pMessage )
 	 *
 	 * @brief	Sends a message to the connected process either over the standard protocoll or the protocoll specified in the message.
 	 *
@@ -131,11 +185,16 @@ namespace oocl
 	 *
 	 * @return	true if it succeeds, false if it fails.
 	 */
-	bool DirectConNetwork::sendMsg( Message* pMessage )
+	bool DirectConNetwork::sendMessage( Message* pMessage )
 	{
-		if( pMessage )
+		if( pMessage && m_bConnected )
 		{
-			m_pStdSocket->write( pMessage->getMsgString() );
+			if( pMessage->getProtocoll() == SOCK_DGRAM )
+				m_pSocketUDPOut->write( pMessage->getMsgString() );
+			else if( pMessage->getProtocoll() == SOCK_STREAM )
+				m_pSocketTCP->write( pMessage->getMsgString() );
+			else
+				Log::getLog("oocl")->logMessage("You tried to send a message over network that was not intended for that", Log::EL_WARNING );
 			
 			return true;
 		}
@@ -205,33 +264,62 @@ namespace oocl
 	 */
 	void DirectConNetwork::run()
 	{
-		// if we are not yet connected we have to listen for a connecting client
 		if( !m_bConnected )
 		{
-			if( m_iStdProtocoll == SOCK_STREAM )
+			m_pSocketTCP = m_pServerSocket->accept();
+
+			std::string strMsg = m_pSocketTCP->read();
+
+			Message* pMsg = Message::createFromString( strMsg.c_str() );
+
+			if( pMsg->getType() != MT_ConnectMessage )
 			{
-				m_pServerSocket = new ServerSocket();
-
-				m_pServerSocket->bind( m_usPort );
-				m_pStdSocket = m_pServerSocket->accept();
-
-				m_bConnected = true;
+				Log::getLog("oocl")->logMessage("the first received message was not a connectMessage!", Log::EL_ERROR );
+				return;
 			}
-			else
+
+			m_usHostPort = ((ConnectMessage*)pMsg)->getPort();
+			m_pSocketUDPOut->connect( m_pSocketTCP->getConnectedIP(), m_usHostPort );
+
+			m_bConnected = true;
+		}
+
+
+		int iBiggestSocket = max( m_pSocketUDPIn->getCSocket(), m_pSocketTCP->getCSocket() );
+
+		fd_set selectSet;
+		FD_ZERO( &selectSet );
+
+		timeval tv;
+		tv.tv_sec = 0;
+		tv.tv_usec = 100000;
+
+		while( m_bConnected )
+		{
+			FD_SET( m_pSocketUDPIn->getCSocket(), &selectSet );
+			FD_SET( m_pSocketTCP->getCSocket(), &selectSet );
+
+			int iRet = select( iBiggestSocket+1, &selectSet, NULL, NULL, &tv );
+			if( iRet == SOCKET_ERROR )
 			{
-				m_pStdSocket = new Socket( SOCK_DGRAM );
+				Log::getLog("oocl")->logMessage( "Selecting failed", Log::EL_ERROR );
+			}
 
-				m_pStdSocket->bind( m_usPort );
-				unsigned int uiIP = 0;
+			if( FD_ISSET( m_pSocketTCP->getCSocket(), &selectSet ) )
+			{
+				std::string strMsg = m_pSocketTCP->read();
+				Message* pMsg = Message::createFromString( strMsg.c_str() );
+				if( !pMsg )
+					continue;
 
-				std::string strHeader = m_pStdSocket->readFrom( 0, &uiIP );
+				if( pMsg->getType() == MT_DisconnectMessage )
+				{
+					m_bConnected = false;
 
-				m_pStdSocket->connect( uiIP, m_usPort );
-
-				/*unsigned short usMsgLength = ((unsigned short*)strHeader.c_str())[1];
-				strHeader.append( m_pStdSocket->read( usMsgLength ) );*/
-
-				Message* pMsg = Message::createFromString( strHeader.c_str() );
+					m_pSocketUDPIn->close();
+					m_pSocketUDPOut->close();
+					m_pSocketTCP->close();
+				}
 
 				for( std::list<MessageListener*>::iterator it = m_lListeners.begin(); it != m_lListeners.end(); it++ )
 				{
@@ -241,34 +329,22 @@ namespace oocl
 						(*it)->returnMutex();
 					}
 				}
-				
-				m_bConnected = true;
-			}
-		}
-
-		while( m_bConnected )
-		{
-			std::string strHeader = m_pStdSocket->read( 0 );
-
-			if( ((unsigned short*)strHeader.c_str())[0] == MT_DisconnectMessage )
-			{
-				if( m_bConnected )
-					disconnect();
 			}
 
-			//unsigned short usMsgLength = ((unsigned short*)strHeader.c_str())[1];
-
-			/*if( usMsgLength > 0 )
-				strHeader.append( m_pStdSocket->read( usMsgLength ) );*/
-
-			Message* pMsg = Message::createFromString( strHeader.c_str() );
-
-			for( std::list<MessageListener*>::iterator it = m_lListeners.begin(); it != m_lListeners.end(); it++ )
+			if( FD_ISSET( m_pSocketUDPIn->getCSocket(), &selectSet ) )
 			{
-				if( (*it)->requestMutex() )
+				std::string strMsg = m_pSocketUDPIn->read();
+				Message* pMsg = Message::createFromString( strMsg.c_str() );
+				if( !pMsg )
+					continue;
+
+				for( std::list<MessageListener*>::iterator it = m_lListeners.begin(); it != m_lListeners.end(); it++ )
 				{
-					(*it)->cbMessage( pMsg );
-					(*it)->returnMutex();
+					if( (*it)->requestMutex() )
+					{
+						(*it)->cbMessage( pMsg );
+						(*it)->returnMutex();
+					}
 				}
 			}
 		}

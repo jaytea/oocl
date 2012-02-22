@@ -17,48 +17,33 @@ public:
 		int iChoice = 0;
 		m_pDirectConNet = new oocl::DirectConNetwork();
 		oocl::StandardMessage::registerMsg();
-		oocl::DisconnectMessage::registerMsg();
+	
+		unsigned short usListeningPort = 0;
+		std::cout << "On which port should I listen?" << std::endl;
+		std::cin >> usListeningPort;
 
-		while( iChoice != 1 && iChoice != 2 )
-		{
-			std::cout << "should I wait for another process to connect (1) or should I connect to another process (2)?" << std::endl;
-			std::cin >> iChoice;
-		}
+		std::cout << "should I wait for another process to connect (1) or should I connect to another process (2)?" << std::endl;
+		std::cin >> iChoice;
+
+		m_pDirectConNet->registerListener( this );
 
 		if( iChoice == 1 )
 		{
-			unsigned short usPort = 0;
-			std::cout << "On which port should I listen?" << std::endl;
-			std::cin >> usPort;
-			
-			std::cout << "TCP (1) or UDP (2)?" << std::endl;
-			std::cin >> iChoice;
-
-			m_pDirectConNet->listen( usPort, iChoice );
-
-			m_pDirectConNet->registerListener( this );
-
-			// listen is a non blocking call as it starts a thread, so wait until another process has connected
-			while( !m_pDirectConNet->isConnected() )
-				Sleep(0);
-
+			m_pDirectConNet->listen( usListeningPort );
 		}
 		else if( iChoice == 2 )
 		{
 			std::string strHostname;
-			std::cout << "Specify the host to connect to!" << std::endl;
+			std::cout << "Specify the host to connect to (leave blank for localhost)!" << std::endl;
 			std::cin >> strHostname;
+			if( strHostname.empty() )
+				strHostname = "localhost";
 
 			unsigned short usPort = 0;
 			std::cout << "On which port should i connect?" << std::endl;
 			std::cin >> usPort;
 
-			std::cout << "TCP (1) or UDP (2)?" << std::endl;
-			std::cin >> iChoice;
-
-			m_pDirectConNet->connect( strHostname, usPort, iChoice );
-
-			m_pDirectConNet->registerListener( this );
+			m_pDirectConNet->connect( strHostname, usPort, usListeningPort );
 		}
 
 		while( m_pDirectConNet->isConnected() )
@@ -71,9 +56,13 @@ public:
 				std::string strMessage;
 				std::cout << "What do you want to send?" << std::endl;
 				std::cin >> strMessage;
+				
+				std::cout << "TCP (1) or UDP (2)?" << std::endl;
+				std::cin >> iChoice;
 
 				oocl::StandardMessage* pMsg = new oocl::StandardMessage( strMessage );
-				m_pDirectConNet->sendMsg( pMsg );
+				pMsg->setProtocoll( iChoice );
+				m_pDirectConNet->sendMessage( pMsg );
 
 				std::cout << "Message sent!" << std::endl;
 			}

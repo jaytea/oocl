@@ -30,9 +30,18 @@ subject to the following restrictions:
 	#include <windows.h>
 #endif
 
-#include "oocl_import_export.h"
 
+#include "oocl_import_export.h"
 #include "Log.h"
+
+
+namespace oocl
+{
+	class Message;
+}
+
+EXPIMP_TEMPLATE template class OOCL_EXPORTIMPORT std::allocator<oocl::Message* (*)(const char*)>;
+EXPIMP_TEMPLATE template class OOCL_EXPORTIMPORT std::vector<oocl::Message* (*)(const char*)>;
 
 namespace oocl
 {
@@ -46,15 +55,18 @@ namespace oocl
 		// *********** getter *************
 		/**
 		 * @brief return a ready-to-send string representation of the message
-		 *  | Type  |Length | Messagebody
-		 *  |2 byte |2 byte |   |   ....
-		 * => Length = length of the messageBody in byte
+		 *  | Type  |Length | Messagebody  | _optional_ PeerID
+		 *  |2 byte |2 byte |   |   ....   |   4 byte
+		 * => Length = length of the messageBody in bytes
 		 */
 		virtual std::string		getMsgString() = 0;
+
+		void setSenderID( unsigned int uiSenderID ) { m_uiSenderID = uiSenderID; }
 
 		/// @brief return the type id of the message object
 		virtual unsigned short  getType() { return m_type; }
 		virtual int             getProtocoll() { return m_iProtocoll; }
+		unsigned int			getSenderID() { return m_uiSenderID; }
 
 	protected:
 		Message() {}
@@ -71,9 +83,11 @@ namespace oocl
 		//static unsigned short 	sm_type;
 		unsigned short 	m_type;
 		int             m_iProtocoll;
+		unsigned int	m_uiSenderID;
 
 	private:
-		static std::vector<Message* (*)(const char*)> sm_msgTypeList;
+		
+		static std::vector<oocl::Message* (*)(const char*)> sm_msgTypeList;
 	};
 }
 

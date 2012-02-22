@@ -3,8 +3,10 @@
 
 namespace oocl
 {
-	///< The sm map logs
+	///< BST of all logs
 	std::map<std::string, Log*> Log::sm_mapLogs;
+	Log* Log::sm_pDefaultLog = getLog("default");
+
 
 	/**
 	 * @fn	Log::Log( std::string strLogName )
@@ -16,12 +18,12 @@ namespace oocl
 	 *
 	 * @param	strLogName	Name of the log.
 	 */
-
 	Log::Log( std::string strLogName ) :
-		m_iLowestLoggedLevel( 0 )
+		m_elLowestLoggedLevel( EL_INFO )
 	{
 		m_fsLogFile.open( strLogName+std::string(".log") );
 	}
+
 
 	/**
 	 * @fn	Log::~Log(void)
@@ -31,12 +33,12 @@ namespace oocl
 	 * @author	Jörn Teuber
 	 * @date	11/25/2011
 	 */
-
 	Log::~Log(void)
 	{
 		flush();
 		m_fsLogFile.close();
 	}
+
 
 	/**
 	 * @fn	Log* Log::getLog( std::string strLogName )
@@ -63,13 +65,45 @@ namespace oocl
 			return it->second;
 	}
 
+
+	/**
+	 * @fn	inline Log* Log::getDefaultLog()
+	 *
+	 * @brief	Gets the default log.
+	 *
+	 * @author	Jörn Teuber
+	 * @date	1/27/2012
+	 *
+	 * @return	null if it fails, else the default log.
+	 */
+	Log* Log::getDefaultLog()
+	{
+		return sm_pDefaultLog;
+	}
+
+
+	/**
+	 * @fn	void Log::setDefaultLogName( const std::string strDefaultLogName )
+	 *
+	 * @brief	Sets the name of the default log.
+	 *
+	 * @author	Jörn Teuber
+	 * @date	1/27/2012
+	 *
+	 * @param	strDefaultLogName	The name of the default log.
+	 */
+	void Log::setDefaultLog( const std::string strDefaultLogName )
+	{
+		sm_pDefaultLog = getLog( strDefaultLogName );
+	}
+
+
 	/**
 	 * @fn	bool Log::logMessage( const std::string strMessage, int iErrorLevel = 0 )
 	 *
-	 * @brief	Logs a message.
+	 * @brief	Logs a message as info if no second parameter is given.
 	 * 			
-	 * @note	in debug mode after every message will be written to the log and it will be flushed.
-	 * 			In release mode only messages with error level "Warning" or higher will be logged and the user has to flush the log himself
+	 * @note	in debug mode every message will be written to the standard output and directly to the logfile.
 	 *
 	 * @author	Jörn Teuber
 	 * @date	11/25/2011
@@ -77,32 +111,146 @@ namespace oocl
 	 * @param	strMessage 	Message to log
 	 * @param	iErrorLevel	(optional) error level.
 	 *
-	 * @return	true if it succeeds, false if it fails.
+	 * @return	true if the message was logged, false if not.
 	 */
-
-	bool Log::logMessage( const std::string strMessage, EErrorLevel iErrorLevel )
+	bool Log::logMessage( const std::string strMessage, EErrorLevel elErrorLevel )
 	{
-		if( iErrorLevel < m_iLowestLoggedLevel )
+		if( elErrorLevel < m_elLowestLoggedLevel )
 			return false;
 
-		switch(iErrorLevel)
+		std::string strPrefix;
+
+		switch(elErrorLevel)
 		{
-		case EL_INFO:			m_strLogText += "INFO: "; break;
-		case EL_WARNING:		m_strLogText += "WARNING: "; break;
-		case EL_ERROR:			m_strLogText += "ERROR:	"; break;
-		case EL_FATAL_ERROR:	m_strLogText += "FATAL ERROR: "; break;
+		case EL_INFO:			strPrefix = "INFO       : "; break;
+		case EL_WARNING:		strPrefix = "WARNING    : "; break;
+		case EL_ERROR:			strPrefix = "ERROR      : "; break;
+		case EL_FATAL_ERROR:	strPrefix = "FATAL ERROR: "; break;
+		default:	return false;
 		}
 
-		m_strLogText += strMessage;
-		m_strLogText += "\n";
+		m_strLogText += strPrefix + strMessage + "\n";
 
 #ifdef _DEBUG
+		std::cout << m_strLogText;
 		flush();
-		std::cout << strMessage << std::endl;
 #endif
 
 		return true;
 	}
+
+
+	/**
+	 * @fn	bool Log::logInfo( const std::string strInfo )
+	 *
+	 * @brief	Same as logMessage(strInfo) but possibly a little bit faster.
+	 *
+	 * @author	Jörn Teuber
+	 * @date	1/26/2012
+	 *
+	 * @param	strInfo	The info.
+	 *
+	 * @return	true if the message was logged, false if not.
+	 */
+	bool Log::logInfo( const std::string strInfo )
+	{
+		if( m_elLowestLoggedLevel > EL_INFO )
+			return false;
+
+		m_strLogText += "INFO       : " + strInfo + "\n";
+
+#ifdef _DEBUG
+		std::cout << m_strLogText;
+		flush();
+#endif
+
+		return true;
+	}
+
+
+	/**
+	 * @fn	inline bool Log::logWarning( const std::string strWarning )
+	 *
+	 * @brief	Same as logMessage(..., EL_WARNING), but faster and lazzier.
+	 *
+	 * @author	Jörn Teuber
+	 * @date	1/26/2012
+	 *
+	 * @param	strWarning	The warning.
+	 *
+	 * @return	true if the message was logged, false if not.
+	 */
+	bool Log::logWarning( const std::string strWarning )
+	{
+		if( m_elLowestLoggedLevel > EL_WARNING )
+			return false;
+
+		m_strLogText += "WARNING    : " + strWarning + "\n";
+
+#ifdef _DEBUG
+		std::cout << m_strLogText;
+		flush();
+#endif
+
+		return true;
+	}
+	
+
+	/**
+	 * @fn	inline bool Log::logError( const std::string strError )
+	 *
+	 * @brief	Same as logMessage(..., EL_ERROR), but faster and lazzier.
+	 *
+	 * @author	Jörn Teuber
+	 * @date	1/26/2012
+	 *
+	 * @param	strError	The error message.
+	 *
+	 * @return	true if the message was logged, false if not.
+	 */
+	bool Log::logError( const std::string strError )
+	{
+		if( m_elLowestLoggedLevel > EL_ERROR )
+			return false;
+
+		m_strLogText += "ERROR      : " + strError + "\n";
+
+#ifdef _DEBUG
+		std::cout << m_strLogText;
+		flush();
+#endif
+
+		return true;
+	}
+	
+
+	/**
+	 * @fn	inline bool Log::logFatalError( const std::string strError )
+	 *
+	 * @brief	Same as logMessage(..., EL_FATAL_ERROR), but faster and lazzier.
+	 *
+	 * @author	Jörn Teuber
+	 * @date	1/26/2012
+	 *
+	 * @param	strError	The error message.
+	 *
+	 * @return	true if the message was logged, false if not.
+	 */
+	bool Log::logFatalError( const std::string strError )
+	{
+		if( m_elLowestLoggedLevel > EL_FATAL_ERROR )
+			return false;
+
+		m_strLogText += "ERROR      : " + strError + "\n";
+
+#ifdef _DEBUG
+		std::cout << m_strLogText;
+		flush();
+#endif
+
+		return true;
+	}
+
 
 	/**
 	 * @fn	bool Log::flush()
@@ -118,6 +266,25 @@ namespace oocl
 		m_fsLogFile.flush();
 
 		m_strLogText.clear();
+	}
+
+
+	/**
+	 * @fn	void Log::setLogLevel( EErrorLevel elLowestLoggedLevel )
+	 *
+	 * @brief	Sets the lowest message level that will still be logged.
+	 * 			
+	 * @note	This call effects all subsequent calls of the logging methods. 
+	 * 			If you do not want any logging pass 4 (EL_FATAL_ERROR+1).
+	 *
+	 * @author	Jörn Teuber
+	 * @date	2/22/2012
+	 *
+	 * @param	elLowestLoggedLevel	The lowest logged message level.
+	 */
+	void Log::setLogLevel( EErrorLevel elLowestLoggedLevel ) 
+	{
+		m_elLowestLoggedLevel = elLowestLoggedLevel; 
 	}
 
 }

@@ -18,16 +18,32 @@ subject to the following restrictions:
 
 namespace oocl
 {
-
-	Peer2PeerNetwork::Peer2PeerNetwork( unsigned short usListeningPort ) :
+	/**
+	 * @fn	Peer2PeerNetwork::Peer2PeerNetwork( unsigned short usListeningPort,
+	 * 		unsigned int uiPeerID )
+	 *
+	 * @brief	Constructor.
+	 *
+	 * @author	Jörn Teuber
+	 * @date	2/19/2012
+	 *
+	 * @param	usListeningPort	The port on which we are listening for new messages.
+	 * @param	uiPeerID	   	Identifier of this Peer, i.e. our own peerID.
+	 */
+	Peer2PeerNetwork::Peer2PeerNetwork( unsigned short usListeningPort, unsigned int uiPeerID ) :
 		m_usListeningPort( usListeningPort ),
-		m_bActive( true )
+		m_uiPeerID( uiPeerID ),
+		m_bActive( true ),
+		m_pSocketUDPIn( NULL ),
+		m_pServerSocket( NULL )
 	{
+		// register all message types, that the p2p network needs
 		SubscribeMessage::registerMsg();
 		ConnectMessage::registerMsg();
 		DisconnectMessage::registerMsg();
 		NewPeerMessage::registerMsg();
 
+		// start the thread that checks for new peers and receives messages from other peers
 		start();
 	}
 
@@ -35,56 +51,92 @@ namespace oocl
 	Peer2PeerNetwork::~Peer2PeerNetwork(void)
 	{
 		m_bActive = false;
+
+		m_mapPeersByID.clear();
+		m_lpPeers.clear();
+		m_lpSocketsWithoutPeers.clear();
 	}
 
 
-	bool Peer2PeerNetwork::addPeer( Peer* pPeer )
+	Peer* Peer2PeerNetwork::addPeer( std::string strHostname, unsigned short usPeerPort )
 	{
-		if( pPeer )
-		{
-			if( !pPeer->isConnected() )
-				if( !pPeer->connect( m_usListeningPort ) )
-					return false;
+		Peer* pPeer = new Peer( strHostname, usPeerPort );
 
-			m_lpPeers.push_back( pPeer );
+		if( !connectAndInsertPeer( pPeer ) )
+			pPeer = NULL;
 
-			return true;
-		}
+		return pPeer;
+	}
+	
+	Peer* Peer2PeerNetwork::addPeer( unsigned int uiIP, unsigned short usPeerPort )
+	{
+		Peer* pPeer = new Peer( uiIP, usPeerPort );
 
-		return false;
+		if( !connectAndInsertPeer( pPeer ) )
+			pPeer = NULL;
+
+		return pPeer;
+	}
+
+	bool Peer2PeerNetwork::connectAndInsertPeer( Peer* pPeer )
+	{
+		if( !pPeer->connect( m_usListeningPort, m_uiPeerID ) )
+			return false;
+
+		m_lpPeers.push_back( pPeer );
+		m_mapPeersByID.insert( std::pair<unsigned int, Peer*>( pPeer->getPeerID(), pPeer ) );
+
+		return true;
+	}
+
+	Peer* Peer2PeerNetwork::getPeerByID( unsigned int uiPeerID )
+	{ 
+		std::map<unsigned int, Peer*>::iterator it = m_mapPeersByID.find( uiPeerID );
+		if( it != m_mapPeersByID.end() )
+			return it->second;
+
+		return NULL; 
 	}
 		
 
 	void Peer2PeerNetwork::run()
 	{
+		// prepare the sockets for receiving
 		ServerSocket* pTCPServerSock = new ServerSocket();
+		Socket*	pSocketUDPIn = new Socket( SOCK_DGRAM );
 
 		pTCPServerSock->bind( m_usListeningPort );
+		pSocketUDPIn->bind( m_usListeningPort );
 
+		timeval tv;
+		tv.tv_sec = 0;
+		tv.tv_usec = 500000;
+
+		// start 
 		while( m_bActive )
 		{
-			int iBiggestSocket = pTCPServerSock->getCSocket();
+			// prepare the fd_set
+			int iBiggestSocket = max( pTCPServerSock->getCSocket(), pSocketUDPIn->getCSocket() );
 			fd_set selectSet;
 			FD_ZERO( &selectSet );
-
+			
+			// add UDP and TCP listening sockets to the set
 			FD_SET( pTCPServerSock->getCSocket(), &selectSet );
+			FD_SET( pSocketUDPIn->getCSocket(), &selectSet );
 
+			// add all peer tcp sockets to the set
 			for( std::list<Peer*>::iterator it = m_lpPeers.begin(); it != m_lpPeers.end(); it++ )
 			{
 				if( (*it)->isConnected() )
 				{
-					int iTCP = (*it)->m_pTCPSocket->getCSocket();
+					int iTCP = (*it)->m_pSocketTCP->getCSocket();
 					if( iTCP > iBiggestSocket )
 						iBiggestSocket = iTCP;
 					FD_SET( iTCP, &selectSet );
-
-					int iUDP = (*it)->m_pUDPSocket->getCSocket();
-					if( iUDP > iBiggestSocket )
-						iBiggestSocket = iUDP;
-					FD_SET( iUDP, &selectSet );
 				}
 			}
 
+			// add all tcp sockets to the set that have not yet been assigned to a peer
 			for( std::list<Socket*>::iterator it = m_lpSocketsWithoutPeers.begin(); it != m_lpSocketsWithoutPeers.end(); it++ )
 			{
 				if( (*it)->isConnected() )
@@ -95,76 +147,96 @@ namespace oocl
 				}
 			}
 
-			timeval tv;
-			tv.tv_sec = 0;
-			tv.tv_usec = 500000;
-
+			// select!
 			int iRet = select( iBiggestSocket, &selectSet, NULL, NULL, &tv );
 			if( iRet == SOCKET_ERROR )
 			{
 				Log::getLog("oocl")->logMessage( "Selecting in the peernetwork failed", Log::EL_ERROR );
 			}
 
+			// if the tcp server socket got a connection push the tcp socket on the list
 			if( FD_ISSET( pTCPServerSock->getCSocket(), &selectSet ) )
 			{
 				m_lpSocketsWithoutPeers.push_back( pTCPServerSock->accept() );
 			}
-
-			for( std::list<Peer*>::iterator it = m_lpPeers.begin(); it != m_lpPeers.end(); it++ )
+			
+			// messages from the udp receiving socket will be pushed on the appropriate MessageBroker
+			if( FD_ISSET( pSocketUDPIn->getCSocket(), &selectSet ) )
 			{
-				if( FD_ISSET( (*it)->m_pTCPSocket->getCSocket(), &selectSet ) )
+				std::string strMsg = pSocketUDPIn->read();
+				if( strMsg.empty() )
 				{
-					std::string strHeader = (*it)->m_pTCPSocket->read( 4 );
-
-					unsigned short usMsgLength = ((unsigned short*)strHeader.c_str())[1];
-					strHeader.append( (*it)->m_pTCPSocket->read( usMsgLength ) );
-
-					Message* pMsg = Message::createFromString( strHeader.c_str() );
-					(*it)->receiveMessage( pMsg );
+					Log::getLog("oocl")->logMessage( "a message from a peer on udp could not be received", Log::EL_WARNING );
 				}
-				
-				if( FD_ISSET( (*it)->m_pUDPSocket->getCSocket(), &selectSet ) )
+				else
 				{
-					std::string strHeader = (*it)->m_pUDPSocket->read( 4 );
+					// messages that come from other peers have to have the sender peerID at the end of the message
+					unsigned int uiPeerID = *((unsigned int*)strMsg.substr( strMsg.length()-4 ).c_str());
+					Message* pMsg = Message::createFromString( strMsg.substr(0,strMsg.length()-4).c_str() );
 
-					unsigned short usMsgLength = ((unsigned short*)strHeader.c_str())[1];
-					strHeader.append( (*it)->m_pUDPSocket->read( usMsgLength ) );
-
-					Message* pMsg = Message::createFromString( strHeader.c_str() );
-					(*it)->receiveMessage( pMsg );
+					if( getPeerByID( uiPeerID ) )
+						getPeerByID( uiPeerID )->receiveMessage( pMsg );
 				}
 			}
-			
-			for( std::list<Socket*>::iterator it = m_lpSocketsWithoutPeers.begin(); it != m_lpSocketsWithoutPeers.end(); it++ )
+
+			// walk through the peer list and check for messages
+			for( std::list<Peer*>::iterator it = m_lpPeers.begin(); it != m_lpPeers.end(); it++ )
+			{
+				if( FD_ISSET( (*it)->m_pSocketTCP->getCSocket(), &selectSet ) )
+				{
+					std::string strMsg = (*it)->m_pSocketTCP->read();
+					if( strMsg.empty() )
+					{
+						Log::getLog("oocl")->logMessage( "a message from a peer on tcp could not be received", Log::EL_WARNING );
+					}
+					else
+					{
+						Message* pMsg = Message::createFromString( strMsg.c_str() );
+						(*it)->receiveMessage( pMsg );
+
+						// delete the peer when he disconnected
+						if( pMsg->getType() == MT_DisconnectMessage )
+						{
+							m_lpPeers.erase( it );
+						}
+					}
+				}
+			}
+
+			// check for connect messages on the sockets without peers
+			std::list<Socket*>::iterator it = m_lpSocketsWithoutPeers.begin();
+			while(  it != m_lpSocketsWithoutPeers.end() )
 			{
 				if( FD_ISSET( (*it)->getCSocket(), &selectSet ) )
 				{
-					std::string strHeader = (*it)->read( 4 );
+					std::string strMsg = (*it)->read( );
+					Message* pMsg = Message::createFromString( strMsg.c_str() );
 
-					unsigned short usMsgLength = ((unsigned short*)strHeader.c_str())[1];
-					strHeader.append( (*it)->read( usMsgLength ) );
-
-					Message* pMsg = Message::createFromString( strHeader.c_str() );
-
-					if( ((unsigned short*)strHeader.c_str())[1] == MT_ConnectMessage )
+					if( pMsg->getType() == MT_ConnectMessage )
 					{
-						unsigned short usPort = ((ConnectMessage*)pMsg)->getProtocoll();
+						unsigned short usPort = ((ConnectMessage*)pMsg)->getPort();
+						PeerID peerID = ((ConnectMessage*)pMsg)->getPeerID();
 
 						Socket* pUDPSocket = new Socket( SOCK_DGRAM );
 						pUDPSocket->connect( (*it)->getConnectedIP(), usPort );
 
 						Peer* pPeer = new Peer( (*it)->getConnectedIP(), usPort );
-						pPeer->setExistingSockets( (*it), pUDPSocket );
+						pPeer->createWithExistingSockets( new Socket( *(*it) ), pUDPSocket, peerID );
 
-						addPeer( pPeer );
+						pPeer->sendMessage( new ConnectMessage( m_usListeningPort, m_uiPeerID ) );
+
+						m_lpPeers.push_back( pPeer );
+						m_mapPeersByID.insert( std::pair<PeerID,Peer*>( peerID, pPeer ) );
+
 						MessageBroker::getBrokerFor( MT_NewPeerMessage )->pumpMessage( new NewPeerMessage( pPeer ) );
-						m_lpSocketsWithoutPeers.erase( it );
 					}
 					else
 					{
 						Log::getLog("oocl")->logMessage("A message from an unknown peer was received", Log::EL_INFO );
 					}
 				}
+
+				it++;
 			}
 		}
 	}

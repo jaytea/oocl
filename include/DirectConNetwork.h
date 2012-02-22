@@ -43,11 +43,11 @@ namespace oocl
 		DirectConNetwork();
 		~DirectConNetwork();
 
-		bool connect( std::string strHostname, unsigned short usPort, int iProtocoll );
-		bool listen( unsigned short usPort, int iProtocoll );
+		bool connect( std::string strHostname, unsigned short usHostPort, unsigned short usListeningPort );
+		bool listen( unsigned short usListeningPort, bool bBlocking = true );
 		bool disconnect();
 
-		bool sendMsg( Message* pMessage );
+		bool sendMessage( Message* pMessage );
 
 		bool registerListener( MessageListener* pListener );
 		bool unregisterListener( MessageListener* pListener );
@@ -59,12 +59,14 @@ namespace oocl
 		virtual void run();
 
 	private:
-		Socket* m_pSocketIn;
-		Socket* m_pSocketOut;
+		Socket* m_pSocketUDPIn;
+		Socket* m_pSocketUDPOut;
+		Socket* m_pSocketTCP;
 		ServerSocket* m_pServerSocket;
 
-		int     m_iProtocoll;
-		unsigned short	m_usPort;
+		unsigned short	m_usHostPort;
+		unsigned short	m_usListeningPort;
+
 		std::list<MessageListener*> m_lListeners;
 
 		bool m_bConnected;

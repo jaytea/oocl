@@ -37,7 +37,7 @@ namespace oocl
 
 	MessageBroker* MessageBroker::getBrokerFor( unsigned short usMessageType )
 	{
-		if( usMessageType > sm_vBroker.size() )
+		if( usMessageType >= sm_vBroker.size() )
 		{
 			sm_vBroker.resize( usMessageType+1, NULL );
 

@@ -27,6 +27,18 @@ subject to the following restrictions:
 
 namespace oocl
 {
+	class MessageBroker;
+}
+
+EXPIMP_TEMPLATE template class OOCL_EXPORTIMPORT std::allocator<oocl::MessageBroker*>;
+EXPIMP_TEMPLATE template class OOCL_EXPORTIMPORT std::vector<oocl::MessageBroker*>;
+
+// disable warning C4251 that would be thrown for std::list in exported classes
+#pragma warning(push)
+#pragma warning(disable:4251)
+
+namespace oocl
+{
 
 	class OOCL_EXPORTIMPORT MessageBroker : public Thread
 	{
@@ -59,5 +71,7 @@ namespace oocl
 	};
 
 }
+
+#pragma warning(pop)
 
 #endif

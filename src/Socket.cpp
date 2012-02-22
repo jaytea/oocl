@@ -120,6 +120,8 @@ namespace oocl
 				return false;
 			}
 
+			bConnected = true;
+
 			return true;
 		}
 

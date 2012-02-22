@@ -52,6 +52,7 @@ namespace oocl
 		virtual std::string getMsgString();
 
 		std::string getBody() { return m_strMsgBody; }
+		void setProtocoll( int iProtocoll ) { m_iProtocoll = iProtocoll; }
 
 	protected:
 		static Message* create(const char * in);
@@ -100,15 +101,19 @@ namespace oocl
 			Message::registerMsg( MT_ConnectMessage, ConnectMessage::create );
 		}
 
-		ConnectMessage( unsigned short usMyPort );
+		ConnectMessage( unsigned short usMyPort, unsigned int uiPeerID = 0 );
 
 		virtual std::string getMsgString();
+
+		unsigned short getPort() { return m_usPort; }
+		unsigned int getPeerID() { return m_uiPeerID; }
 
 	protected:
 		static Message* create(const char * in);
 
 	private:
-		unsigned short m_usPort;
+		unsigned short	m_usPort;
+		unsigned int	m_uiPeerID;
 	};
 	
 	

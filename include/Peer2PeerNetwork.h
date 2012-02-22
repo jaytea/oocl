@@ -40,20 +40,33 @@ namespace oocl
 	class OOCL_EXPORTIMPORT Peer2PeerNetwork : public Thread
 	{
 	public:
-		Peer2PeerNetwork( unsigned short usListeningPort ); 
+		Peer2PeerNetwork( unsigned short usListeningPort, PeerID uiPeerID ); 
 		~Peer2PeerNetwork(void);
 
-		bool addPeer( Peer* pPeer );
+		Peer* addPeer( std::string strHostname, unsigned short usPeerPort );
+		Peer* addPeer( unsigned int uiIP, unsigned short usPeerPort );
+
+		// getter
+		Peer*				getPeerByID( PeerID uiPeerID );
+		std::list<Peer*>*	getPeerList() { return &m_lpPeers; }
 		
 	protected:
 		virtual void run();
 
 	private:
+		bool connectAndInsertPeer( Peer* pPeer );
+
+	private:
 		std::list<Peer*> m_lpPeers;
+		std::map<PeerID, Peer*> m_mapPeersByID;
 		std::list<Socket*> m_lpSocketsWithoutPeers;
 
-		bool m_bActive;
-		unsigned short m_usListeningPort;
+		Socket*			m_pSocketUDPIn;
+		ServerSocket*	m_pServerSocket;
+
+		bool			m_bActive;
+		unsigned short	m_usListeningPort;
+		PeerID			m_uiPeerID;
 	};
 
 }

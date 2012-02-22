@@ -14,8 +14,8 @@ subject to the following restrictions:
 */
 /// This file was written by Jörn Teuber
 
-#ifndef PEER
-#define PEER
+#ifndef PEER_H
+#define PEER_H
 
 #include <time.h>
 #include <stdlib.h>
@@ -23,6 +23,9 @@ subject to the following restrictions:
 #include "MessageBroker.h"
 #include "ExplicitMessages.h"
 #include "Socket.h"
+
+
+typedef unsigned int PeerID;
 
 namespace oocl
 {
@@ -41,14 +44,6 @@ namespace oocl
 		friend class Peer2PeerNetwork;
 
 	public:
-		Peer( unsigned int uiIP, unsigned short usPort );
-		virtual ~Peer(void);
-
-		bool connect( unsigned short usMyPort );
-		bool setExistingSockets( Socket* pTCPSocket, Socket* pUDPSocket );
-
-		virtual bool cbMessage( Message* pMessage );
-
 		// will be send to the peer
 		bool sendMessage( Message* pMessage );
 		bool subscribe( unsigned short usType );
@@ -56,20 +51,35 @@ namespace oocl
 		// was sent by the peer
 		bool receiveMessage( Message* pMessage );
 
-		bool isConnected() { return m_bConnected; }
+		// getter
+		bool	isConnected()	{ return m_bConnected; }
+		PeerID	getPeerID()		{ return m_uiPeerID; }
+
+		virtual bool cbMessage( Message* pMessage );
+
+	private:
+		Peer( std::string strHostname, unsigned short usPeerPort );
+		Peer( unsigned int uiIP, unsigned short usPeerPort );
+		virtual ~Peer(void);
+		
+		bool connect( unsigned short usListeningPort, PeerID uiUserID  );
+		bool createWithExistingSockets( Socket* pTCPSocket, Socket* pUDPSocket, PeerID peerID );
+		bool disconnect();
 
 	private:
 		bool m_bConnected;
 
 		std::list<unsigned short> m_lusSubscribedMsgTypes;
 
-		Socket* m_pTCPSocket;
-		Socket* m_pUDPSocket;
+		Socket* m_pSocketTCP;
+		Socket* m_pSocketUDPOut;
 
+		std::string		m_strHostname;
 		unsigned int	m_uiIP;
 		unsigned short	m_usPort;
+		PeerID			m_uiPeerID;
 	};
 
 }
 
-#endif // PEER
+#endif // PEER_H

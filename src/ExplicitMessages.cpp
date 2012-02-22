@@ -63,8 +63,9 @@ namespace oocl
 
 	// ******************** ConnectMessage *********************
 
-	ConnectMessage::ConnectMessage( unsigned short usMyPort ) :
-		m_usPort( usMyPort )
+	ConnectMessage::ConnectMessage( unsigned short usMyPort, unsigned int uiPeerID ) :
+		m_usPort( usMyPort ),
+		m_uiPeerID( uiPeerID )
 	{
 		m_iProtocoll = SOCK_STREAM;
 		m_type = MT_ConnectMessage;
@@ -74,15 +75,18 @@ namespace oocl
 	{
 		unsigned short usMsg[3];
 		usMsg[0] = MT_ConnectMessage;
-		usMsg[1] = sizeof(unsigned short);
+		usMsg[1] = sizeof(short)+sizeof(int);
 		usMsg[2] = m_usPort;
 
-		return std::string( (char*)usMsg, 6 );
+		return std::string( (char*)usMsg, 6 ) + std::string( (char*)&m_uiPeerID, sizeof(int) );
 	}
 
 	Message* ConnectMessage::create(const char * in)
 	{
-		return new ConnectMessage( ((unsigned short*)in)[2] );
+		unsigned short usMyPort = ((unsigned short*)in)[2];
+		unsigned int uiPeerID = *((unsigned int*)&in[6]);
+
+		return new ConnectMessage( usMyPort, uiPeerID );
 	}
 
 
