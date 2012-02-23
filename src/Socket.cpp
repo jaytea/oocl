@@ -41,7 +41,7 @@ namespace oocl
 
 		if( iSockType != SOCK_STREAM && iSockType != SOCK_DGRAM )
 		{
-			Log::getLog("oocl")->logMessage("Socket gets invalid protocoll type; defaults to TCP", Log::EL_WARNING );
+			Log::getLog("oocl")->logWarning("Socket gets invalid protocoll type; defaults to TCP" );
 			iSockType = SOCK_STREAM;
 		}
 
@@ -53,7 +53,7 @@ namespace oocl
 #endif
 		{
     		bValid = false;
-			Log::getLog("oocl")->logMessage("Creating socket failed", Log::EL_ERROR);
+			Log::getLog("oocl")->logError("Creating socket failed");
 		}
 	}
 
@@ -79,7 +79,7 @@ namespace oocl
 			{
 				std::ostringstream os;
 				os << "Connecting socket to " << m_addrData.sin_addr.s_net << "." << m_addrData.sin_addr.s_host << "." << m_addrData.sin_addr.s_lh << "." << m_addrData.sin_addr.s_impno << ":" << usPort << " failed";
-				Log::getLog("oocl")->logMessage( os.str(), Log::EL_ERROR );
+				Log::getLog("oocl")->logError( os.str() );
 
     			close();
 				return false;
@@ -92,7 +92,7 @@ namespace oocl
 		
 		std::ostringstream os;
 		os << "Connecting to " << m_addrData.sin_addr.s_net << "." << m_addrData.sin_addr.s_host << "." << m_addrData.sin_addr.s_lh << "." << m_addrData.sin_addr.s_impno << ":" << usPort << " failed due to invalid socket";
-		Log::getLog("oocl")->logMessage( os.str(), Log::EL_ERROR );
+		Log::getLog("oocl")->logError( os.str() );
 
 		return false;
 	}
@@ -114,7 +114,7 @@ namespace oocl
 			{
 				std::ostringstream os;
 				os << "Binding socket to port " << usPort << " failed";
-				Log::getLog("oocl")->logMessage( os.str(), Log::EL_ERROR );
+				Log::getLog("oocl")->logError( os.str() );
 
     			close();
 				return false;
@@ -186,7 +186,7 @@ namespace oocl
 			}
 			else if(rc < 0)
 			{
-				Log::getLog("oocl")->logMessage( "receiving on connected socket failed", Log::EL_ERROR );
+				Log::getLog("oocl")->logError( "receiving on connected socket failed" );
 				close();
 			}
 		}
@@ -216,7 +216,7 @@ namespace oocl
 			else if(rc < 0)
 			{
 				rc = WSAGetLastError();
-				Log::getLog("oocl")->logMessage( "receiving on connectionless socket failed", Log::EL_ERROR );
+				Log::getLog("oocl")->logError( "receiving on connectionless socket failed" );
 				close();
 				return std::string();
 			}
@@ -245,7 +245,7 @@ namespace oocl
 			{
 				std::ostringstream os;
 				os << "Sending failed: " << count << ":" << rc << ":" << in;
-				Log::getLog("oocl")->logMessage( os.str(), Log::EL_ERROR );
+				Log::getLog("oocl")->logError( os.str() );
 				close();
 				// TODO: implement failcount, close connection after n failed sendings
 
@@ -255,7 +255,7 @@ namespace oocl
 			return true;
 		}
 
-		Log::getLog("oocl")->logMessage( "Sending failed due to unconnected socket", Log::EL_WARNING );
+		Log::getLog("oocl")->logWarning( "Sending failed due to unconnected socket" );
 
 		return false;
 	}

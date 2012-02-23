@@ -32,9 +32,9 @@ namespace oocl
 	/**
 	 * @class	Peer
 	 *
-	 * @brief	this class manages one peer in the peer 2 peer network.
+	 * @brief	This class manages one peer in the peer 2 peer network.
 	 * 			
-	 * 
+	 * @note	To create a peer call Peer2PeerNetwork::addPeer(...).
 	 *
 	 * @author	Jörn Teuber
 	 * @date	12/9/2011

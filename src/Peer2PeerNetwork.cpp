@@ -151,7 +151,7 @@ namespace oocl
 			int iRet = select( iBiggestSocket, &selectSet, NULL, NULL, &tv );
 			if( iRet == SOCKET_ERROR )
 			{
-				Log::getLog("oocl")->logMessage( "Selecting in the peernetwork failed", Log::EL_ERROR );
+				Log::getLog("oocl")->logError( "Selecting in the peernetwork failed" );
 			}
 
 			// if the tcp server socket got a connection push the tcp socket on the list
@@ -166,7 +166,7 @@ namespace oocl
 				std::string strMsg = pSocketUDPIn->read();
 				if( strMsg.empty() )
 				{
-					Log::getLog("oocl")->logMessage( "a message from a peer on udp could not be received", Log::EL_WARNING );
+					Log::getLog("oocl")->logWarning( "a message from a peer on udp could not be received" );
 				}
 				else
 				{
@@ -187,7 +187,7 @@ namespace oocl
 					std::string strMsg = (*it)->m_pSocketTCP->read();
 					if( strMsg.empty() )
 					{
-						Log::getLog("oocl")->logMessage( "a message from a peer on tcp could not be received", Log::EL_WARNING );
+						Log::getLog("oocl")->logWarning( "a message from a peer on tcp could not be received" );
 					}
 					else
 					{
@@ -232,7 +232,7 @@ namespace oocl
 					}
 					else
 					{
-						Log::getLog("oocl")->logMessage("A message from an unknown peer was received", Log::EL_INFO );
+						Log::getLog("oocl")->logInfo("A message from an unknown peer was received" );
 					}
 				}
 

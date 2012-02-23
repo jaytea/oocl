@@ -26,7 +26,7 @@ namespace oocl
 	/**
 	 * @class	MessageListener
 	 *
-	 * @brief	Message listener.
+	 * @brief	Interface for all classes that need to receive messages of any type.
 	 *
 	 * @author	Jörn Teuber
 	 * @date	11/25/2011
@@ -60,53 +60,18 @@ namespace oocl
 		 *
 		 * @brief	This is the callback method for the messages.
 		 * 			
-		 * @note	in the standard implementation this method will be called at the same time to be thread-safe. 
-		 * 			If you do not want this behaviour see the notes at requestMutex().
+		 * @note	Please note that every message type has its own thread to deliver the messages.
+		 * 			So be sure to either only process thread-safe data here or make the data thread-safe.
+		 * 			If you do not want to handle the message now you can return false to let the message delivery thread return to you with this messsage later.
 		 *
 		 * @author	Jörn Teuber
 		 * @date	11/25/2011
 		 *
 		 * @param [in,out]	pMessage	If non-null, the message.
 		 *
-		 * @return	true if it succeeds, false if it fails.
+		 * @return	return true if you have processed the data, false if you want to be called later with the same message.
 		 */
 		virtual bool cbMessage( Message* pMessage ) = 0;
-
-		/**
-		 * @fn	virtual bool MessageListener::requestMutex()
-		 *
-		 * @brief	will always be called before cbMessage() to be thread-safe.
-		 * 			
-		 * @note	you can implement this for your listeners if you do not need this strikt thread safety.
-		 *
-		 * @author	Jörn Teuber
-		 * @date	11/25/2011
-		 *
-		 * @return	true if cbMessage can be called safely, false if not
-		 */
-		virtual bool requestMutex() 
-		{ 
-			if( m_bMutex )
-			{
-				m_bMutex = false;
-				return true;
-			}
-
-			return false;
-		}
-
-		/**
-		 * @fn	virtual void MessageListener::returnMutex()
-		 *
-		 * @brief	Returns the mutex.
-		 *
-		 * @author	Jörn Teuber
-		 * @date	11/25/2011
-		 */
-		virtual void returnMutex()
-		{
-			m_bMutex = true;
-		}
 
 	protected:
 

@@ -132,7 +132,7 @@ namespace oocl
 
 				if( pMsg->getType() != MT_ConnectMessage )
 				{
-					Log::getLog("oocl")->logMessage("the first received message was not a connectMessage!", Log::EL_ERROR );
+					Log::getLog("oocl")->logError("the first received message was not a connectMessage!" );
 					return false;
 				}
 
@@ -194,7 +194,7 @@ namespace oocl
 			else if( pMessage->getProtocoll() == SOCK_STREAM )
 				m_pSocketTCP->write( pMessage->getMsgString() );
 			else
-				Log::getLog("oocl")->logMessage("You tried to send a message over network that was not intended for that", Log::EL_WARNING );
+				Log::getLog("oocl")->logWarning("You tried to send a message over network that was not intended for that" );
 			
 			return true;
 		}
@@ -274,7 +274,7 @@ namespace oocl
 
 			if( pMsg->getType() != MT_ConnectMessage )
 			{
-				Log::getLog("oocl")->logMessage("the first received message was not a connectMessage!", Log::EL_ERROR );
+				Log::getLog("oocl")->logError("the first received message was not a connectMessage!" );
 				return;
 			}
 
@@ -302,7 +302,7 @@ namespace oocl
 			int iRet = select( iBiggestSocket+1, &selectSet, NULL, NULL, &tv );
 			if( iRet == SOCKET_ERROR )
 			{
-				Log::getLog("oocl")->logMessage( "Selecting failed", Log::EL_ERROR );
+				Log::getLog("oocl")->logError( "Selecting failed" );
 			}
 
 			if( FD_ISSET( m_pSocketTCP->getCSocket(), &selectSet ) )
@@ -321,13 +321,12 @@ namespace oocl
 					m_pSocketTCP->close();
 				}
 
-				for( std::list<MessageListener*>::iterator it = m_lListeners.begin(); it != m_lListeners.end(); it++ )
+				std::list< MessageListener* > lWaitList( m_lListeners );
+
+				for( std::list<MessageListener*>::iterator it = lWaitList.begin(); it != lWaitList.end(); it = lWaitList.erase( it ) )
 				{
-					if( (*it)->requestMutex() )
-					{
-						(*it)->cbMessage( pMsg );
-						(*it)->returnMutex();
-					}
+					if( !(*it)->cbMessage( pMsg ) )
+						lWaitList.push_back( (*it) );
 				}
 			}
 
@@ -338,13 +337,12 @@ namespace oocl
 				if( !pMsg )
 					continue;
 
-				for( std::list<MessageListener*>::iterator it = m_lListeners.begin(); it != m_lListeners.end(); it++ )
+				std::list< MessageListener* > lWaitList( m_lListeners );
+
+				for( std::list<MessageListener*>::iterator it = lWaitList.begin(); it != lWaitList.end(); it = lWaitList.erase( it ) )
 				{
-					if( (*it)->requestMutex() )
-					{
-						(*it)->cbMessage( pMsg );
-						(*it)->returnMutex();
-					}
+					if( !(*it)->cbMessage( pMsg ) )
+						lWaitList.push_back( (*it) );
 				}
 			}
 		}

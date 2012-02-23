@@ -36,7 +36,7 @@ namespace oocl
 		{
 			std::ostringstream os;
 			os << "No message class for message type " << usType << " registered";
-			Log::getLog("oocl")->logMessage( os.str(), Log::EL_ERROR );
+			Log::getLog("oocl")->logError( os.str() );
 		}
 
 		return NULL;
@@ -48,7 +48,7 @@ namespace oocl
 		{
 			std::ostringstream os;
 			os << "The message with ID " << usType << " was successfully registered.";
-			Log::getLog("oocl")->logMessage( os.str(), Log::EL_INFO );
+			Log::getLog("oocl")->logInfo( os.str() );
 
 			sm_msgTypeList.resize( usType+1, NULL );
 			sm_msgTypeList[usType] = create;
@@ -57,7 +57,7 @@ namespace oocl
 		{
 			std::ostringstream os;
 			os << "The message with ID " << usType << " was successfully registered.";
-			Log::getLog("oocl")->logMessage( os.str(), Log::EL_INFO );
+			Log::getLog("oocl")->logInfo( os.str() );
 
 			sm_msgTypeList[usType] = create;
 		}
@@ -65,7 +65,7 @@ namespace oocl
 		{
 			std::ostringstream os;
 			os << "You tried to register the message with ID " << usType << ", but it is already registered";
-			Log::getLog("oocl")->logMessage( os.str(), Log::EL_INFO );
+			Log::getLog("oocl")->logInfo( os.str() );
 		}
 	}
 

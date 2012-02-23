@@ -19,6 +19,7 @@ subject to the following restrictions:
 namespace oocl
 {
 
+	///< The list of all registered MessageBroker
 	std::vector< MessageBroker* > MessageBroker::sm_vBroker;
 
 
@@ -35,6 +36,19 @@ namespace oocl
 		m_bRunThread = false;
 	}
 
+
+	/**
+	 * @fn	MessageBroker* MessageBroker::getBrokerFor( unsigned short usMessageType )
+	 *
+	 * @brief	Returns the broker for the given message type.
+	 *
+	 * @author	Jörn Teuber
+	 * @date	2/23/2012
+	 *
+	 * @param	usMessageType	Message type for which you need the broker.
+	 *
+	 * @return	The broker you need.
+	 */
 	MessageBroker* MessageBroker::getBrokerFor( unsigned short usMessageType )
 	{
 		if( usMessageType >= sm_vBroker.size() )
@@ -55,36 +69,70 @@ namespace oocl
 			return sm_vBroker[usMessageType];
 	}
 
-	bool MessageBroker::registerListener( MessageListener* pListener )
+
+	/**
+	 * @fn	void MessageBroker::registerListener( MessageListener* pListener )
+	 *
+	 * @brief	Registers the listener described by pListener.
+	 *
+	 * @author	Jörn Teuber
+	 * @date	2/23/2012
+	 *
+	 * @param [in]	pListener	The listener you want to register with this brocker.
+	 */
+	void MessageBroker::registerListener( MessageListener* pListener )
 	{
-		m_lListeners.push_back( pListener );
-		return true;
+		if( pListener )
+			m_lListeners.push_back( pListener );
 	}
 
-	bool MessageBroker::unregisterListener( MessageListener* pListener )
-	{
-		for( std::list< MessageListener* >::iterator it = m_lListeners.begin(); it != m_lListeners.end(); it++ )
-		{
-			if( (*it) == pListener )
-			{
-				m_lListeners.erase( it );
-				return true;
-			}
-		}
 
-		return false;
+	/**
+	 * @fn	void MessageBroker::unregisterListener( MessageListener* pListener )
+	 *
+	 * @brief	Unregisters the listener described by pListener.
+	 *
+	 * @author	Jörn Teuber
+	 * @date	2/23/2012
+	 *
+	 * @param [in]	pListener	The listener you want to unregister.
+	 */
+	void MessageBroker::unregisterListener( MessageListener* pListener )
+	{
+		if( pListener )
+			m_lListeners.remove( pListener );
 	}
 
-	bool MessageBroker::pumpMessage( Message* pMessage )
+
+	/**
+	 * @fn	void MessageBroker::pumpMessage( Message* pMessage )
+	 *
+	 * @brief	Pump message.
+	 *
+	 * @author	Jörn Teuber
+	 * @date	2/23/2012
+	 *
+	 * @param [in,out]	pMessage	If non-null, the message.
+	 */
+	void MessageBroker::pumpMessage( Message* pMessage )
 	{
-		if( m_lMessageQueue.size() == 10 )
-			m_lMessageQueue.pop_front();
-
-		m_lMessageQueue.push_back( pMessage );
-
-		return true;
+		if( pMessage )
+			m_lMessageQueue.push_back( pMessage );
 	}
 
+
+	/**
+	 * @fn	bool MessageBroker::requestExclusiveMessaging( MessageListener* pListener )
+	 *
+	 * @brief	Request exclusive messaging, so that only the given MessageListener gets messages until discarded.
+	 *
+	 * @author	Jörn Teuber
+	 * @date	2/23/2012
+	 *
+	 * @param [in]	pListener	The listener that needs full attention.
+	 *
+	 * @return	true if it succeeds, false if it fails.
+	 */
 	bool MessageBroker::requestExclusiveMessaging( MessageListener* pListener )
 	{
 		if( !m_pExclusiveListener )
@@ -96,6 +144,19 @@ namespace oocl
 		return false;
 	}
 
+
+	/**
+	 * @fn	bool MessageBroker::discardExclusiveMessaging( MessageListener* pListener )
+	 *
+	 * @brief	Discard exclusive messaging.
+	 *
+	 * @author	Jörn Teuber
+	 * @date	2/23/2012
+	 *
+	 * @param [in]	pListener	The listener.
+	 *
+	 * @return	true if it succeeds, false if it fails.
+	 */
 	bool MessageBroker::discardExclusiveMessaging( MessageListener* pListener )
 	{
 		if( m_pExclusiveListener == pListener )
@@ -122,12 +183,7 @@ namespace oocl
 			{
 				for( std::list< MessageListener* >::iterator it = lWaitList.begin(); it != lWaitList.end(); it = lWaitList.erase( it ) )
 				{
-					if( (*it)->requestMutex() )
-					{
-						(*it)->cbMessage( pMessage );
-						(*it)->returnMutex();
-					}
-					else
+					if( !(*it)->cbMessage( pMessage ) )
 						lWaitList.push_back( (*it) );
 				}
 			}

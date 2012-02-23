@@ -92,8 +92,6 @@
     <ClInclude Include="..\..\include\Message.h" />
     <ClInclude Include="..\..\include\MessageBroker.h" />
     <ClInclude Include="..\..\include\MessageListener.h" />
-    <ClInclude Include="..\..\include\MessagePump.h" />
-    <ClInclude Include="..\..\include\MessageSystem.h" />
     <ClInclude Include="..\..\include\Peer.h" />
     <ClInclude Include="..\..\include\Peer2PeerNetwork.h" />
     <ClInclude Include="..\..\include\ServerSocket.h" />
@@ -108,8 +106,6 @@
     <ClCompile Include="..\..\src\Message.cpp" />
     <ClCompile Include="..\..\src\MessageBroker.cpp" />
     <ClCompile Include="..\..\src\MessageListener.cpp" />
-    <ClCompile Include="..\..\src\MessagePump.cpp" />
-    <ClCompile Include="..\..\src\MessageSystem.cpp" />
     <ClCompile Include="..\..\src\Peer.cpp" />
     <ClCompile Include="..\..\src\Peer2PeerNetwork.cpp" />
     <ClCompile Include="..\..\src\ServerSocket.cpp" />

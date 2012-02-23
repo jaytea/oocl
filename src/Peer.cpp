@@ -139,7 +139,7 @@ namespace oocl
 		{
 			if( m_uiPeerID>0 && pMessage->getSenderID() == m_uiPeerID )
 			{
-				Log::getLog("oocl")->logMessage("stopped message from beeing send back to the sender", Log::EL_INFO );
+				Log::getLog("oocl")->logInfo("stopped message from beeing send back to the sender" );
 				return true;
 			}
 
@@ -149,12 +149,12 @@ namespace oocl
 			else if( pMessage->getProtocoll() == SOCK_STREAM )
 				bReturn = m_pSocketTCP->write( pMessage->getMsgString() );
 			else
-				Log::getLog("oocl")->logMessage("You tried to send a message over network that was not intended for that", Log::EL_WARNING );
+				Log::getLog("oocl")->logWarning("You tried to send a message over network that was not intended for that" );
 
 			return bReturn;
 		}
 
-		Log::getLog("oocl")->logMessage( "Message was dropped because the peer is not connected", Log::EL_INFO );
+		Log::getLog("oocl")->logInfo( "Message was dropped because the peer is not connected" );
 
 		return false;
 	}
@@ -180,8 +180,8 @@ namespace oocl
 		case MT_SubscribeMessage:
 			{
 				unsigned short usType = ((SubscribeMessage*)pMessage)->getTypeToSubscribe();
-				if( MessageBroker::getBrokerFor( usType )->registerListener( this ) )
-					m_lusSubscribedMsgTypes.push_back( usType );
+				MessageBroker::getBrokerFor( usType )->registerListener( this );
+				m_lusSubscribedMsgTypes.push_back( usType );
 
 				break;
 			}

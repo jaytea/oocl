@@ -33,22 +33,28 @@ namespace oocl
 EXPIMP_TEMPLATE template class OOCL_EXPORTIMPORT std::allocator<oocl::MessageBroker*>;
 EXPIMP_TEMPLATE template class OOCL_EXPORTIMPORT std::vector<oocl::MessageBroker*>;
 
-// disable warning C4251 that would be thrown for std::list in exported classes
-#pragma warning(push)
-#pragma warning(disable:4251)
-
 namespace oocl
 {
-
+	/**
+	 * @class	MessageBroker
+	 *
+	 * @brief	Manages the delivery of messages to all listeners who subscribed for it.
+	 * 			
+	 * @note	To subscribe for a specific message type call MessageBroker::getBrokerFor(messageType)->registerListener(this). 
+	 * 			Now you will get all messages that are sent through MessageBroker::pumpMessage().
+	 *
+	 * @author	Jörn Teuber
+	 * @date	2/22/2012
+	 */
 	class OOCL_EXPORTIMPORT MessageBroker : public Thread
 	{
 	public:
 		static MessageBroker* getBrokerFor( unsigned short usMessageType );
 
-		bool registerListener( MessageListener* pListener );
-		bool unregisterListener( MessageListener* pListener );
+		void registerListener( MessageListener* pListener );
+		void unregisterListener( MessageListener* pListener );
 
-		bool pumpMessage( Message* pMessage );
+		void pumpMessage( Message* pMessage );
 
 		bool requestExclusiveMessaging( MessageListener* pListener );
 		bool discardExclusiveMessaging( MessageListener* pListener );
@@ -71,7 +77,5 @@ namespace oocl
 	};
 
 }
-
-#pragma warning(pop)
 
 #endif
