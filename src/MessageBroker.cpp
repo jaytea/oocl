@@ -175,7 +175,7 @@ namespace oocl
 			while( m_lMessageQueue.size() == 0 )
 				Sleep(0);
 
-			std::list< MessageListener* > lWaitList( m_lListeners );
+			std::list< MessageListener* > lWaitList( m_lListeners.begin(), m_lListeners.end() );
 
 			Message* pMessage = m_lMessageQueue.front();
 

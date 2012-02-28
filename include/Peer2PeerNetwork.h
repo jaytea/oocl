@@ -61,8 +61,8 @@ namespace oocl
 		std::map<PeerID, Peer*> m_mapPeersByID;
 		std::list<Socket*> m_lpSocketsWithoutPeers;
 
-		Socket*			m_pSocketUDPIn;
-		ServerSocket*	m_pServerSocket;
+		Socket*			m_pServerSocketUDP;
+		ServerSocket*	m_pServerSocketTCP;
 
 		bool			m_bActive;
 		unsigned short	m_usListeningPort;

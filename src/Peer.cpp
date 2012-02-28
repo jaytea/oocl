@@ -9,7 +9,7 @@ namespace oocl
 		m_uiPeerID( 0 ),
 		m_strHostname( strHostname ),
 		m_usPort( usPeerPort ),
-		m_bConnected( false ),
+		m_ucConnectStatus( 0 ),
 		m_pSocketTCP( NULL ),
 		m_pSocketUDPOut( NULL )
 	{
@@ -20,7 +20,7 @@ namespace oocl
 		m_uiPeerID( 0 ),
 		m_strHostname(),
 		m_usPort( usPeerPort ),
-		m_bConnected( false ),
+		m_ucConnectStatus( 0 ),
 		m_pSocketTCP( NULL ),
 		m_pSocketUDPOut( NULL )
 	{
@@ -28,8 +28,8 @@ namespace oocl
 
 	Peer::~Peer(void)
 	{
-		for( std::list<unsigned short>::iterator it = m_lusSubscribedMsgTypes.begin(); it != m_lusSubscribedMsgTypes.end(); it++ )
-			MessageBroker::getBrokerFor( (*it) )->unregisterListener( this );
+		if( m_ucConnectStatus > 0 )
+			disconnect();
 
 		if( m_pSocketTCP )
 			delete m_pSocketTCP;
@@ -39,30 +39,30 @@ namespace oocl
 
 	bool Peer::connect( unsigned short usListeningPort, unsigned int uiPeerID )
 	{
-		if( !m_bConnected )
+		if( m_ucConnectStatus == 0 )
 		{
 			m_pSocketTCP = new Socket( SOCK_STREAM );
 			m_pSocketUDPOut = new Socket( SOCK_DGRAM );
 
-			if( m_uiIP )
-			{
-				if( !m_pSocketUDPOut->connect( m_uiIP, m_usPort ) || !m_pSocketTCP->connect( m_uiIP, m_usPort ) )
-				{
-					delete m_pSocketTCP;
-					delete m_pSocketUDPOut;
+			bool bUDPConnected = false, bTCPConnected = false;
 
-					return false;
-				}
+			if( m_uiIP != 0 )
+			{
+				bUDPConnected = m_pSocketUDPOut->connect( m_uiIP, m_usPort );
+				bTCPConnected = m_pSocketTCP->connect( m_uiIP, m_usPort );
 			}
 			else
 			{
-				if( !m_pSocketUDPOut->connect( m_strHostname, m_usPort ) || !m_pSocketTCP->connect( m_strHostname, m_usPort ) )
-				{
-					delete m_pSocketTCP;
-					delete m_pSocketUDPOut;
+				bUDPConnected = m_pSocketUDPOut->connect( m_strHostname, m_usPort );
+				bTCPConnected = m_pSocketTCP->connect( m_strHostname, m_usPort );
+			}
+			
+			if( !bUDPConnected || !bTCPConnected )
+			{
+				delete m_pSocketTCP;
+				delete m_pSocketUDPOut;
 
-					return false;
-				}
+				return false;
 			}
 
 			ConnectMessage* pMsg = new ConnectMessage( usListeningPort, uiPeerID );
@@ -79,36 +79,78 @@ namespace oocl
 				}
 			}
 
-			m_bConnected = true;
+			m_ucConnectStatus = 1;
+			
+			std::string strMsg = m_pSocketTCP->read( );
+			Message* pMsg2 = Message::createFromString( strMsg.c_str() );
+
+			if( pMsg2->getType() == MT_ConnectMessage )
+			{
+				m_uiPeerID = ((ConnectMessage*)pMsg2)->getPeerID();
+				m_usPort = ((ConnectMessage*)pMsg2)->getPort();
+				m_ucConnectStatus = 2;
+			}
+			else
+			{
+				Log::getLog("oocl")->logError( "The first message from a peer was not a ConnectMessage" );
+			}
 
 			return true;
 		}
+
+		Log::getLog("oocl")->logWarning( "You tried to connect to a peer that is already connected" );
 
 		return false;
 	}
 
-	bool Peer::createWithExistingSockets( Socket* pTCPSocket, Socket* pUDPSocket, PeerID peerID )
+	bool Peer::connected( Socket* pTCPSocket, ConnectMessage* pMsg, unsigned short usListeningPort, PeerID uiUserID )
 	{
-		if( !m_bConnected && pTCPSocket->isConnected() && pUDPSocket->isConnected() )
+		if( m_ucConnectStatus == 0 )
 		{
-			m_uiIP = pTCPSocket->getConnectedIP();
+			if( !pTCPSocket->isValid() || !pTCPSocket->isConnected() ) // this would be very very strange, but better be safe
+			{
+				Log::getLog("oocl")->logError( "A peer connected but the tcp socket is not connected or invalid" );
+				return false;
+			}
 
+			m_uiPeerID = pMsg->getPeerID();
 			m_pSocketTCP = pTCPSocket;
-			m_pSocketUDPOut = pUDPSocket;
 
-			m_bConnected = true;
-			m_uiPeerID = peerID;
+			m_pSocketUDPOut = new Socket( SOCK_DGRAM );
+			m_pSocketUDPOut->connect( m_uiIP, m_usPort );
+
+			ConnectMessage* pMsg = new ConnectMessage( usListeningPort, uiUserID );
+
+			// try to contact the peer twice
+			if( !m_pSocketTCP->write( pMsg->getMsgString() ) )
+			{
+				if( !m_pSocketTCP->write( pMsg->getMsgString() ) )
+				{
+					delete m_pSocketTCP;
+					delete m_pSocketUDPOut;
+
+					return false;
+				}
+			}
+
+			m_ucConnectStatus = 2;
+
 			return true;
 		}
+
+		Log::getLog("oocl")->logWarning( "A peer tried to connect to you but you are already connected to each other" );
 
 		return false;
 	}
 	
 	bool Peer::disconnect()
 	{
-		if( m_bConnected )
+		if( m_ucConnectStatus > 0 )
 		{
 			sendMessage( new DisconnectMessage() );
+
+			for( std::list<unsigned short>::iterator it = m_lusSubscribedMsgTypes.begin(); it != m_lusSubscribedMsgTypes.end(); it++ )
+				MessageBroker::getBrokerFor( (*it) )->unregisterListener( this );
 
 			m_pSocketTCP->close();
 			delete m_pSocketTCP;
@@ -118,7 +160,7 @@ namespace oocl
 			delete m_pSocketUDPOut;
 			m_pSocketUDPOut = NULL;
 
-			m_bConnected = false;
+			m_ucConnectStatus = 0;
 
 			return true;
 		}
@@ -135,7 +177,7 @@ namespace oocl
 
 	bool Peer::sendMessage( Message* pMessage )
 	{
-		if( m_bConnected )
+		if( m_ucConnectStatus == 2 )
 		{
 			if( m_uiPeerID>0 && pMessage->getSenderID() == m_uiPeerID )
 			{
@@ -153,17 +195,21 @@ namespace oocl
 
 			return bReturn;
 		}
-
-		Log::getLog("oocl")->logInfo( "Message was dropped because the peer is not connected" );
-
-		return false;
+		else if( m_ucConnectStatus == 1 )
+		{
+			Log::getLog("oocl")->logInfo( "Message was dropped because the peer is not yet fully connected" );
+			return false;
+		}
+		else
+		{
+			Log::getLog("oocl")->logInfo( "Message was dropped because the peer is not connected" );
+			return false;
+		}
 	}
 
 	bool Peer::subscribe( unsigned short usType )
 	{
-		SubscribeMessage* pMsg = new SubscribeMessage( usType );
-
-		return sendMessage( pMsg );
+		return sendMessage( new SubscribeMessage( usType ) );
 	}
 
 	bool Peer::receiveMessage( Message* pMessage )
@@ -172,11 +218,6 @@ namespace oocl
 
 		switch( pMessage->getType() )
 		{
-		case MT_ConnectMessage:
-			{
-				m_uiPeerID = ((ConnectMessage*)pMessage)->getPeerID();
-				break;
-			}
 		case MT_SubscribeMessage:
 			{
 				unsigned short usType = ((SubscribeMessage*)pMessage)->getTypeToSubscribe();
@@ -195,8 +236,8 @@ namespace oocl
 				delete m_pSocketUDPOut;
 				m_pSocketUDPOut = NULL;
 
-				m_bConnected = false;
-				break;
+				m_ucConnectStatus = 0;
+				// no break, let the client know when a peer disconnected
 			}
 		default:
 			MessageBroker::getBrokerFor( pMessage->getType() )->pumpMessage( pMessage );

@@ -52,7 +52,7 @@ namespace oocl
 		bool receiveMessage( Message* pMessage );
 
 		// getter
-		bool	isConnected()	{ return m_bConnected; }
+		bool	isConnected()	{ return m_ucConnectStatus == 2; }
 		PeerID	getPeerID()		{ return m_uiPeerID; }
 
 		virtual bool cbMessage( Message* pMessage );
@@ -63,11 +63,11 @@ namespace oocl
 		virtual ~Peer(void);
 		
 		bool connect( unsigned short usListeningPort, PeerID uiUserID  );
-		bool createWithExistingSockets( Socket* pTCPSocket, Socket* pUDPSocket, PeerID peerID );
+		bool connected( Socket* pTCPSocket, ConnectMessage* pMsg, unsigned short usListeningPort, PeerID uiUserID );
 		bool disconnect();
 
 	private:
-		bool m_bConnected;
+		unsigned char m_ucConnectStatus;
 
 		std::list<unsigned short> m_lusSubscribedMsgTypes;
 

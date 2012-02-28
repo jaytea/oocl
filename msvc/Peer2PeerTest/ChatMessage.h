@@ -29,6 +29,7 @@ public:
 	ChatMessage( unsigned int uiUserID, std::string strMessage );
 	
 	virtual std::string getMsgString();
+	virtual unsigned short getBodyLength();
 	
 	unsigned int	getPeerID() { return m_uiUserID; }
 	std::string		getMessage() { return m_strMessage; }

@@ -55,11 +55,12 @@ namespace oocl
 		// *********** getter *************
 		/**
 		 * @brief return a ready-to-send string representation of the message
-		 *  | Type  |Length | Messagebody  | _optional_ PeerID
-		 *  |2 byte |2 byte |   |   ....   |   4 byte
+		 *  | Type  |Length | Messagebody
+		 *  |2 byte |2 byte |   |   .... 
 		 * => Length = length of the messageBody in bytes
 		 */
 		virtual std::string		getMsgString() = 0;
+		virtual unsigned short	getBodyLength() = 0;
 
 		void setSenderID( unsigned int uiSenderID ) { m_uiSenderID = uiSenderID; }
 

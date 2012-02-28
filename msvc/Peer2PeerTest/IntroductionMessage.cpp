@@ -29,13 +29,18 @@ std::string IntroductionMessage::getMsgString()
 {
 	unsigned short usMsg[4];
 	usMsg[0] = MT_IntroductionMessage;
-	usMsg[1] = 4 + m_strUsername.length();
+	usMsg[1] = getBodyLength();
 	usMsg[2] = ((unsigned short*)&m_uiUserID)[0];
 	usMsg[3] = ((unsigned short*)&m_uiUserID)[1];
 
 	std::string strHeader( (char*)usMsg, 8 );
 
 	return strHeader+m_strUsername;
+}
+
+unsigned short IntroductionMessage::getBodyLength()
+{
+	return 4 + m_strUsername.length();
 }
 
 oocl::Message* IntroductionMessage::create(const char * in)

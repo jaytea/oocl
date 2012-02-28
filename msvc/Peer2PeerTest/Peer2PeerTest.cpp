@@ -13,6 +13,8 @@
 #include "IntroductionMessage.h"
 
 // code copied from http://www.spieleprogrammierer.de/18-c-cplusplus-csharp-delphi-java-python-und-lua/15218-cplusplus-konsolen-chat/
+
+// this code writes the given string to a specified position inside the console
 #ifdef linux
 	inline void PortableOutput(const std::string &str, int y=0, int x=0)
 	{
@@ -32,7 +34,7 @@
 
 inline void clearLine( int y )
 {
-	PortableOutput( "                                                                               ", y );
+	PortableOutput( "                                                                 ", y );
 }
 
 
@@ -82,8 +84,8 @@ public:
 		oocl::MessageBroker::getBrokerFor( MT_DisconnectMessage )->registerListener( this );
 		oocl::MessageBroker::getBrokerFor( MT_NewPeerMessage )->registerListener( this );
 
-		PortableOutput( "Instructions: type \"+IP:Port\" to add another Peer", m_iLines+1 );
-		PortableOutput( "Instructions: type \"exit\" to close the chat", m_iLines+2 );
+		PortableOutput( "Instructions: type \"+IP:Port\" to add another Peer", m_iLines+2 );
+		PortableOutput( "Instructions: type \"exit\" to close the chat", m_iLines+3 );
 
 		clearLine( m_iLines );
 		PortableOutput( ">", m_iLines );
@@ -101,8 +103,8 @@ public:
 				ssPort >> usPort;
 
 				oocl::Peer* pPeer = m_pPeer2PeerNet->addPeer( strHostname, usPort );
-				pPeer->subscribe( MT_ChatMessage );
-				pPeer->sendMessage( new IntroductionMessage( m_uiUserID, m_strName ) );
+				//pPeer->subscribe( MT_ChatMessage );
+				//pPeer->sendMessage( new IntroductionMessage( m_uiUserID, m_strName ) );
 
 				clearLine( m_iLines );
 				PortableOutput( ">", m_iLines );
@@ -110,6 +112,12 @@ public:
 			else if( strInput == "exit" )
 			{
 				break;
+			}
+			else if( strInput == "connected" )
+			{
+				std::cout << m_pPeer2PeerNet->getPeerList()->size() << " Peers connected" << std::endl;
+				clearLine( m_iLines );
+				PortableOutput( ">", m_iLines );
 			}
 			else
 			{

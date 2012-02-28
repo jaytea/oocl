@@ -29,13 +29,18 @@ std::string ChatMessage::getMsgString()
 {
 	unsigned short usMsg[4];
 	usMsg[0] = MT_ChatMessage;
-	usMsg[1] = 4 + m_strMessage.length();
-	usMsg[2] = ((unsigned short*)&m_uiUserID)[0];
+	usMsg[1] = getBodyLength();
+	usMsg[2] = ((unsigned short*)&m_uiUserID)[0]; // TODO: this seems unnessecary
 	usMsg[3] = ((unsigned short*)&m_uiUserID)[1];
 
 	std::string strHeader( (char*)usMsg, 8 );
 
 	return strHeader+m_strMessage;
+}
+
+unsigned short ChatMessage::getBodyLength()
+{
+	return 4 + m_strMessage.length();
 }
 
 oocl::Message* ChatMessage::create(const char * in)

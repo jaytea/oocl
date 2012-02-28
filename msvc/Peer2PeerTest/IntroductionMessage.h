@@ -29,6 +29,7 @@ public:
 	IntroductionMessage( unsigned int uiUserID, std::string strUsername);
 	
 	virtual std::string getMsgString();
+	virtual unsigned short getBodyLength();
 	
 	unsigned int	getPeerID() { return m_uiUserID; }
 	std::string		getUsername() { return m_strUsername; }

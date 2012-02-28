@@ -72,11 +72,6 @@ namespace oocl
 		 * @return	return true if you have processed the data, false if you want to be called later with the same message.
 		 */
 		virtual bool cbMessage( Message* pMessage ) = 0;
-
-	protected:
-
-		///< true if the mutex is free
-		bool m_bMutex; 
 	};
 
 }

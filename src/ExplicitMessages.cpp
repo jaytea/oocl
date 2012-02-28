@@ -24,10 +24,15 @@ namespace oocl
 	{
 		unsigned short usTemp[2];
 		usTemp[0] = m_type;
-		usTemp[1] = m_strMsgBody.length();
+		usTemp[1] = getBodyLength();
 		std::string strHeader( (char*)usTemp, 4 );
 
 		return strHeader + m_strMsgBody;
+	}
+
+	unsigned short StandardMessage::getBodyLength()
+	{
+		return m_strMsgBody.length();
 	}
 
 	Message* StandardMessage::create(const char * in)
@@ -49,10 +54,15 @@ namespace oocl
 	{
 		unsigned short usMsg[3];
 		usMsg[0] = MT_SubscribeMessage;
-		usMsg[1] = sizeof(unsigned short);
+		usMsg[1] = getBodyLength();
 		usMsg[2] = m_usTypeToSubscribe;
 
 		return std::string( (char*)usMsg, 6 );
+	}
+
+	unsigned short SubscribeMessage::getBodyLength()
+	{
+		return sizeof(unsigned short);
 	}
 
 	Message* SubscribeMessage::create(const char * in)
@@ -75,10 +85,15 @@ namespace oocl
 	{
 		unsigned short usMsg[3];
 		usMsg[0] = MT_ConnectMessage;
-		usMsg[1] = sizeof(short)+sizeof(int);
+		usMsg[1] = getBodyLength();
 		usMsg[2] = m_usPort;
 
 		return std::string( (char*)usMsg, 6 ) + std::string( (char*)&m_uiPeerID, sizeof(int) );
+	}
+
+	unsigned short ConnectMessage::getBodyLength()
+	{
+		return sizeof(short)+sizeof(int);
 	}
 
 	Message* ConnectMessage::create(const char * in)
@@ -103,9 +118,14 @@ namespace oocl
 	{
 		unsigned short usMsg[2];
 		usMsg[0] = MT_DisconnectMessage;
-		usMsg[1] = 0;
+		usMsg[1] = getBodyLength();
 
 		return std::string( (char*)usMsg, 4 );
+	}
+
+	unsigned short DisconnectMessage::getBodyLength()
+	{
+		return 0;
 	}
 
 	Message* DisconnectMessage::create(const char * in)
@@ -129,9 +149,14 @@ namespace oocl
 		// return an invalid message as this message is only for intra client use
 		unsigned short usMsg[2];
 		usMsg[0] = 0;
-		usMsg[1] = 0;
+		usMsg[1] = getBodyLength();
 
 		return std::string( (char*)usMsg, 4 );
+	}
+
+	unsigned short NewPeerMessage::getBodyLength()
+	{
+		return 0;
 	}
 
 	Message* NewPeerMessage::create(const char * in)

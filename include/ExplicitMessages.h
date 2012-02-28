@@ -50,6 +50,7 @@ namespace oocl
 		StandardMessage( std::string strMsgBody );
 
 		virtual std::string getMsgString();
+		virtual unsigned short getBodyLength();
 
 		std::string getBody() { return m_strMsgBody; }
 		void setProtocoll( int iProtocoll ) { m_iProtocoll = iProtocoll; }
@@ -77,6 +78,7 @@ namespace oocl
 		SubscribeMessage( unsigned short usTypeToSubscribe );
 
 		virtual std::string getMsgString();
+		virtual unsigned short getBodyLength();
 
 		// getter
 		unsigned short getTypeToSubscribe() { return m_usTypeToSubscribe; }
@@ -104,6 +106,7 @@ namespace oocl
 		ConnectMessage( unsigned short usMyPort, unsigned int uiPeerID = 0 );
 
 		virtual std::string getMsgString();
+		virtual unsigned short getBodyLength();
 
 		unsigned short getPort() { return m_usPort; }
 		unsigned int getPeerID() { return m_uiPeerID; }
@@ -132,6 +135,7 @@ namespace oocl
 		DisconnectMessage();
 
 		virtual std::string getMsgString();
+		virtual unsigned short getBodyLength();
 
 	protected:
 		static Message* create(const char * in);
@@ -153,6 +157,7 @@ namespace oocl
 		NewPeerMessage( Peer* pPeer );
 
 		virtual std::string getMsgString();
+		virtual unsigned short getBodyLength();
 		
 		Peer* getPeer() { return m_pPeer; }
 
