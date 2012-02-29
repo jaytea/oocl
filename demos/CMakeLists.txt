@@ -1,0 +1,2 @@
+add_subdirectory(DirectConTest)
+add_subdirectory(Peer2PeerTest)

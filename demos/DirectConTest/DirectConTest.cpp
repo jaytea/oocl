@@ -1,8 +1,6 @@
 // DirectConTest.cpp : Definiert den Einstiegspunkt für die Konsolenanwendung.
 //
 
-#include "stdafx.h"
-
 #include <DirectConNetwork.h>
 #include <ExplicitMessages.h>
 
@@ -110,7 +108,7 @@ private:
 };
 
 
-int _tmain(int argc, _TCHAR* argv[])
+int main(int argc, char* argv[])
 {
 	DirectConTest* pTest = new DirectConTest();
 

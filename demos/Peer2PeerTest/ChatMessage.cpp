@@ -13,40 +13,39 @@ subject to the following restrictions:
 3. This notice may not be removed or altered from any source distribution.
 */
 /// This file was written by Jörn Teuber
-#include "StdAfx.h"
-#include "IntroductionMessage.h"
+#include "ChatMessage.h"
 
 
-IntroductionMessage::IntroductionMessage( unsigned int uiUserID, std::string strUsername ) :
+ChatMessage::ChatMessage( unsigned int uiUserID, std::string strMessage ) :
 	m_uiUserID( uiUserID ),
-	m_strUsername( strUsername )
+	m_strMessage( strMessage )
 {
 	m_iProtocoll = SOCK_STREAM;
-	m_type = MT_IntroductionMessage;
+	m_type = MT_ChatMessage;
 }
 	
-std::string IntroductionMessage::getMsgString()
+std::string ChatMessage::getMsgString()
 {
 	unsigned short usMsg[4];
-	usMsg[0] = MT_IntroductionMessage;
+	usMsg[0] = MT_ChatMessage;
 	usMsg[1] = getBodyLength();
-	usMsg[2] = ((unsigned short*)&m_uiUserID)[0];
+	usMsg[2] = ((unsigned short*)&m_uiUserID)[0]; // TODO: this seems unnessecary
 	usMsg[3] = ((unsigned short*)&m_uiUserID)[1];
 
 	std::string strHeader( (char*)usMsg, 8 );
 
-	return strHeader+m_strUsername;
+	return strHeader+m_strMessage;
 }
 
-unsigned short IntroductionMessage::getBodyLength()
+unsigned short ChatMessage::getBodyLength()
 {
-	return 4 + m_strUsername.length();
+	return 4 + m_strMessage.length();
 }
 
-oocl::Message* IntroductionMessage::create(const char * in)
+oocl::Message* ChatMessage::create(const char * in)
 {
 	unsigned int uiUserID = ((unsigned int*)in)[1];
-	std::string strUsername( &in[8], ((unsigned short*)in)[1]-4 );
+	std::string strMessage( &in[8], ((unsigned short*)in)[1]-4 );
 
-	return new IntroductionMessage( uiUserID, strUsername );
+	return new ChatMessage( uiUserID, strMessage );
 }

@@ -1,7 +1,6 @@
 // Peer2PeerTest.cpp : Definiert den Einstiegspunkt für die Konsolenanwendung.
 //
 
-#include "stdafx.h"
 #include <string>
 #include <iostream>
 #include <sstream>
@@ -190,7 +189,7 @@ private:
 };
 
 
-int _tmain(int argc, _TCHAR* argv[])
+int main(int argc, char* argv[])
 {
 	Peer2PeerTest* pTest = new Peer2PeerTest();
 
