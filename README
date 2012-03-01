@@ -1,9 +1,21 @@
 The OBJECT ORIENTED COMMUNICATION LIBRARY  (oocl)
 is intended to be a platform independent and easy to use c++ library for network communication.
 
-It has no other dependencies.
+It is currently very much work in progress, so don't be surprised if something does not work.
+If you have suggestions feel free to contact me via github (https://github.com/jaytea).
 
-There are project files for following IDEs:
-- Microsoft Visual Studio 2008 (./msvc/2008)
-- Microsoft Visual Studio 2010 (./msvc/2010)
-- Code::Blocks (./cb)
+LICENSE:
+The library is released under the zlib-license! So feel free to do whatever you want with it, just give us credit if you use it.
+
+INSTALLATION:
+We use cmake for oocl to get it as plattform independend as possible. Just get CMake from their website http://www.cmake.org/ and let it run on oocl. You should not have to do anything manually.
+
+DOCUMENTATION:
+DoxyGen documentation is available online at http://jaytea.org/oocl/
+
+DEPENDENCIES:
+- Linux: None
+- Windows: Ws2_32.lib
+
+DEMOS/TUTORIALS:
+If you want to know how to use oocl take a look at the demos in the demos directory.
