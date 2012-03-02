@@ -12,7 +12,7 @@ subject to the following restrictions:
 2. Altered source versions must be plainly marked as such, and must not be misrepresented as being the original software.
 3. This notice may not be removed or altered from any source distribution.
 */
-/// This file was written by Jörn Teuber
+// This file was written by Jörn Teuber
 
 #ifndef PEER2PEERNETWORK_H
 #define PEER2PEERNETWORK_H
@@ -30,7 +30,7 @@ namespace oocl
 	/**
 	 * @class	Peer2PeerNetwork
 	 *
-	 * @brief	Peer 2 peer network.
+	 * @brief	Manager class for a message based peer2peer network.
 	 * 			
 	 * @note	sends message: NewPeerMessage
 	 *
@@ -66,7 +66,7 @@ namespace oocl
 
 		bool			m_bActive;
 		unsigned short	m_usListeningPort;
-		PeerID			m_uiPeerID;
+		PeerID			m_uiUserID;
 	};
 
 }

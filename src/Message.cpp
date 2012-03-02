@@ -12,7 +12,7 @@ subject to the following restrictions:
 2. Altered source versions must be plainly marked as such, and must not be misrepresented as being the original software.
 3. This notice may not be removed or altered from any source distribution.
 */
-/// This file was written by Jürgen Lorenz and Jörn Teuber
+// This file was written by Jürgen Lorenz and Jörn Teuber
 
 #include "Message.h"
 
@@ -21,9 +21,18 @@ namespace oocl
 
 	// ******************** Message *********************
 	
-	//unsigned short Message::sm_type = MT_InvalidMessage; // this is an invalid type
 	std::vector<Message* (*)(const char*)> Message::sm_msgTypeList;
 
+
+	/**
+	 * @fn	Message* Message::createFromString( const char* cMsg )
+	 *
+	 * @brief	Creates an object of an implementation of message from a received byte buffer.
+	 *
+	 * @param	cMsg	The message as byte buffer.
+	 *
+	 * @return	null if it fails, else a pointer to the created message object.
+	 */
 	Message* Message::createFromString( const char* cMsg )
 	{
 		unsigned short usType = ((unsigned short*)cMsg)[0];
@@ -42,6 +51,21 @@ namespace oocl
 		return NULL;
 	}
 
+
+	/**
+	 * @fn	void Message::registerMsg( unsigned short usType, Message* (*create)(const char*) )
+	 *
+	 * @brief	registers a message imlementation with the system, so that it can be created when received
+	 * 			
+	 * @note	has to be called from the message implementation before it can be recognized by
+	 * 			the network.
+	 *
+	 * @author	Jörn Teuber
+	 * @date	3/1/2012
+	 *
+	 * @param	usType		  	The type.
+	 * @param [in]	create	a pointer to a function that receives a byte buffer and returns a pointer to a newly created object of your message implementation.
+	 */
 	void Message::registerMsg( unsigned short usType, Message* (*create)(const char*)  )
 	{
 		if( usType >= sm_msgTypeList.size() )

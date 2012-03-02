@@ -1,9 +1,31 @@
-#include "Peer.h"
+/*
+Object Oriented Communication Library
+Copyright (c) 2011 Jürgen Lorenz and Jörn Teuber
 
+This software is provided 'as-is', without any express or implied warranty.
+In no event will the authors be held liable for any damages arising from the use of this software.
+Permission is granted to anyone to use this software for any purpose,
+including commercial applications, and to alter it and redistribute it freely,
+subject to the following restrictions:
+
+1. The origin of this software must not be misrepresented; you must not claim that you wrote the original software. If you use this software in a product, an acknowledgment in the product documentation would be appreciated but is not required.
+2. Altered source versions must be plainly marked as such, and must not be misrepresented as being the original software.
+3. This notice may not be removed or altered from any source distribution.
+*/
+// This file was written by Jörn Teuber
+
+#include "Peer.h"
 
 namespace oocl
 {
-
+	/**
+	 * @fn	Peer::Peer( std::string strHostname, unsigned short usPeerPort )
+	 *
+	 * @brief	Constructor.
+	 *
+	 * @param	strHostname	The hostname.
+	 * @param	usPeerPort 	The peer port.
+	 */
 	Peer::Peer( std::string strHostname, unsigned short usPeerPort ) :
 		m_uiIP( 0 ),
 		m_uiPeerID( 0 ),
@@ -14,7 +36,16 @@ namespace oocl
 		m_pSocketUDPOut( NULL )
 	{
 	}
-		
+
+
+	/**
+	 * @fn	Peer::Peer( unsigned int uiIP, unsigned short usPeerPort )
+	 *
+	 * @brief	Constructor.
+	 *
+	 * @param	uiIP	  	The ip.
+	 * @param	usPeerPort	The peer port.
+	 */
 	Peer::Peer( unsigned int uiIP, unsigned short usPeerPort ) :
 		m_uiIP( uiIP ),
 		m_uiPeerID( 0 ),
@@ -26,6 +57,12 @@ namespace oocl
 	{
 	}
 
+
+	/**
+	 * @fn	Peer::~Peer(void)
+	 *
+	 * @brief	Destructor.
+	 */
 	Peer::~Peer(void)
 	{
 		if( m_ucConnectStatus > 0 )
@@ -37,6 +74,17 @@ namespace oocl
 			delete m_pSocketUDPOut;
 	}
 
+
+	/**
+	 * @fn	bool Peer::connect( unsigned short usListeningPort, unsigned int uiPeerID )
+	 *
+	 * @brief	Connects.
+	 *
+	 * @param	usListeningPort	The listening port.
+	 * @param	uiPeerID	   	Identifier for the peer.
+	 *
+	 * @return	true if it succeeds, false if it fails.
+	 */
 	bool Peer::connect( unsigned short usListeningPort, unsigned int uiPeerID )
 	{
 		if( m_ucConnectStatus == 0 )
@@ -103,6 +151,20 @@ namespace oocl
 		return false;
 	}
 
+
+	/**
+	 * @fn	bool Peer::connected( Socket* pTCPSocket, ConnectMessage* pMsg,
+	 * 		unsigned short usListeningPort, PeerID uiUserID )
+	 *
+	 * @brief	Called when someone connects.
+	 *
+	 * @param [in]	pTCPSocket		The connected tcp socket.
+	 * @param [in]	pMsg	  		The connect message sent by the connecting peer.
+	 * @param	usListeningPort   	The listening port.
+	 * @param	uiUserID		  	Identifier for the user.
+	 *
+	 * @return	true if it succeeds, false if it fails.
+	 */
 	bool Peer::connected( Socket* pTCPSocket, ConnectMessage* pMsg, unsigned short usListeningPort, PeerID uiUserID )
 	{
 		if( m_ucConnectStatus == 0 )
@@ -142,7 +204,15 @@ namespace oocl
 
 		return false;
 	}
-	
+
+
+	/**
+	 * @fn	bool Peer::disconnect()
+	 *
+	 * @brief	Disconnects this peer.
+	 *
+	 * @return	true if it succeeds, false if it fails.
+	 */
 	bool Peer::disconnect()
 	{
 		if( m_ucConnectStatus > 0 )
@@ -168,6 +238,16 @@ namespace oocl
 		return false;
 	}
 
+
+	/**
+	 * @fn	bool Peer::cbMessage( Message* pMessage )
+	 *
+	 * @brief	Gets the messages to which the peer has subscribed.
+	 *
+	 * @param [in]	pMessage	The incoming message.
+	 *
+	 * @return	true if it succeeds, false if it fails.
+	 */
 	bool Peer::cbMessage( Message* pMessage )
 	{
 		sendMessage( pMessage );
@@ -175,6 +255,19 @@ namespace oocl
 		return true;
 	}
 
+
+	/**
+	 * @fn	bool Peer::sendMessage( Message* pMessage )
+	 *
+	 * @brief	Sends a message to the connected peer.
+	 *
+	 * @author	Jörn Teuber
+	 * @date	3/1/2012
+	 *
+	 * @param [in]	pMessage	The message to send.
+	 *
+	 * @return	true if it succeeds, false if it fails.
+	 */
 	bool Peer::sendMessage( Message* pMessage )
 	{
 		if( m_ucConnectStatus == 2 )
@@ -207,11 +300,37 @@ namespace oocl
 		}
 	}
 
+
+	/**
+	 * @fn	bool Peer::subscribe( unsigned short usType )
+	 *
+	 * @brief	Subscribe a message type at the connected peer.
+	 *
+	 * @author	Jörn Teuber
+	 * @date	3/1/2012
+	 *
+	 * @param	usType	The type.
+	 *
+	 * @return	true if it succeeds, false if it fails.
+	 */
 	bool Peer::subscribe( unsigned short usType )
 	{
 		return sendMessage( new SubscribeMessage( usType ) );
 	}
 
+
+	/**
+	 * @fn	bool Peer::receiveMessage( Message* pMessage )
+	 *
+	 * @brief	Called when a message of the connected peer was received.
+	 *
+	 * @author	Jörn Teuber
+	 * @date	3/1/2012
+	 *
+	 * @param [in]	pMessage	The received message.
+	 *
+	 * @return	true if it succeeds, false if it fails.
+	 */
 	bool Peer::receiveMessage( Message* pMessage )
 	{
 		pMessage->setSenderID( m_uiPeerID );

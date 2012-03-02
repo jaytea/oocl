@@ -12,7 +12,7 @@ subject to the following restrictions:
 2. Altered source versions must be plainly marked as such, and must not be misrepresented as being the original software.
 3. This notice may not be removed or altered from any source distribution.
 */
-/// This file was written by Jörn Teuber
+// This file was written by Jörn Teuber
 
 #ifndef MESSAGE_H_INCLUDED
 #define MESSAGE_H_INCLUDED
@@ -47,6 +47,14 @@ namespace oocl
 {
 
 #define MT_InvalidMessage 0
+	/**
+	 * @class	Message
+	 *
+	 * @brief	Interface and manager for all message classes.
+	 *
+	 * @author	Jörn Teuber
+	 * @date	3/1/2012
+	 */
 	class OOCL_EXPORTIMPORT Message
 	{
 	public:
@@ -57,7 +65,7 @@ namespace oocl
 		 * @brief return a ready-to-send string representation of the message
 		 *  | Type  |Length | Messagebody
 		 *  |2 byte |2 byte |   |   .... 
-		 * => Length = length of the messageBody in bytes
+		 * => Length = length of the messageBody in bytes (as returned by getBodyLength() )
 		 */
 		virtual std::string		getMsgString() = 0;
 		virtual unsigned short	getBodyLength() = 0;
@@ -73,15 +81,9 @@ namespace oocl
 		Message() {}
 		virtual ~Message(void) {}
 
-		/**
-		 * @brief registers a message imlementation with the system, so that it can be used
-		 *
-		 * @note has to be called from the message implementation before it can be recognized by the network
-		 */
 		static void registerMsg( unsigned short type, Message* (*create)(const char*) );
 
 	protected:
-		//static unsigned short 	sm_type;
 		unsigned short 	m_type;
 		int             m_iProtocoll;
 		unsigned int	m_uiSenderID;

@@ -39,9 +39,6 @@ namespace oocl
 		 * @fn	MessageListener::MessageListener(void)
 		 *
 		 * @brief	Default constructor.
-		 *
-		 * @author	Jörn Teuber
-		 * @date	11/25/2011
 		 */
 		MessageListener(void) {}
 
@@ -49,9 +46,6 @@ namespace oocl
 		 * @fn	virtual MessageListener::~MessageListener(void)
 		 *
 		 * @brief	Destructor.
-		 *
-		 * @author	Jörn Teuber
-		 * @date	11/25/2011
 		 */
 		virtual ~MessageListener(void) {};
 
@@ -64,10 +58,7 @@ namespace oocl
 		 * 			So be sure to either only process thread-safe data here or make the data thread-safe.
 		 * 			If you do not want to handle the message now you can return false to let the message delivery thread return to you with this messsage later.
 		 *
-		 * @author	Jörn Teuber
-		 * @date	11/25/2011
-		 *
-		 * @param [in,out]	pMessage	If non-null, the message.
+		 * @param [in]	pMessage	the message.
 		 *
 		 * @return	return true if you have processed the data, false if you want to be called later with the same message.
 		 */

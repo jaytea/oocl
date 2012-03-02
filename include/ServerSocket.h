@@ -12,7 +12,7 @@ subject to the following restrictions:
 2. Altered source versions must be plainly marked as such, and must not be misrepresented as being the original software.
 3. This notice may not be removed or altered from any source distribution.
 */
-/// This file was written by Jürgen Lorenz
+// This file was written by Jürgen Lorenz
 
 #ifndef SERVERSOCKET_H_INCLUDED
 #define SERVERSOCKET_H_INCLUDED
@@ -23,7 +23,14 @@ subject to the following restrictions:
 
 namespace oocl
 {
-
+	/**
+	 * @class	ServerSocket
+	 *
+	 * @brief	Specialized server socket for receiving incoming connections.
+	 *
+	 * @author	Jörn Teuber
+	 * @date	3/1/2012
+	 */
 	class OOCL_EXPORTIMPORT ServerSocket : public SocketStub
 	{
 	public:

@@ -12,7 +12,7 @@ subject to the following restrictions:
 2. Altered source versions must be plainly marked as such, and must not be misrepresented as being the original software.
 3. This notice may not be removed or altered from any source distribution.
 */
-/// This file was written by Jürgen Lorenz and Jörn Teuber
+// This file was written by Jürgen Lorenz and Jörn Teuber
 
 #include "Thread.h"
 
@@ -24,9 +24,6 @@ namespace oocl
 	 * @fn	Thread::Thread()
 	 *
 	 * @brief	Default constructor.
-	 *
-	 * @author	Jörn Teuber
-	 * @date	11/23/2011
 	 */
 	Thread::Thread() :
 		m_bActive( false )
@@ -37,10 +34,7 @@ namespace oocl
 	/**
 	 * @fn	void Thread::join()
 	 *
-	 * @brief	blocks until the thread has finished
-	 *
-	 * @author	Jörn Teuber
-	 * @date	11/23/2011
+	 * @brief	blocks until the thread has finished.
 	 */
 	void Thread::join()
 	{
@@ -59,9 +53,6 @@ namespace oocl
 	 * 			
 	 * @note	Only call this from _inside_ the thread method!
 	 *
-	 * @author	Jörn Teuber
-	 * @date	11/23/2011
-	 *
 	 * @param	iMilliseconds	milliseconds to sleep or 0 to pass the current CPU timeslot to the next thread or process.
 	 */
 	void Thread::sleep( int iMilliseconds )
@@ -79,9 +70,6 @@ namespace oocl
 	 *
 	 * @brief	Query whether this thread is alive.
 	 *
-	 * @author	Jörn Teuber
-	 * @date	11/23/2011
-	 *
 	 * @return	true if alive, false if not.
 	 */
 	bool Thread::isAlive()
@@ -94,9 +82,6 @@ namespace oocl
 	 * @fn	bool Thread::start()
 	 *
 	 * @brief	Starts the thread.
-	 *
-	 * @author	Jörn Teuber
-	 * @date	11/23/2011
 	 *
 	 * @return	true if it succeeds, false if it fails.
 	 */
@@ -127,9 +112,6 @@ namespace oocl
 	 * @fn	void Thread::setPriority( EPriority iPriority )
 	 *
 	 * @brief	Sets a new thread priority.
-	 *
-	 * @author	Jörn Teuber
-	 * @date	11/23/2011
 	 *
 	 * @param	iPriority	the new priority.
 	 */

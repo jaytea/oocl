@@ -12,7 +12,7 @@ subject to the following restrictions:
 2. Altered source versions must be plainly marked as such, and must not be misrepresented as being the original software.
 3. This notice may not be removed or altered from any source distribution.
 */
-/// This file was written by Jörn Teuber
+// This file was written by Jörn Teuber
 
 #ifndef LOG_H
 #define LOG_H
@@ -37,12 +37,17 @@ namespace oocl
 	class OOCL_EXPORTIMPORT Log
 	{
 	public:
+		/**
+		 * @enum	EErrorLevel
+		 *
+		 * @brief	Values that represent the importance of the logged message (aka the error level ;) ).
+		 */
 		enum EErrorLevel
 		{
-			EL_INFO = 0,	// Information 
-			EL_WARNING,		// Problems or errors that were catched and do not have any impact on the execution of the program
-			EL_ERROR,		// Errors which could not be dealt with and likely altered the programs behaviour
-			EL_FATAL_ERROR	// Errors that crashes the programm
+			EL_INFO = 0,	///< Information 
+			EL_WARNING,		///< Problems or errors that were catched and do not have any impact on the execution of the program
+			EL_ERROR,		///< Errors which could not be dealt with and likely altered the programs behaviour
+			EL_FATAL_ERROR	///< Errors that crashes the programm
 		};
 
 		static Log* getLog( std::string strLogName );

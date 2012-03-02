@@ -12,7 +12,7 @@ subject to the following restrictions:
 2. Altered source versions must be plainly marked as such, and must not be misrepresented as being the original software.
 3. This notice may not be removed or altered from any source distribution.
 */
-/// This file was written by Jürgen Lorenz and Jörn Teuber
+// This file was written by Jürgen Lorenz and Jörn Teuber
 
 #include "MessageBroker.h"
 
@@ -23,6 +23,11 @@ namespace oocl
 	std::vector< MessageBroker* > MessageBroker::sm_vBroker;
 
 
+	/**
+	 * @fn	MessageBroker::MessageBroker(void)
+	 *
+	 * @brief	Default constructor.
+	 */
 	MessageBroker::MessageBroker(void)
 		: m_pExclusiveListener( NULL ),
 		m_iSequenceNumber( 0 ),
@@ -31,6 +36,12 @@ namespace oocl
 		start();
 	}
 
+
+	/**
+	 * @fn	MessageBroker::~MessageBroker(void)
+	 *
+	 * @brief	Destructor.
+	 */
 	MessageBroker::~MessageBroker(void)
 	{
 		m_bRunThread = false;
@@ -41,9 +52,6 @@ namespace oocl
 	 * @fn	MessageBroker* MessageBroker::getBrokerFor( unsigned short usMessageType )
 	 *
 	 * @brief	Returns the broker for the given message type.
-	 *
-	 * @author	Jörn Teuber
-	 * @date	2/23/2012
 	 *
 	 * @param	usMessageType	Message type for which you need the broker.
 	 *
@@ -75,9 +83,6 @@ namespace oocl
 	 *
 	 * @brief	Registers the listener described by pListener.
 	 *
-	 * @author	Jörn Teuber
-	 * @date	2/23/2012
-	 *
 	 * @param [in]	pListener	The listener you want to register with this brocker.
 	 */
 	void MessageBroker::registerListener( MessageListener* pListener )
@@ -91,9 +96,6 @@ namespace oocl
 	 * @fn	void MessageBroker::unregisterListener( MessageListener* pListener )
 	 *
 	 * @brief	Unregisters the listener described by pListener.
-	 *
-	 * @author	Jörn Teuber
-	 * @date	2/23/2012
 	 *
 	 * @param [in]	pListener	The listener you want to unregister.
 	 */
@@ -109,9 +111,6 @@ namespace oocl
 	 *
 	 * @brief	Pump message.
 	 *
-	 * @author	Jörn Teuber
-	 * @date	2/23/2012
-	 *
 	 * @param [in,out]	pMessage	If non-null, the message.
 	 */
 	void MessageBroker::pumpMessage( Message* pMessage )
@@ -125,9 +124,6 @@ namespace oocl
 	 * @fn	bool MessageBroker::requestExclusiveMessaging( MessageListener* pListener )
 	 *
 	 * @brief	Request exclusive messaging, so that only the given MessageListener gets messages until discarded.
-	 *
-	 * @author	Jörn Teuber
-	 * @date	2/23/2012
 	 *
 	 * @param [in]	pListener	The listener that needs full attention.
 	 *
@@ -150,9 +146,6 @@ namespace oocl
 	 *
 	 * @brief	Discard exclusive messaging.
 	 *
-	 * @author	Jörn Teuber
-	 * @date	2/23/2012
-	 *
 	 * @param [in]	pListener	The listener.
 	 *
 	 * @return	true if it succeeds, false if it fails.
@@ -168,19 +161,27 @@ namespace oocl
 		return false;
 	}
 
+
+	/**
+	 * @fn	void MessageBroker::run()
+	 *
+	 * @brief	Distributes the messages in the message queue of this broker.
+	 */
 	void MessageBroker::run()
 	{
+		// TODO: This really needs an overhaul. In practice this wastes way to much time inside the idle loop. 
+		//			A simple heuristic could decide whether we stay in the thread or close it and open another on demand.
 		while( m_bRunThread )
 		{
 			while( m_lMessageQueue.size() == 0 )
 				Sleep(0);
 
-			std::list< MessageListener* > lWaitList( m_lListeners.begin(), m_lListeners.end() );
-
 			Message* pMessage = m_lMessageQueue.front();
 
 			if( !m_pExclusiveListener )
 			{
+				std::list< MessageListener* > lWaitList( m_lListeners.begin(), m_lListeners.end() );
+
 				for( std::list< MessageListener* >::iterator it = lWaitList.begin(); it != lWaitList.end(); it = lWaitList.erase( it ) )
 				{
 					if( !(*it)->cbMessage( pMessage ) )
@@ -189,7 +190,10 @@ namespace oocl
 			}
 			else
 			{
-				m_pExclusiveListener->cbMessage( pMessage );
+				bool bRet = false;
+				do {
+					bRet = m_pExclusiveListener->cbMessage( pMessage );
+				} while( !bRet );
 			}
 
 			m_lMessageQueue.pop_front();

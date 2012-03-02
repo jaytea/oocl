@@ -12,7 +12,7 @@ subject to the following restrictions:
 2. Altered source versions must be plainly marked as such, and must not be misrepresented as being the original software.
 3. This notice may not be removed or altered from any source distribution.
 */
-/// This file was written by Jürgen Lorenz and Jörn Teuber
+// This file was written by Jürgen Lorenz and Jörn Teuber
 
 #include "Socket.h"
 
@@ -22,6 +22,17 @@ namespace oocl
 	int Socket::iSocketCounter = 0;
 
 
+	/**
+	 * @fn	Socket::Socket(int socket, struct sockaddr_in sock_addr)
+	 *
+	 * @brief	Private socket constructor for the server socket, uses an existing c socket.
+	 *
+	 * @author	Jörn Teuber
+	 * @date	3/2/2012
+	 *
+	 * @param	socket   	The c socket.
+	 * @param	sock_addr	The address as returned by accept.
+	 */
 	Socket::Socket(int socket, struct sockaddr_in sock_addr)
 		: SocketStub(),
 		bValid( true ),
@@ -32,6 +43,17 @@ namespace oocl
 	{
 	}
 
+
+	/**
+	 * @fn	Socket::Socket( int iSockType )
+	 *
+	 * @brief	Public constructor for a new, clean and unconnected socket.
+	 *
+	 * @author	Jörn Teuber
+	 * @date	3/2/2012
+	 *
+	 * @param	iSockType	Protocoll used by the socket, TCP = SOCK_STREAM, UDP = SOCK_DGRAM.
+	 */
 	Socket::Socket( int iSockType )
 		: SocketStub(),
 		bConnected( false ),
@@ -57,11 +79,33 @@ namespace oocl
 		}
 	}
 
+
+	/**
+	 * @fn	bool Socket::connect( std::string host, unsigned short usPort )
+	 *
+	 * @brief	Connects the socket to the given Peer.
+	 *
+	 * @param	host  	The host.
+	 * @param	usPort	The port.
+	 *
+	 * @return	true if it succeeds, false if it fails.
+	 */
 	bool Socket::connect( std::string host, unsigned short usPort )
 	{
 		return connect( getAddrFromString( host.c_str() ), usPort );
 	}
 
+
+	/**
+	 * @fn	bool Socket::connect( unsigned int uiHostIP, unsigned short usPort )
+	 *
+	 * @brief	Connects the socket to the given Peer.
+	 *
+	 * @param	uiHostIP	The host ip.
+	 * @param	usPort  	The port.
+	 *
+	 * @return	true if it succeeds, false if it fails.
+	 */
 	bool Socket::connect( unsigned int uiHostIP, unsigned short usPort )
 	{
 		if( bValid && !bConnected )
@@ -97,6 +141,16 @@ namespace oocl
 		return false;
 	}
 
+
+	/**
+	 * @fn	bool Socket::bind( unsigned short usPort )
+	 *
+	 * @brief	Binds the socket to the given port, used for UDP listening.
+	 *
+	 * @param	usPort	The port.
+	 *
+	 * @return	true if it succeeds, false if it fails.
+	 */
 	bool Socket::bind( unsigned short usPort )
 	{
 		if( bValid && !bConnected )
@@ -128,23 +182,54 @@ namespace oocl
 		return false;
 	}
 
+
+	/**
+	 * @fn	Socket::~Socket()
+	 *
+	 * @brief	Destructor.
+	 */
 	Socket::~Socket()
 	{
 		close();
 		SocketStub::~SocketStub();
 	}
 
+
+	/**
+	 * @fn	bool Socket::isValid()
+	 *
+	 * @brief	Query if this socket is valid, i.e. the C socket could not be created.
+	 *
+	 * @return	true if valid, false if not.
+	 */
 	bool Socket::isValid()
 	{
 		return bValid;
 	}
 
+
+	/**
+	 * @fn	bool Socket::isConnected()
+	 *
+	 * @brief	Query if this socket is connected.
+	 *
+	 * @return	true if connected, false if not.
+	 */
 	bool Socket::isConnected()
 	{
 		return bConnected;
 	}
 
 
+	/**
+	 * @fn	std::string Socket::read(int count)
+	 *
+	 * @brief	Receives a package of count length at max and returns it as string.
+	 *
+	 * @param	count	The number of bytes to receive.
+	 *
+	 * @return	The received bytes as string.
+	 */
 	std::string Socket::read(int count)
 	{
 		if(count==0){
@@ -159,6 +244,14 @@ namespace oocl
 		return std::string();
 	}
 
+
+	/**
+	 * @fn	char Socket::readC()
+	 *
+	 * @brief	Receive exactly one byte.
+	 *
+	 * @return	The received byte.
+	 */
 	char Socket::readC()
 	{
 		char * in = readCA(1);
@@ -169,6 +262,17 @@ namespace oocl
 		return 0;
 	}
 
+
+	/**
+	 * @fn	char * Socket::readCA(int count, int * readCount)
+	 *
+	 * @brief	Receives a package with max count size, returns a char array and stores the number of actually received bytes in readCount.
+	 *
+	 * @param	count			 	Maximum number of bytes to read.
+	 * @param [out]		readCount	If non-null, contains the number of actually received bytes.
+	 *
+	 * @return	null if it fails, else the ca.
+	 */
 	char * Socket::readCA(int count, int * readCount)
 	{
 		if(bConnected && count>0)
@@ -193,6 +297,17 @@ namespace oocl
 		return NULL;
 	}
 
+
+	/**
+	 * @fn	std::string Socket::readFrom( int count, unsigned int* hostIP )
+	 *
+	 * @brief	Receives from an unconnected, i.e. UDP socket.
+	 *
+	 * @param	count		  	Maximum number of bytes to read.
+	 * @param [out]		hostIP	If non-null, the ip of the peer that sent the package.
+	 *
+	 * @return	The received bytes as string.
+	 */
 	std::string Socket::readFrom( int count, unsigned int* hostIP )
 	{
 		if( bValid && !bConnected )
@@ -226,16 +341,46 @@ namespace oocl
 	}
 
 
+	/**
+	 * @fn	bool Socket::write(std::string in)
+	 *
+	 * @brief	Send a package to the connected process.
+	 *
+	 * @param	in	The package as string.
+	 *
+	 * @return	true if it succeeds, false if it fails.
+	 */
 	bool Socket::write(std::string in)
 	{
 		return writeCA(in.c_str(),in.length());
 	}
 
+
+	/**
+	 * @fn	bool Socket::writeC(char in)
+	 *
+	 * @brief	Sends one byte to the connected process.
+	 *
+	 * @param	in	The byte to send.
+	 *
+	 * @return	true if it succeeds, false if it fails.
+	 */
 	bool Socket::writeC(char in)
 	{
 		return writeCA(&in,1);
 	}
 
+
+	/**
+	 * @fn	bool Socket::writeCA(const char * in, int count)
+	 *
+	 * @brief	Sends a byte array to the connected process.
+	 *
+	 * @param	in   	The byte array.
+	 * @param	count	Number of bytes to send.
+	 *
+	 * @return	true if it succeeds, false if it fails.
+	 */
 	bool Socket::writeCA(const char * in, int count)
 	{
 		if( bConnected && count>0 )
@@ -260,8 +405,21 @@ namespace oocl
 		return false;
 	}
 
+
+	/**
+	 * @fn	bool Socket::writeTo( std::string in, std::string host, unsigned short port )
+	 *
+	 * @brief	Sends a package .
+	 *
+	 * @param	in  	The package to send as string.
+	 * @param	host	The host to send to.
+	 * @param	port	The port of the host.
+	 *
+	 * @return	true if it succeeds, false if it fails.
+	 */
 	bool Socket::writeTo( std::string in, std::string host, unsigned short port )
 	{
+		// TODO!: this is totally wrong! It can only connect once, the second call of this won't send anything
 		if( connect( host, port ) )
 		{
 			return write( in );
@@ -271,6 +429,11 @@ namespace oocl
 	}
 
 
+	/**
+	 * @fn	void Socket::close()
+	 *
+	 * @brief	Closes this socket.
+	 */
 	void Socket::close()
 	{
 		bConnected = false;
@@ -281,6 +444,16 @@ namespace oocl
 #endif
 	}
 
+
+	/**
+	 * @fn	unsigned int Socket::getAddrFromString(const char* hostnameOrIp)
+	 *
+	 * @brief	Gets the IP from a string, this can be an IP as string or a domain name.
+	 *
+	 * @param	hostnameOrIp	The hostname or ip.
+	 *
+	 * @return	The address from string.
+	 */
 	unsigned int Socket::getAddrFromString(const char* hostnameOrIp)
 	{
 		unsigned long ip;

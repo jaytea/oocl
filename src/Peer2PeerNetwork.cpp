@@ -12,7 +12,7 @@ subject to the following restrictions:
 2. Altered source versions must be plainly marked as such, and must not be misrepresented as being the original software.
 3. This notice may not be removed or altered from any source distribution.
 */
-/// This file was written by Jörn Teuber
+// This file was written by Jörn Teuber
 
 #include "Peer2PeerNetwork.h"
 
@@ -24,15 +24,12 @@ namespace oocl
 	 *
 	 * @brief	Constructor.
 	 *
-	 * @author	Jörn Teuber
-	 * @date	2/19/2012
-	 *
 	 * @param	usListeningPort	The port on which we are listening for new messages.
-	 * @param	uiPeerID	   	Identifier of this Peer, i.e. our own peerID.
+	 * @param	uiUserID	   	Identifier of this Peer, i.e. our own peerID.
 	 */
-	Peer2PeerNetwork::Peer2PeerNetwork( unsigned short usListeningPort, unsigned int uiPeerID ) :
+	Peer2PeerNetwork::Peer2PeerNetwork( unsigned short usListeningPort, unsigned int uiUserID ) :
 		m_usListeningPort( usListeningPort ),
-		m_uiPeerID( uiPeerID ),
+		m_uiUserID( uiUserID ),
 		m_bActive( true ),
 		m_pServerSocketUDP( NULL ),
 		m_pServerSocketTCP( NULL )
@@ -48,6 +45,11 @@ namespace oocl
 	}
 
 
+	/**
+	 * @fn	Peer2PeerNetwork::~Peer2PeerNetwork(void)
+	 *
+	 * @brief	Destructor.
+	 */
 	Peer2PeerNetwork::~Peer2PeerNetwork(void)
 	{
 		for( std::list<Peer*>::iterator it = m_lpPeers.begin(); it != m_lpPeers.end(); it++ )
@@ -66,6 +68,16 @@ namespace oocl
 	}
 
 
+	/**
+	 * @fn	Peer* Peer2PeerNetwork::addPeer( std::string strHostname, unsigned short usPeerPort )
+	 *
+	 * @brief	Adds a peer to the network.
+	 *
+	 * @param	strHostname	The hostname.
+	 * @param	usPeerPort 	The port on which the peer listens.
+	 *
+	 * @return	null if it fails, else.
+	 */
 	Peer* Peer2PeerNetwork::addPeer( std::string strHostname, unsigned short usPeerPort )
 	{
 		Peer* pPeer = new Peer( strHostname, usPeerPort );
@@ -75,7 +87,18 @@ namespace oocl
 
 		return pPeer;
 	}
-	
+
+
+	/**
+	 * @fn	Peer* Peer2PeerNetwork::addPeer( unsigned int uiIP, unsigned short usPeerPort )
+	 *
+	 * @brief	Adds a peer to the network.
+	 *
+	 * @param	uiIP	  	The ip.
+	 * @param	usPeerPort	The port on which the peer listens.
+	 *
+	 * @return	null if it fails, else.
+	 */
 	Peer* Peer2PeerNetwork::addPeer( unsigned int uiIP, unsigned short usPeerPort )
 	{
 		Peer* pPeer = new Peer( uiIP, usPeerPort );
@@ -86,9 +109,19 @@ namespace oocl
 		return pPeer;
 	}
 
+
+	/**
+	 * @fn	bool Peer2PeerNetwork::connectAndInsertPeer( Peer* pPeer )
+	 *
+	 * @brief	Connects an and insert peer, used by the addPeer methods.
+	 *
+	 * @param [in]	pPeer	The peer.
+	 *
+	 * @return	true if it succeeds, false if it fails.
+	 */
 	bool Peer2PeerNetwork::connectAndInsertPeer( Peer* pPeer )
 	{
-		if( !pPeer->connect( m_usListeningPort, m_uiPeerID ) )
+		if( !pPeer->connect( m_usListeningPort, m_uiUserID ) )
 			return false;
 
 		m_lpPeers.push_back( pPeer );
@@ -99,6 +132,16 @@ namespace oocl
 		return true;
 	}
 
+
+	/**
+	 * @fn	Peer* Peer2PeerNetwork::getPeerByID( unsigned int uiPeerID )
+	 *
+	 * @brief	Gets a peer by identifier.
+	 *
+	 * @param	uiPeerID	Identifier for the peer.
+	 *
+	 * @return	null if it fails, else the peer.
+	 */
 	Peer* Peer2PeerNetwork::getPeerByID( unsigned int uiPeerID )
 	{ 
 		std::map<unsigned int, Peer*>::iterator it = m_mapPeersByID.find( uiPeerID );
@@ -107,8 +150,13 @@ namespace oocl
 
 		return NULL; 
 	}
-		
 
+
+	/**
+	 * @fn	void Peer2PeerNetwork::run()
+	 *
+	 * @brief	Thread for managing incoming messages and connections.
+	 */
 	void Peer2PeerNetwork::run()
 	{
 		// prepare the sockets for receiving
@@ -226,7 +274,7 @@ namespace oocl
 					if( pMsg->getType() == MT_ConnectMessage )
 					{
 						Peer* pPeer = new Peer( (*it)->getConnectedIP(), ((ConnectMessage*)pMsg)->getPort() );
-						pPeer->connected( (*it), (ConnectMessage*)pMsg, m_usListeningPort, m_uiPeerID );
+						pPeer->connected( (*it), (ConnectMessage*)pMsg, m_usListeningPort, m_uiUserID );
 
 						m_lpPeers.push_back( pPeer );
 						m_mapPeersByID.insert( std::pair<PeerID,Peer*>( pPeer->getPeerID(), pPeer ) );

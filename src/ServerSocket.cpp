@@ -12,13 +12,17 @@ subject to the following restrictions:
 2. Altered source versions must be plainly marked as such, and must not be misrepresented as being the original software.
 3. This notice may not be removed or altered from any source distribution.
 */
-/// This file was written by Jürgen Lorenz and Jörn Teuber
+// This file was written by Jürgen Lorenz and Jörn Teuber
 
 #include "ServerSocket.h"
 
 namespace oocl
 {
-
+	/**
+	 * @fn	ServerSocket::ServerSocket()
+	 *
+	 * @brief	Default constructor.
+	 */
 	ServerSocket::ServerSocket()
 		: SocketStub(),
 		bValid( true ),
@@ -39,6 +43,16 @@ namespace oocl
 #endif
 	}
 
+
+	/**
+	 * @fn	bool ServerSocket::bind( unsigned short port )
+	 *
+	 * @brief	Binds the socket to the given port.
+	 *
+	 * @param	port	The port.
+	 *
+	 * @return	true if it succeeds, false if it fails.
+	 */
 	bool ServerSocket::bind( unsigned short port )
 	{
 		if( bValid && !bBound )
@@ -72,6 +86,12 @@ namespace oocl
 		return false;
 	}
 
+
+	/**
+	 * @fn	ServerSocket::~ServerSocket()
+	 *
+	 * @brief	Destructor.
+	 */
 	ServerSocket::~ServerSocket()
 	{
 		bBound = false;
@@ -83,6 +103,14 @@ namespace oocl
 		SocketStub::~SocketStub();
 	}
 
+
+	/**
+	 * @fn	Socket * ServerSocket::accept()
+	 *
+	 * @brief	Waits for another process to connect.
+	 *
+	 * @return	A connected TCP socket.
+	 */
 	Socket * ServerSocket::accept()
 	{
 		if( bBound )

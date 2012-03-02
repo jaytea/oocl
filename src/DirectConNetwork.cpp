@@ -12,7 +12,7 @@ subject to the following restrictions:
 2. Altered source versions must be plainly marked as such, and must not be misrepresented as being the original software.
 3. This notice may not be removed or altered from any source distribution.
 */
-/// This file was written by Jörn Teuber
+// This file was written by Jörn Teuber
 
 #include "DirectConNetwork.h"
 
@@ -22,9 +22,6 @@ namespace oocl
 	 * @fn	DirectConNetwork::DirectConNetwork()
 	 *
 	 * @brief	Default constructor.
-	 *
-	 * @author	Jörn Teuber
-	 * @date	9/14/2011
 	 */
 	DirectConNetwork::DirectConNetwork() :
 		m_bConnected(false)
@@ -37,9 +34,6 @@ namespace oocl
 	 * @fn	DirectConNetwork::~DirectConNetwork()
 	 *
 	 * @brief	Destructor.
-	 *
-	 * @author	Jörn Teuber
-	 * @date	9/14/2011
 	 */
 	DirectConNetwork::~DirectConNetwork()
 	{
@@ -58,9 +52,6 @@ namespace oocl
 	 * 		int iProtocoll )
 	 *
 	 * @brief	Connects with another process.
-	 *
-	 * @author	Jörn Teuber
-	 * @date	9/14/2011
 	 *
 	 * @param	strHostname		The hostname as string (URL or IP).
 	 * @param	usHostPort	   	The port to connect to.
@@ -100,9 +91,6 @@ namespace oocl
 	 * @fn	bool DirectConNetwork::listen( unsigned short usListeningPort )
 	 *
 	 * @brief	Waits for a client to connect.
-	 *
-	 * @author	Jörn Teuber
-	 * @date	12/15/2011
 	 *
 	 * @param	usListeningPort	The listening port.
 	 * @param	bBlocking		If true, a call of this method will be blocking.
@@ -155,9 +143,6 @@ namespace oocl
 	 *
 	 * @brief	Disconnects from the other process.
 	 *
-	 * @author	Jörn Teuber
-	 * @date	9/14/2011
-	 *
 	 * @return	true if it succeeds, false if it fails.
 	 */
 	bool DirectConNetwork::disconnect()
@@ -177,9 +162,6 @@ namespace oocl
 	 * @fn	bool DirectConNetwork::sendMessage( Message* pMessage )
 	 *
 	 * @brief	Sends a message to the connected process either over the standard protocoll or the protocoll specified in the message.
-	 *
-	 * @author	Jörn Teuber
-	 * @date	9/14/2011
 	 *
 	 * @param [in]	pMessage	The message that you want to send.
 	 *
@@ -207,9 +189,6 @@ namespace oocl
 	 *
 	 * @brief	Registers the listener described by pListener to this network so that the listener will receive all further messages.
 	 *
-	 * @author	Jörn Teuber
-	 * @date	9/15/2011
-	 *
 	 * @param [in]	pListener	The object that you want to receive messages from the network.
 	 *
 	 * @return	true if it succeeds, false if it fails.
@@ -229,9 +208,6 @@ namespace oocl
 	 * @fn	bool DirectConNetwork::unregisterListener( MessageListener* pListener )
 	 *
 	 * @brief	Unregisters the specified listener.
-	 *
-	 * @author	Jörn Teuber
-	 * @date	9/15/2011
 	 *
 	 * @param [in]	pListener	The listener that you want to unregister.
 	 *
@@ -258,9 +234,6 @@ namespace oocl
 	 * @fn	void DirectConNetwork::run()
 	 *
 	 * @brief	implementation of the Thread run-method, listens for incoming messages.
-	 *
-	 * @author	Jörn Teuber
-	 * @date	11/25/2011
 	 */
 	void DirectConNetwork::run()
 	{

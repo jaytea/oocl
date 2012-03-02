@@ -12,10 +12,17 @@ subject to the following restrictions:
 2. Altered source versions must be plainly marked as such, and must not be misrepresented as being the original software.
 3. This notice may not be removed or altered from any source distribution.
 */
-/// This file was written by Jörn Teuber
+// This file was written by Jörn Teuber
 
 #ifndef EXPLICITMESSAGES_H_INCLUDED
 #define EXPLICITMESSAGES_H_INCLUDED
+
+
+/**
+ * @file ExplicitMessages.h
+ * 		 
+ *	The classes in this file are all messages that are needed for the DirectConNetwork and Peer2PeerNetwork
+ */
 
 #include "Message.h"
 
@@ -23,6 +30,14 @@ namespace oocl
 {
 	
 #define MT_StandardMessage 1
+	/**
+	 * @class	StandardMessage
+	 *
+	 * @brief	A basic message which just holds a string as body.
+	 *
+	 * @author	Jörn Teuber
+	 * @date	3/1/2012
+	 */
 	class OOCL_EXPORTIMPORT StandardMessage : public Message
 	{
 	public:
@@ -34,19 +49,7 @@ namespace oocl
 			Message::registerMsg( MT_StandardMessage, StandardMessage::create );
 		}
 
-
 		StandardMessage( const char * cMsgBody, unsigned short length );
-
-		/**
-		 * @fn	StandardMessage::StandardMessage( std::string strMsgBody );
-		 *
-		 * @brief	Constructor for creating the message in this client. 
-		 *
-		 * @author	Jörn Teuber
-		 * @date	11/27/2011
-		 *
-		 * @param	strMsgBody	The message body.
-		 */
 		StandardMessage( std::string strMsgBody );
 
 		virtual std::string getMsgString();
@@ -64,6 +67,14 @@ namespace oocl
 
 	
 #define MT_SubscribeMessage 2
+	/**
+	 * @class	SubscribeMessage
+	 *
+	 * @brief	Message for subscribing a given message type at the receiver.
+	 *
+	 * @author	Jörn Teuber
+	 * @date	3/1/2012
+	 */
 	class OOCL_EXPORTIMPORT SubscribeMessage : public Message
 	{
 	public:
@@ -92,6 +103,14 @@ namespace oocl
 	
 	
 #define MT_ConnectMessage 3
+	/**
+	 * @class	ConnectMessage
+	 *
+	 * @brief	Message that contains all necessary information for connecting.
+	 *
+	 * @author	Jörn Teuber
+	 * @date	3/1/2012
+	 */
 	class OOCL_EXPORTIMPORT ConnectMessage : public Message
 	{
 	public:
@@ -121,6 +140,14 @@ namespace oocl
 	
 	
 #define MT_DisconnectMessage 4
+	/**
+	 * @class	DisconnectMessage
+	 *
+	 * @brief	Say goodbye to the receiver.
+	 *
+	 * @author	Jörn Teuber
+	 * @date	3/1/2012
+	 */
 	class OOCL_EXPORTIMPORT DisconnectMessage : public Message
 	{
 	public:
@@ -143,6 +170,14 @@ namespace oocl
 	
 	class Peer;
 #define MT_NewPeerMessage 5
+	/**
+	 * @class	NewPeerMessage
+	 *
+	 * @brief	In client message that gets sent whenever a new peer has connected.
+	 *
+	 * @author	Jörn Teuber
+	 * @date	3/1/2012
+	 */
 	class OOCL_EXPORTIMPORT NewPeerMessage : public Message
 	{
 	public:
