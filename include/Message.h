@@ -76,9 +76,10 @@ namespace oocl
 		virtual unsigned short  getType() { return m_type; }
 		virtual int             getProtocoll() { return m_iProtocoll; }
 		unsigned int			getSenderID() { return m_uiSenderID; }
+		bool					isIncoming() { return m_bIncoming; }
 
 	protected:
-		Message() {}
+		Message();
 		virtual ~Message(void) {}
 
 		static void registerMsg( unsigned short type, Message* (*create)(const char*) );
@@ -87,6 +88,7 @@ namespace oocl
 		unsigned short 	m_type;
 		int             m_iProtocoll;
 		unsigned int	m_uiSenderID;
+		bool			m_bIncoming; ///< true if message came from a network, false if this client is sending it
 
 	private:
 		

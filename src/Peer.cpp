@@ -250,6 +250,12 @@ namespace oocl
 	 */
 	bool Peer::cbMessage( Message* pMessage )
 	{
+		if( pMessage->isIncoming() )
+		{
+			Log::getLog("oocl")->logWarning("stopped incoming message from being sent back into the network");
+			return true;
+		}
+
 		sendMessage( pMessage );
 
 		return true;
@@ -260,9 +266,6 @@ namespace oocl
 	 * @fn	bool Peer::sendMessage( Message* pMessage )
 	 *
 	 * @brief	Sends a message to the connected peer.
-	 *
-	 * @author	Jörn Teuber
-	 * @date	3/1/2012
 	 *
 	 * @param [in]	pMessage	The message to send.
 	 *
@@ -306,9 +309,6 @@ namespace oocl
 	 *
 	 * @brief	Subscribe a message type at the connected peer.
 	 *
-	 * @author	Jörn Teuber
-	 * @date	3/1/2012
-	 *
 	 * @param	usType	The type.
 	 *
 	 * @return	true if it succeeds, false if it fails.
@@ -323,9 +323,6 @@ namespace oocl
 	 * @fn	bool Peer::receiveMessage( Message* pMessage )
 	 *
 	 * @brief	Called when a message of the connected peer was received.
-	 *
-	 * @author	Jörn Teuber
-	 * @date	3/1/2012
 	 *
 	 * @param [in]	pMessage	The received message.
 	 *

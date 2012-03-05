@@ -24,6 +24,13 @@ namespace oocl
 	std::vector<Message* (*)(const char*)> Message::sm_msgTypeList;
 
 
+	Message::Message() :
+		m_bIncoming( false )
+	{
+		Log::getLog("oocl")->logInfo( "Message constructor" );
+	}
+
+
 	/**
 	 * @fn	Message* Message::createFromString( const char* cMsg )
 	 *
@@ -36,10 +43,12 @@ namespace oocl
 	Message* Message::createFromString( const char* cMsg )
 	{
 		unsigned short usType = ((unsigned short*)cMsg)[0];
+		Message* pReturn = NULL;
 
 		if( usType < sm_msgTypeList.size() && sm_msgTypeList[usType] != NULL )
 		{
-			return sm_msgTypeList[usType]( cMsg );
+			pReturn = sm_msgTypeList[usType]( cMsg );
+			pReturn->m_bIncoming = true;
 		}
 		else
 		{
@@ -48,7 +57,7 @@ namespace oocl
 			Log::getLog("oocl")->logError( os.str() );
 		}
 
-		return NULL;
+		return pReturn;
 	}
 
 
