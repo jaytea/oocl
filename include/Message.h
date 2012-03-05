@@ -1,6 +1,6 @@
-/*
+ï»¿/*
 Object Oriented Communication Library
-Copyright (c) 2011 Jürgen Lorenz and Jörn Teuber
+Copyright (c) 2011 JÃ¼rgen Lorenz and JÃ¶rn Teuber
 
 This software is provided 'as-is', without any express or implied warranty.
 In no event will the authors be held liable for any damages arising from the use of this software.
@@ -12,7 +12,7 @@ subject to the following restrictions:
 2. Altered source versions must be plainly marked as such, and must not be misrepresented as being the original software.
 3. This notice may not be removed or altered from any source distribution.
 */
-// This file was written by Jörn Teuber
+// This file was written by JÃ¶rn Teuber
 
 #ifndef MESSAGE_H_INCLUDED
 #define MESSAGE_H_INCLUDED
@@ -52,7 +52,7 @@ namespace oocl
 	 *
 	 * @brief	Interface and manager for all message classes.
 	 *
-	 * @author	Jörn Teuber
+	 * @author	JÃ¶rn Teuber
 	 * @date	3/1/2012
 	 */
 	class OOCL_EXPORTIMPORT Message

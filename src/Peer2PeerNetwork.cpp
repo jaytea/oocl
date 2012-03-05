@@ -1,6 +1,6 @@
 /*
 Object Oriented Communication Library
-Copyright (c) 2011 Jürgen Lorenz and Jörn Teuber
+Copyright (c) 2011 JÃ¼rgen Lorenz and JÃ¶rn Teuber
 
 This software is provided 'as-is', without any express or implied warranty.
 In no event will the authors be held liable for any damages arising from the use of this software.
@@ -12,7 +12,7 @@ subject to the following restrictions:
 2. Altered source versions must be plainly marked as such, and must not be misrepresented as being the original software.
 3. This notice may not be removed or altered from any source distribution.
 */
-// This file was written by Jörn Teuber
+// This file was written by JÃ¶rn Teuber
 
 #include "Peer2PeerNetwork.h"
 
@@ -174,8 +174,13 @@ namespace oocl
 		while( m_bActive )
 		{
 			// TODO: instead of building the set every frame build it once and copy it every frame. Update the source set it whenever a peer is added
+
+			// substitution of std::max / max as it is defined different in msvc and gnucc
+			int iBiggestSocket = m_pServerSocketTCP->getCSocket();
+			if( iBiggestSocket < m_pServerSocketUDP->getCSocket() )
+				iBiggestSocket = m_pServerSocketUDP->getCSocket();
+			
 			// prepare the fd_set
-			int iBiggestSocket = max( m_pServerSocketTCP->getCSocket(), m_pServerSocketUDP->getCSocket() );
 			fd_set selectSet;
 			FD_ZERO( &selectSet );
 			
@@ -208,7 +213,11 @@ namespace oocl
 
 			// select!
 			int iRet = select( iBiggestSocket, &selectSet, NULL, NULL, &tv );
+#ifdef _MSC_VER
 			if( iRet == SOCKET_ERROR )
+#else	
+			if( iRet < 0 )
+#endif
 			{
 				Log::getLog("oocl")->logError( "Selecting in the peernetwork failed" );
 			}

@@ -1,6 +1,6 @@
 /*
 Object Oriented Communication Library
-Copyright (c) 2011 Jürgen Lorenz and Jörn Teuber
+Copyright (c) 2011 JÃ¼rgen Lorenz and JÃ¶rn Teuber
 
 This software is provided 'as-is', without any express or implied warranty.
 In no event will the authors be held liable for any damages arising from the use of this software.
@@ -12,7 +12,7 @@ subject to the following restrictions:
 2. Altered source versions must be plainly marked as such, and must not be misrepresented as being the original software.
 3. This notice may not be removed or altered from any source distribution.
 */
-// This file was written by Jörn Teuber
+// This file was written by JÃ¶rn Teuber
 
 #include "Log.h"
 
@@ -27,15 +27,12 @@ namespace oocl
 	 *
 	 * @brief	Constructor.
 	 *
-	 * @author	Jörn Teuber
-	 * @date	11/25/2011
-	 *
 	 * @param	strLogName	Name of the log.
 	 */
 	Log::Log( std::string strLogName ) :
 		m_elLowestLoggedLevel( EL_INFO )
 	{
-		m_fsLogFile.open( strLogName+std::string(".log") );
+		m_fsLogFile.open( std::string(strLogName+std::string(".log")).c_str() );
 	}
 
 
@@ -43,9 +40,6 @@ namespace oocl
 	 * @fn	Log::~Log(void)
 	 *
 	 * @brief	Destructor.
-	 *
-	 * @author	Jörn Teuber
-	 * @date	11/25/2011
 	 */
 	Log::~Log(void)
 	{
@@ -58,9 +52,6 @@ namespace oocl
 	 * @fn	Log* Log::getLog( std::string strLogName )
 	 *
 	 * @brief	get the log with the given name.
-	 *
-	 * @author	Jörn Teuber
-	 * @date	11/25/2011
 	 *
 	 * @param	strLogName	Name of the log.
 	 *
@@ -85,9 +76,6 @@ namespace oocl
 	 *
 	 * @brief	Gets the default log.
 	 *
-	 * @author	Jörn Teuber
-	 * @date	1/27/2012
-	 *
 	 * @return	null if it fails, else the default log.
 	 */
 	Log* Log::getDefaultLog()
@@ -100,9 +88,6 @@ namespace oocl
 	 * @fn	void Log::setDefaultLogName( const std::string strDefaultLogName )
 	 *
 	 * @brief	Sets the name of the default log.
-	 *
-	 * @author	Jörn Teuber
-	 * @date	1/27/2012
 	 *
 	 * @param	strDefaultLogName	The name of the default log.
 	 */
@@ -118,9 +103,6 @@ namespace oocl
 	 * @brief	Logs a message as info if no second parameter is given.
 	 * 			
 	 * @note	in debug mode every message will be written to the standard output and directly to the logfile.
-	 *
-	 * @author	Jörn Teuber
-	 * @date	11/25/2011
 	 *
 	 * @param	strMessage 	Message to log
 	 * @param	iErrorLevel	(optional) error level.
@@ -159,9 +141,6 @@ namespace oocl
 	 *
 	 * @brief	Same as logMessage(strInfo) but possibly a little bit faster.
 	 *
-	 * @author	Jörn Teuber
-	 * @date	1/26/2012
-	 *
 	 * @param	strInfo	The info.
 	 *
 	 * @return	true if the message was logged, false if not.
@@ -186,9 +165,6 @@ namespace oocl
 	 * @fn	inline bool Log::logWarning( const std::string strWarning )
 	 *
 	 * @brief	Same as logMessage(..., EL_WARNING), but faster and lazzier.
-	 *
-	 * @author	Jörn Teuber
-	 * @date	1/26/2012
 	 *
 	 * @param	strWarning	The warning.
 	 *
@@ -215,9 +191,6 @@ namespace oocl
 	 *
 	 * @brief	Same as logMessage(..., EL_ERROR), but faster and lazzier.
 	 *
-	 * @author	Jörn Teuber
-	 * @date	1/26/2012
-	 *
 	 * @param	strError	The error message.
 	 *
 	 * @return	true if the message was logged, false if not.
@@ -243,9 +216,6 @@ namespace oocl
 	 *
 	 * @brief	Same as logMessage(..., EL_FATAL_ERROR), but faster and lazzier.
 	 *
-	 * @author	Jörn Teuber
-	 * @date	1/26/2012
-	 *
 	 * @param	strError	The error message.
 	 *
 	 * @return	true if the message was logged, false if not.
@@ -270,9 +240,6 @@ namespace oocl
 	 * @fn	bool Log::flush()
 	 *
 	 * @brief	writes the current log to the file so that it is safe.
-	 *
-	 * @author	Jörn Teuber
-	 * @date	11/25/2011
 	 */
 	void Log::flush()
 	{
@@ -290,9 +257,6 @@ namespace oocl
 	 * 			
 	 * @note	This call effects all subsequent calls of the logging methods. 
 	 * 			If you do not want any logging pass 4 (EL_FATAL_ERROR+1).
-	 *
-	 * @author	Jörn Teuber
-	 * @date	2/22/2012
 	 *
 	 * @param	elLowestLoggedLevel	The lowest logged message level.
 	 */

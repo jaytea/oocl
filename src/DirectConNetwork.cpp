@@ -1,6 +1,6 @@
 /*
 Object Oriented Communication Library
-Copyright (c) 2011 Jürgen Lorenz and Jörn Teuber
+Copyright (c) 2011 JÃ¼rgen Lorenz and JÃ¶rn Teuber
 
 This software is provided 'as-is', without any express or implied warranty.
 In no event will the authors be held liable for any damages arising from the use of this software.
@@ -12,7 +12,7 @@ subject to the following restrictions:
 2. Altered source versions must be plainly marked as such, and must not be misrepresented as being the original software.
 3. This notice may not be removed or altered from any source distribution.
 */
-// This file was written by Jörn Teuber
+// This file was written by JÃ¶rn Teuber
 
 #include "DirectConNetwork.h"
 
@@ -257,8 +257,10 @@ namespace oocl
 			m_bConnected = true;
 		}
 
-
-		int iBiggestSocket = max( m_pSocketUDPIn->getCSocket(), m_pSocketTCP->getCSocket() );
+		// substitution of std::max / max as it is defined different in msvc and gnucc
+		int iBiggestSocket = m_pSocketUDPIn->getCSocket();
+		if( iBiggestSocket < m_pSocketTCP->getCSocket() )
+			iBiggestSocket = m_pSocketTCP->getCSocket();
 
 		fd_set selectSet;
 		FD_ZERO( &selectSet );
@@ -273,7 +275,11 @@ namespace oocl
 			FD_SET( m_pSocketTCP->getCSocket(), &selectSet );
 
 			int iRet = select( iBiggestSocket+1, &selectSet, NULL, NULL, &tv );
+#ifdef _MSC_VER
 			if( iRet == SOCKET_ERROR )
+#else
+			if( iRet < 0 )
+#endif
 			{
 				Log::getLog("oocl")->logError( "Selecting failed" );
 			}
