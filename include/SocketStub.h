@@ -19,8 +19,11 @@ subject to the following restrictions:
 
 #include <string>
 #include <stdio.h>
+#include <sstream>
 
 #include "oocl_import_export.h"
+
+#include "Log.h"
 
 #ifdef linux
 	#include <sys/types.h>

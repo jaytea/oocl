@@ -225,7 +225,9 @@ namespace oocl
 			// if the tcp server socket got a connection push the tcp socket on the list
 			if( FD_ISSET( m_pServerSocketTCP->getCSocket(), &selectSet ) )
 			{
-				m_lpSocketsWithoutPeers.push_back( m_pServerSocketTCP->accept() );
+				Socket* pSocket = m_pServerSocketTCP->accept();
+				if( pSocket )
+					m_lpSocketsWithoutPeers.push_back( pSocket );
 			}
 			
 			// messages from the udp receiving socket will be pushed on the appropriate MessageBroker
@@ -248,27 +250,37 @@ namespace oocl
 			}
 
 			// walk through the peer list and check for messages
-			for( std::list<Peer*>::iterator it = m_lpPeers.begin(); it != m_lpPeers.end(); it++ )
+			std::list<Peer*>::iterator itPeers = m_lpPeers.begin();
+			while( itPeers != m_lpPeers.end() )
 			{
-				if( FD_ISSET( (*it)->m_pSocketTCP->getCSocket(), &selectSet ) )
+				bool bPeerDisconnected = false;
+				Peer* pPeer = *itPeers; // TODO: this looks like shit
+
+				if( FD_ISSET( pPeer->m_pSocketTCP->getCSocket(), &selectSet ) )
 				{
-					std::string strMsg = (*it)->m_pSocketTCP->read();
+					std::string strMsg = pPeer->m_pSocketTCP->read();
 					while( !strMsg.empty() )
 					{
 						Message* pMsg = Message::createFromString( strMsg.c_str() );
-						(*it)->receiveMessage( pMsg );
+						pPeer->receiveMessage( pMsg );
 						
 						// some messages need special attention here
 						if( pMsg->getType() == MT_DisconnectMessage ) // remove the peer from the lists when he disconnected
 						{
-							m_mapPeersByID.erase( (*it)->getPeerID() );
-							it = m_lpPeers.erase( it );
+							m_mapPeersByID.erase( pPeer->getPeerID() );
+							itPeers = m_lpPeers.erase( itPeers );
+							bPeerDisconnected = true;
 							break;
 						}
 
 						strMsg = strMsg.substr( pMsg->getBodyLength() +4 );
 					}
+
+					if( bPeerDisconnected )
+						continue;
 				}
+
+				itPeers++;
 			}
 
 			// check for connect messages on the sockets without peers

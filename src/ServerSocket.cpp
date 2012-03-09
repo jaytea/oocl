@@ -32,12 +32,14 @@ namespace oocl
 		sockfd = socket(AF_INET, SOCK_STREAM, 0);
 #ifdef linux
 		if(sockfd < 0) {
-			perror("ERROR opening socket");
+			Log::getLog("oocl")->logError("ERROR opening socket");
 			bValid = false;
 		}
 #else
 		if(sockfd == INVALID_SOCKET) {
-			printf("ERROR opening socket! Error code: %d\n", WSAGetLastError() );
+			std::ostringstream os;
+			os << "ERROR opening socket! Error code: " << WSAGetLastError();
+			Log::getLog("oocl")->logError( os.str() );
 			bValid = false;
 		}
 #endif
@@ -65,13 +67,15 @@ namespace oocl
 			int result = ::bind( sockfd, (struct sockaddr *) &addr, sizeof(addr) );
 #ifdef linux
 			if( result < 0 ){
-				perror("ERROR on binding");
+				Log::getLog("oocl")->logError("ERROR on binding");
 				return false;
 			}
 #else
 			if( result == SOCKET_ERROR )
 			{
-				printf("ERROR on binding! Error code: %d\n", WSAGetLastError() );
+				std::ostringstream os;
+				os << "ERROR on binding! Error code: " << WSAGetLastError();
+				Log::getLog("oocl")->logError( os.str() );
 				return false;
 			}
 #endif
@@ -125,12 +129,14 @@ namespace oocl
 			int newsockfd = ::accept(sockfd, (struct sockaddr *) &cli_addr, &clilen);
 #ifdef linux
 			if(newsockfd < 0) {
-				perror("ERROR on accept");
+				Log::getLog("oocl")->logError("ERROR on accept");
 				return NULL;
 			}
 #else
 			if(newsockfd == INVALID_SOCKET) {
-				printf("ERROR on accept! Error code: %d\n", WSAGetLastError() );
+				std::ostringstream os;
+				os << "ERROR on accept! Error code: " << WSAGetLastError();
+				Log::getLog("oocl")->logError( os.str() );
 				return NULL;
 			}
 #endif

@@ -20,6 +20,11 @@
 		mvaddwstr(y, x, str.c_str());
 		refresh();
 	}
+
+	void clearScreen()
+	{
+		system("clear");
+	}
 #else
 #include <Windows.h>
 
@@ -29,13 +34,17 @@
 		SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), pos);
 		std::wcout << str.c_str();
 	}
+
+	void clearScreen()
+	{
+		system("cls");
+	}
 #endif
 
 inline void clearLine( int y )
 {
 	PortableOutput( "                                                                 ", y );
 }
-
 
 /**
  * @class	Peer2PeerTest
@@ -83,11 +92,7 @@ public:
 		oocl::MessageBroker::getBrokerFor( MT_DisconnectMessage )->registerListener( this );
 		oocl::MessageBroker::getBrokerFor( MT_NewPeerMessage )->registerListener( this );
 
-		PortableOutput( "Instructions: type \"+IP:Port\" to add another Peer", m_iLines+2 );
-		PortableOutput( "Instructions: type \"exit\" to close the chat", m_iLines+3 );
-
-		clearLine( m_iLines );
-		PortableOutput( ">", m_iLines );
+		redraw();
 
 		while( 1 )
 		{
@@ -102,21 +107,12 @@ public:
 				ssPort >> usPort;
 
 				oocl::Peer* pPeer = m_pPeer2PeerNet->addPeer( strHostname, usPort );
-				//pPeer->subscribe( MT_ChatMessage );
-				//pPeer->sendMessage( new IntroductionMessage( m_uiUserID, m_strName ) );
 
-				clearLine( m_iLines );
-				PortableOutput( ">", m_iLines );
+				redraw();
 			}
 			else if( strInput == "exit" )
 			{
 				break;
-			}
-			else if( strInput == "connected" )
-			{
-				std::cout << m_pPeer2PeerNet->getPeerList()->size() << " Peers connected" << std::endl;
-				clearLine( m_iLines );
-				PortableOutput( ">", m_iLines );
 			}
 			else
 			{
@@ -137,22 +133,31 @@ public:
 
 		if( usType == MT_ChatMessage )
 		{
+			// new chat message: push it into the chatlog
 			std::string strUsername = m_mapIDtoName.find( ((ChatMessage*)pMessage)->getPeerID() )->second;
-
 			m_lChatLines.push_back( "<"+strUsername+"> " + ((ChatMessage*)pMessage)->getMessage() );
 		}
 		else if( usType == MT_NewPeerMessage )
 		{
+			// a new peer connected: subscribe for chat messages and send your userID and name through a introduction message
 			oocl::Peer* pPeer = ((oocl::NewPeerMessage*)pMessage)->getPeer();
 			pPeer->subscribe( MT_ChatMessage );
 			pPeer->sendMessage( new IntroductionMessage( m_uiUserID, m_strName ) );
 		}
 		else if( usType == MT_IntroductionMessage )
 		{
+			// associate the PeerID with a name
 			m_mapIDtoName.insert( std::pair<unsigned int, std::string>( ((IntroductionMessage*)pMessage)->getPeerID(),  ((IntroductionMessage*)pMessage)->getUsername() ) );
 			PortableOutput( ((IntroductionMessage*)pMessage)->getUsername(), m_iLines+1, (m_mapIDtoName.size()-1)*12 );
 			PortableOutput( ">", m_iLines );
 			m_lChatLines.push_back( ((IntroductionMessage*)pMessage)->getUsername()+" connected!" );
+		}
+		else if( usType == MT_DisconnectMessage )
+		{
+			// remove this peer from the list
+			std::map<unsigned int, std::string>::iterator it = m_mapIDtoName.find( pMessage->getSenderID() );
+			if( it != m_mapIDtoName.end() )
+				m_mapIDtoName.erase( it );
 		}
 		else
 		{
@@ -162,18 +167,33 @@ public:
 		if( m_lChatLines.size() > m_iLines )
 			m_lChatLines.pop_front();
 
+		redraw();
+
+		return true;
+	}
+
+	void redraw()
+	{
+		clearScreen();
+
 		int i=0;
 		for( std::list<std::string>::iterator it = m_lChatLines.begin(); it != m_lChatLines.end(); it++ )
 		{
-			clearLine(i);
 			PortableOutput( (*it), i );
 			i++;
 		}
-			
-		clearLine( m_iLines );
-		PortableOutput( ">", m_iLines );
 
-		return true;
+		int iPosX = 0;
+		for( std::map<unsigned int, std::string>::iterator it = m_mapIDtoName.begin(); it != m_mapIDtoName.end(); it++ )
+		{
+			PortableOutput( (*it).second + " | ", m_iLines+1, iPosX );
+			iPosX += (*it).second.length()+3;
+		}
+
+		PortableOutput( "Instructions: type \"+IP:Port\" to add another Peer", m_iLines+2 );
+		PortableOutput( "Instructions: type \"exit\" to close the chat", m_iLines+3 );
+
+		PortableOutput( ">", m_iLines );
 	}
 	
 private:

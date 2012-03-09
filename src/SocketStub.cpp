@@ -35,7 +35,9 @@ namespace oocl
 			WSADATA wsaData;
 			int iResult = WSAStartup(MAKEWORD(2, 2), &wsaData);
 			if (iResult != 0) {
-				printf("WSAStartup failed: %d\n", iResult);
+				std::ostringstream os;
+				os << "WSAStartup failed: " << WSAGetLastError();
+				Log::getLog("oocl")->logError( os.str() );
 			}
 		}
 	#endif
