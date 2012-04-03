@@ -9,6 +9,8 @@ set(Sources src/DirectConNetwork.cpp src/ExplicitMessages.cpp src/Log.cpp src/Me
 include_directories (include) 
 
 add_definitions ( "-D OOCL_EXPORT" )
+find_package (Threads)
+find_package (Curses)
 
 SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${oocl_SOURCE_DIR}/bin)
 
@@ -16,4 +18,6 @@ add_library (oocl SHARED ${Headers} ${Sources})
 
 if (MSVC)
    target_link_libraries (oocl Ws2_32)
+else (MSVC)
+   target_link_libraries (oocl ${CMAKE_THREAD_LIBS_INIT} ${CURSES_LIBRARY})
 endif (MSVC)

@@ -1,4 +1,4 @@
-// DirectConTest.cpp : Definiert den Einstiegspunkt für die Konsolenanwendung.
+// DirectConTest.cpp : Definiert den Einstiegspunkt fï¿½r die Konsolenanwendung.
 //
 
 #include <DirectConNetwork.h>
@@ -68,7 +68,11 @@ public:
 			{
 				m_bWaitForMessage = true;
 				while( m_bWaitForMessage )
+#ifdef linux
+					usleep(500000);
+#else
 					Sleep(500);
+#endif
 			}
 			else if( iChoice == 3 )
 			{

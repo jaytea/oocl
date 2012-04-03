@@ -58,6 +58,9 @@ namespace oocl
 
 		bool requestExclusiveMessaging( MessageListener* pListener );
 		bool discardExclusiveMessaging( MessageListener* pListener );
+		
+		void enableContinuousProcessing();
+		void disableContinuousProcessing();
 
 	private:
 		virtual void run();
@@ -72,6 +75,7 @@ namespace oocl
 		std::list< Message* > m_lMessageQueue;
 
 		bool m_bRunThread;
+		bool m_bRunContinuously;
 
 		static std::vector< MessageBroker* > sm_vBroker;
 	};

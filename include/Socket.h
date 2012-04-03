@@ -20,6 +20,12 @@ subject to the following restrictions:
 #include <string>
 #include <stdio.h>
 #include <sstream>
+#include <cstring>
+
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <sys/socket.h>
+#include <netdb.h>
 
 #include "oocl_import_export.h"
 

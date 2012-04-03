@@ -31,9 +31,9 @@ namespace oocl
 	MessageBroker::MessageBroker(void)
 		: m_pExclusiveListener( NULL ),
 		m_iSequenceNumber( 0 ),
-		m_bRunThread( true )
+		m_bRunThread( false ),
+		m_bRunContinuously( false )
 	{
-		start();
 	}
 
 
@@ -117,6 +117,9 @@ namespace oocl
 	{
 		if( pMessage )
 			m_lMessageQueue.push_back( pMessage );
+		
+		if( !m_bRunThread )
+			start();
 	}
 
 
@@ -160,6 +163,17 @@ namespace oocl
 
 		return false;
 	}
+	
+	
+	void MessageBroker::enableContinuousProcessing()
+	{
+		m_bRunContinuously = true;
+	}
+	
+	void MessageBroker::disableContinuousProcessing()
+	{
+		m_bRunContinuously = false;
+	}
 
 
 	/**
@@ -169,12 +183,15 @@ namespace oocl
 	 */
 	void MessageBroker::run()
 	{
+		m_bRunThread = true;
+		
 		// TODO: This really needs an overhaul. In practice this wastes way to much time inside the idle loop. 
 		//			A simple heuristic could decide whether we stay in the thread or close it and open another on demand.
+		//			Or just let the developer decide through a binary argument if this thread should always run.
 		while( m_bRunThread )
 		{
 			while( m_lMessageQueue.size() == 0 )
-				sleep(0);
+				Thread::sleep(0);
 
 			Message* pMessage = m_lMessageQueue.front();
 
@@ -197,6 +214,9 @@ namespace oocl
 			}
 
 			m_lMessageQueue.pop_front();
+			
+			if( !m_bRunContinuously && m_lMessageQueue.size() == 0 )
+				m_bRunThread = false;
 		}
 	}
 

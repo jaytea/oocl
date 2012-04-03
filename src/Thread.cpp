@@ -1,6 +1,6 @@
 /*
 Object Oriented Communication Library
-Copyright (c) 2011 Jürgen Lorenz and Jörn Teuber
+Copyright (c) 2011 Jï¿½rgen Lorenz and Jï¿½rn Teuber
 
 This software is provided 'as-is', without any express or implied warranty.
 In no event will the authors be held liable for any damages arising from the use of this software.
@@ -12,7 +12,7 @@ subject to the following restrictions:
 2. Altered source versions must be plainly marked as such, and must not be misrepresented as being the original software.
 3. This notice may not be removed or altered from any source distribution.
 */
-// This file was written by Jürgen Lorenz and Jörn Teuber
+// This file was written by Jï¿½rgen Lorenz and Jï¿½rn Teuber
 
 #include "Thread.h"
 
@@ -123,8 +123,8 @@ namespace oocl
 		struct sched_param sp;
 		memset(&sp, 0, sizeof(struct sched_param));
 	
-		int iMin = sched_get_priority_min();
-		int iMax = sched_get_priority_max();
+		int iMin = sched_get_priority_min(0);
+		int iMax = sched_get_priority_max(0);
 		int iAvg = (iMax + iMin) / 2;
 
 		sp.sched_priority = iAvg + ( iPriority * (iMax - iMin) ) / 4;

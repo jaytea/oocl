@@ -1,6 +1,6 @@
 /*
 Object Oriented Communication Library
-Copyright (c) 2011 Jürgen Lorenz and Jörn Teuber
+Copyright (c) 2011 Jï¿½rgen Lorenz and Jï¿½rn Teuber
 
 This software is provided 'as-is', without any express or implied warranty.
 In no event will the authors be held liable for any damages arising from the use of this software.
@@ -12,7 +12,7 @@ subject to the following restrictions:
 2. Altered source versions must be plainly marked as such, and must not be misrepresented as being the original software.
 3. This notice may not be removed or altered from any source distribution.
 */
-// This file was written by Jürgen Lorenz and Jörn Teuber
+// This file was written by Jï¿½rgen Lorenz and Jï¿½rn Teuber
 
 #include "Socket.h"
 
@@ -27,7 +27,7 @@ namespace oocl
 	 *
 	 * @brief	Private socket constructor for the server socket, uses an existing c socket.
 	 *
-	 * @author	Jörn Teuber
+	 * @author	Jï¿½rn Teuber
 	 * @date	3/2/2012
 	 *
 	 * @param	socket   	The c socket.
@@ -49,7 +49,7 @@ namespace oocl
 	 *
 	 * @brief	Public constructor for a new, clean and unconnected socket.
 	 *
-	 * @author	Jörn Teuber
+	 * @author	Jï¿½rn Teuber
 	 * @date	3/2/2012
 	 *
 	 * @param	iSockType	Protocoll used by the socket, TCP = SOCK_STREAM, UDP = SOCK_DGRAM.
@@ -113,16 +113,19 @@ namespace oocl
 			m_addrData.sin_addr.s_addr = uiHostIP;
 			m_addrData.sin_family = AF_INET;
 			m_addrData.sin_port = htons(usPort);
-
+			
 			int result = ::connect(sockfd,(struct sockaddr *) &m_addrData, sizeof(m_addrData));
 #ifdef linux
 			if( result < 0)
+			{
+				std::ostringstream os;
+				os << "Connecting socket to " << m_addrData.sin_addr.s_addr << ":" << usPort << " failed";
 #else
 			if( result == SOCKET_ERROR )
-#endif
 			{
 				std::ostringstream os;
 				os << "Connecting socket to " << m_addrData.sin_addr.s_net << "." << m_addrData.sin_addr.s_host << "." << m_addrData.sin_addr.s_lh << "." << m_addrData.sin_addr.s_impno << ":" << usPort << " failed";
+#endif
 				Log::getLog("oocl")->logError( os.str() );
 
     			close();
@@ -135,7 +138,11 @@ namespace oocl
 		}
 		
 		std::ostringstream os;
+#ifdef linux
+		os << "Connecting to " << m_addrData.sin_addr.s_addr << ":" << usPort << " failed due to invalid socket";
+#else
 		os << "Connecting to " << m_addrData.sin_addr.s_net << "." << m_addrData.sin_addr.s_host << "." << m_addrData.sin_addr.s_lh << "." << m_addrData.sin_addr.s_impno << ":" << usPort << " failed due to invalid socket";
+#endif
 		Log::getLog("oocl")->logError( os.str() );
 
 		return false;
@@ -191,7 +198,6 @@ namespace oocl
 	Socket::~Socket()
 	{
 		close();
-		SocketStub::~SocketStub();
 	}
 
 
@@ -317,7 +323,7 @@ namespace oocl
 			}
 
 			char * buffer = new char[count];
-			int fromlen = sizeof( sockaddr_in );
+			socklen_t fromlen = sizeof( sockaddr_in );
 			struct sockaddr_in addr;
 
 			int rc = ::recvfrom( sockfd,buffer,count,0, (sockaddr*)&addr, &fromlen);
@@ -330,7 +336,6 @@ namespace oocl
 			}
 			else if(rc < 0)
 			{
-				rc = WSAGetLastError();
 				Log::getLog("oocl")->logError( "receiving on connectionless socket failed" );
 				close();
 				return std::string();
@@ -457,16 +462,16 @@ namespace oocl
 	unsigned int Socket::getAddrFromString(const char* hostnameOrIp)
 	{
 		unsigned long ip;
-		HOSTENT* he;
+		hostent* he;
 
-		/* Parameter prüfen */
+		/* Parameter prï¿½fen */
 		if(hostnameOrIp==NULL)
-			return SOCKET_ERROR;
+			return 0;
 
 		/* eine IP in hostnameOrIp ? */
 		ip=inet_addr(hostnameOrIp);
 
-		/* bei einem fehler liefert inet_addr den Rückgabewert INADDR_NONE */
+		/* bei einem fehler liefert inet_addr den Rï¿½ckgabewert INADDR_NONE */
 		if(ip!=INADDR_NONE)
 		{
 			return ip;
@@ -475,16 +480,16 @@ namespace oocl
 		{
 			struct sockaddr_in addr;
 
-			/* Hostname in hostnameOrIp auflösen */
+			/* Hostname in hostnameOrIp auflï¿½sen */
 			he = gethostbyname(hostnameOrIp);
 			if(he==NULL)
 			{
-				return SOCKET_ERROR;
+				return 0;
 			}
 			else
 			{
 				/*die 4 Bytes der IP von he nach addr kopieren */
-				memcpy(&(addr.sin_addr),he->h_addr_list[0],4);
+				std::memcpy(&(addr.sin_addr),he->h_addr_list[0],4);
 			}
 
 			return addr.sin_addr.s_addr;

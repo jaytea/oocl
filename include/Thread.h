@@ -19,6 +19,8 @@ subject to the following restrictions:
 
 #ifdef linux
 	#include <pthread.h>
+	#include <unistd.h>
+	#include <string.h>
 #else
 	#include <windows.h>
 #endif

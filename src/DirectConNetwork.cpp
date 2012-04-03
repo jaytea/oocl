@@ -237,6 +237,7 @@ namespace oocl
 	 */
 	void DirectConNetwork::run()
 	{
+		// if the listen call was not blocking, call accept here
 		if( !m_bConnected )
 		{
 			m_pSocketTCP = m_pServerSocket->accept();

@@ -1,4 +1,4 @@
-// Peer2PeerTest.cpp : Definiert den Einstiegspunkt für die Konsolenanwendung.
+// Peer2PeerTest.cpp : Definiert den Einstiegspunkt fï¿½r die Konsolenanwendung.
 //
 
 #include <string>
@@ -15,9 +15,11 @@
 
 // this code writes the given string to a specified position inside the console
 #ifdef linux
+#include <curses.h>
+
 	inline void PortableOutput(const std::string &str, int y=0, int x=0)
 	{
-		mvaddwstr(y, x, str.c_str());
+		mvaddstr(y, x, str.c_str());
 		refresh();
 	}
 
@@ -41,17 +43,12 @@
 	}
 #endif
 
-inline void clearLine( int y )
-{
-	PortableOutput( "                                                                 ", y );
-}
-
 /**
  * @class	Peer2PeerTest
  *
  * @brief	Test and demo for the Peer2PeerNetwork, implements a simple commandline chat.
  *
- * @author	Jörn Teuber
+ * @author	Jï¿½rn Teuber
  * @date	2/20/2012
  */
 class Peer2PeerTest : public oocl::MessageListener
@@ -63,7 +60,7 @@ public:
 	 *
 	 * @brief	Main function that initializes the network and processes the user input.
 	 *
-	 * @author	Jörn Teuber
+	 * @author	Jï¿½rn Teuber
 	 * @date	2/20/2012
 	 */
 	void run()

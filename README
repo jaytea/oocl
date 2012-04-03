@@ -14,7 +14,7 @@ DOCUMENTATION:
 DoxyGen documentation is available online at http://jaytea.org/oocl/
 
 DEPENDENCIES:
-- Linux: None
+- Linux: Curses (only for the Peer2PeerTest demo)
 - Windows: Ws2_32.lib
 
 DEMOS/TUTORIALS:
