@@ -22,10 +22,17 @@ subject to the following restrictions:
 #include <sstream>
 #include <cstring>
 
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <sys/socket.h>
-#include <netdb.h>
+/*
+#ifdef linux
+#	include <netinet/in.h>
+#	include <arpa/inet.h>
+#	include <sys/socket.h>
+#	include <netdb.h>
+#else
+#	include <Windows.h>
+#	include <WinSock2.h>
+#endif
+*/
 
 #include "oocl_import_export.h"
 

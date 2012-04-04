@@ -26,11 +26,13 @@ subject to the following restrictions:
 #include "Log.h"
 
 #ifdef linux
-	#include <sys/types.h>
-	#include <sys/socket.h>
-	#include <arpa/inet.h>
+#	include <netinet/in.h>
+#	include <sys/types.h>
+#	include <sys/socket.h>
+#	include <arpa/inet.h>
+#	include <netdb.h>
 #else
-	#include <windows.h>
+#	include <windows.h>
 #endif
 
 namespace oocl

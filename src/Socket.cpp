@@ -323,7 +323,11 @@ namespace oocl
 			}
 
 			char * buffer = new char[count];
+#ifdef _MSC_VER
+			int fromlen = sizeof( sockaddr_in );
+#else
 			socklen_t fromlen = sizeof( sockaddr_in );
+#endif
 			struct sockaddr_in addr;
 
 			int rc = ::recvfrom( sockfd,buffer,count,0, (sockaddr*)&addr, &fromlen);
