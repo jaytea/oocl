@@ -92,7 +92,7 @@ namespace oocl
 	protected:
 		Socket(int socket, struct sockaddr_in sock_addr);
 
-		struct sockaddr_in m_addrData;
+		::sockaddr_in m_addrData;
 		//struct sockaddr_in6 addr6;
 		int sockfd;
 

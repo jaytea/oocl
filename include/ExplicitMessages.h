@@ -190,9 +190,6 @@ namespace oocl
 		}
 
 		NewPeerMessage( Peer* pPeer );
-
-		virtual std::string getMsgString();
-		virtual unsigned short getBodyLength();
 		
 		Peer* getPeer() { return m_pPeer; }
 

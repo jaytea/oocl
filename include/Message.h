@@ -67,8 +67,8 @@ namespace oocl
 		 *  |2 byte |2 byte |   |   .... 
 		 * => Length = length of the messageBody in bytes (as returned by getBodyLength() )
 		 */
-		virtual std::string		getMsgString() = 0;
-		virtual unsigned short	getBodyLength() = 0;
+		virtual std::string		getMsgString()  { int i=0; return std::string( (char*)&i, 4 ); }
+		virtual unsigned short	getBodyLength() { return 0; }
 
 		void setSenderID( unsigned int uiSenderID ) { m_uiSenderID = uiSenderID; }
 

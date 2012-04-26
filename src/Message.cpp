@@ -27,7 +27,6 @@ namespace oocl
 	Message::Message() :
 		m_bIncoming( false )
 	{
-		Log::getLog("oocl")->logInfo( "Message constructor" );
 	}
 
 

@@ -25,10 +25,11 @@ subject to the following restrictions:
 #include "Socket.h"
 
 
-typedef unsigned int PeerID;
-
 namespace oocl
 {
+
+	typedef unsigned int PeerID;
+
 	/**
 	 * @class	Peer
 	 *

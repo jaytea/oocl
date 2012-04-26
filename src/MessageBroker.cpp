@@ -32,7 +32,8 @@ namespace oocl
 		: m_pExclusiveListener( NULL ),
 		m_iSequenceNumber( 0 ),
 		m_bRunThread( false ),
-		m_bRunContinuously( false )
+		m_bRunContinuously( false ),
+		m_bSynchronous( false )
 	{
 	}
 
@@ -115,11 +116,18 @@ namespace oocl
 	 */
 	void MessageBroker::pumpMessage( Message* pMessage )
 	{
-		if( pMessage )
+		if( !m_lListeners.empty() && pMessage != NULL )
+		{
 			m_lMessageQueue.push_back( pMessage );
 		
-		if( !m_bRunThread )
-			start();
+			if( !m_bRunThread )
+			{
+				if( m_bSynchronous )
+					run();
+				else
+					start();
+			}
+		}
 	}
 
 
@@ -163,16 +171,67 @@ namespace oocl
 
 		return false;
 	}
-	
-	
+
+
+	/**
+	 * @fn	void MessageBroker::enableContinuousProcessing()
+	 *
+	 * @brief	Enables continuous processing of messages in the message passing thread.
+	 * 			
+	 * @note	synchronous messaging will be disabled when you enable continuous processing.
+	 *
+	 * @author	Jörn Teuber
+	 * @date	4/18/2012
+	 */
 	void MessageBroker::enableContinuousProcessing()
 	{
 		m_bRunContinuously = true;
+		m_bSynchronous = false;
 	}
-	
+
+
+	/**
+	 * @fn	void MessageBroker::disableContinuousProcessing()
+	 *
+	 * @brief	Disables continuous processing.
+	 *
+	 * @author	Jörn Teuber
+	 * @date	4/18/2012
+	 */
 	void MessageBroker::disableContinuousProcessing()
 	{
 		m_bRunContinuously = false;
+	}
+
+
+	/**
+	 * @fn	void MessageBroker::enableSynchronousMessaging()
+	 *
+	 * @brief	Enables synchronous messaging, i.e. pumpMessage() will be blocking until all listeners got the message.
+	 * 			
+	 * @note	continuous processing will be disabled when you enable synchronous messaging.
+	 *
+	 * @author	Jörn Teuber
+	 * @date	4/18/2012
+	 */
+	void MessageBroker::enableSynchronousMessaging()
+	{
+		m_bRunContinuously = false;
+		m_bSynchronous = true;
+	}
+
+
+	/**
+	 * @fn	void MessageBroker::disableSynchronousMessaging()
+	 *
+	 * @brief	Disables synchronous messaging.
+	 *
+	 * @author	Jörn Teuber
+	 * @date	4/18/2012
+	 */
+	void MessageBroker::disableSynchronousMessaging()
+	{
+		m_bSynchronous = false;
 	}
 
 
@@ -184,10 +243,7 @@ namespace oocl
 	void MessageBroker::run()
 	{
 		m_bRunThread = true;
-		
-		// TODO: This really needs an overhaul. In practice this wastes way to much time inside the idle loop. 
-		//			A simple heuristic could decide whether we stay in the thread or close it and open another on demand.
-		//			Or just let the developer decide through a binary argument if this thread should always run.
+
 		while( m_bRunThread )
 		{
 			while( m_lMessageQueue.size() == 0 )
@@ -215,8 +271,8 @@ namespace oocl
 
 			m_lMessageQueue.pop_front();
 			
-			if( !m_bRunContinuously && m_lMessageQueue.size() == 0 )
-				m_bRunThread = false;
+			if( !m_bRunContinuously )
+				m_bRunThread = !m_lMessageQueue.empty();
 		}
 	}
 

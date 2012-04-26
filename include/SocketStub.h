@@ -33,6 +33,7 @@ subject to the following restrictions:
 #	include <netdb.h>
 #else
 #	include <windows.h>
+#	include <WinSock.h>
 #endif
 
 namespace oocl

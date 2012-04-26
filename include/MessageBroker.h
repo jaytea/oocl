@@ -62,6 +62,9 @@ namespace oocl
 		void enableContinuousProcessing();
 		void disableContinuousProcessing();
 
+		void enableSynchronousMessaging();
+		void disableSynchronousMessaging();
+
 	private:
 		virtual void run();
 
@@ -76,6 +79,7 @@ namespace oocl
 
 		bool m_bRunThread;
 		bool m_bRunContinuously;
+		bool m_bSynchronous;
 
 		static std::vector< MessageBroker* > sm_vBroker;
 	};

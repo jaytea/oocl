@@ -303,39 +303,8 @@ namespace oocl
 	NewPeerMessage::NewPeerMessage( Peer* pPeer ) :
 		m_pPeer( pPeer )
 	{
-		m_iProtocoll = SOCK_STREAM;
+		m_iProtocoll = 0;
 		m_type = MT_NewPeerMessage;
-	}
-
-
-	/**
-	 * @fn	std::string NewPeerMessage::getMsgString()
-	 *
-	 * @brief	Returns the message as string.
-	 *
-	 * @return	The message as string.
-	 */
-	std::string NewPeerMessage::getMsgString()
-	{
-		// return an invalid message as this message is only for intra client use
-		unsigned short usMsg[2];
-		usMsg[0] = 0;
-		usMsg[1] = getBodyLength();
-
-		return std::string( (char*)usMsg, 4 );
-	}
-
-
-	/**
-	 * @fn	unsigned short NewPeerMessage::getBodyLength()
-	 *
-	 * @brief	Returns the size in bytes of the message body (message without header).
-	 *
-	 * @return	The body length in byte.
-	 */
-	unsigned short NewPeerMessage::getBodyLength()
-	{
-		return 0;
 	}
 
 
