@@ -161,7 +161,7 @@ namespace oocl
 	{
 		// prepare the sockets for receiving
 		m_pServerSocketTCP = new ServerSocket();
-		m_pServerSocketUDP = new Socket( SOCK_DGRAM );
+		m_pServerSocketUDP = new BerkeleySocket( SOCK_DGRAM );
 
 		m_pServerSocketTCP->bind( m_usListeningPort );
 		m_pServerSocketUDP->bind( m_usListeningPort );
@@ -294,7 +294,7 @@ namespace oocl
 
 					if( pMsg->getType() == MT_ConnectMessage )
 					{
-						Peer* pPeer = new Peer( (*it)->getConnectedIP(), ((ConnectMessage*)pMsg)->getPort() );
+						Peer* pPeer = new Peer( ((BerkeleySocket*)(*it))->getConnectedIP(), ((ConnectMessage*)pMsg)->getPort() );
 						pPeer->connected( (*it), (ConnectMessage*)pMsg, m_usListeningPort, m_uiUserID );
 
 						m_lpPeers.push_back( pPeer );

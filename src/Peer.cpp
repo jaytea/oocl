@@ -1,6 +1,6 @@
 /*
 Object Oriented Communication Library
-Copyright (c) 2011 Jürgen Lorenz and Jörn Teuber
+Copyright (c) 2011 JÃ¼rgen Lorenz and JÃ¶rn Teuber
 
 This software is provided 'as-is', without any express or implied warranty.
 In no event will the authors be held liable for any damages arising from the use of this software.
@@ -12,7 +12,7 @@ subject to the following restrictions:
 2. Altered source versions must be plainly marked as such, and must not be misrepresented as being the original software.
 3. This notice may not be removed or altered from any source distribution.
 */
-// This file was written by Jörn Teuber
+// This file was written by JÃ¶rn Teuber
 
 #include "Peer.h"
 
@@ -89,8 +89,8 @@ namespace oocl
 	{
 		if( m_ucConnectStatus == 0 )
 		{
-			m_pSocketTCP = new Socket( SOCK_STREAM );
-			m_pSocketUDPOut = new Socket( SOCK_DGRAM );
+			m_pSocketTCP = new BerkeleySocket( SOCK_STREAM );
+			m_pSocketUDPOut = new BerkeleySocket( SOCK_DGRAM );
 
 			bool bUDPConnected = false, bTCPConnected = false;
 
@@ -178,7 +178,7 @@ namespace oocl
 			m_uiPeerID = pMsg->getPeerID();
 			m_pSocketTCP = pTCPSocket;
 
-			m_pSocketUDPOut = new Socket( SOCK_DGRAM );
+			m_pSocketUDPOut = new BerkeleySocket( SOCK_DGRAM );
 			m_pSocketUDPOut->connect( m_uiIP, m_usPort );
 
 			ConnectMessage* pMsg = new ConnectMessage( usListeningPort, uiUserID );

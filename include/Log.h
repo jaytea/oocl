@@ -1,4 +1,4 @@
-﻿/*
+/*
 Object Oriented Communication Library
 Copyright (c) 2011 Jürgen Lorenz and Jörn Teuber
 

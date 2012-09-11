@@ -66,13 +66,13 @@ namespace oocl
 			m_usHostPort = usHostPort;
 			m_usListeningPort = usListeningPort;
 			
-			m_pSocketUDPIn = new Socket( SOCK_DGRAM );
+			m_pSocketUDPIn = new BerkeleySocket( SOCK_DGRAM );
 			m_pSocketUDPIn->bind( m_usListeningPort );
 
-			m_pSocketUDPOut = new Socket( SOCK_DGRAM );
+			m_pSocketUDPOut = new BerkeleySocket( SOCK_DGRAM );
 			m_pSocketUDPOut->connect( strHostname, m_usHostPort );
 
-			m_pSocketTCP = new Socket( SOCK_STREAM );
+			m_pSocketTCP = new BerkeleySocket( SOCK_STREAM );
 			m_pSocketTCP->connect( strHostname, m_usHostPort );
 			
 			m_bConnected = true;
@@ -104,8 +104,8 @@ namespace oocl
 			m_usListeningPort = usListeningPort;
 
 			m_pServerSocket = new ServerSocket();
-			m_pSocketUDPIn = new Socket( SOCK_DGRAM );
-			m_pSocketUDPOut = new Socket( SOCK_DGRAM );
+			m_pSocketUDPIn = new BerkeleySocket( SOCK_DGRAM );
+			m_pSocketUDPOut = new BerkeleySocket( SOCK_DGRAM );
 
 			m_pServerSocket->bind( usListeningPort );
 			m_pSocketUDPIn->bind( usListeningPort );
@@ -125,7 +125,7 @@ namespace oocl
 				}
 
 				m_usHostPort = ((ConnectMessage*)pMsg)->getPort();
-				m_pSocketUDPOut->connect( m_pSocketTCP->getConnectedIP(), m_usHostPort );
+				m_pSocketUDPOut->connect( ((BerkeleySocket*)m_pSocketTCP)->getConnectedIP(), m_usHostPort );
 
 				m_bConnected = true;
 			}
@@ -253,7 +253,7 @@ namespace oocl
 			}
 
 			m_usHostPort = ((ConnectMessage*)pMsg)->getPort();
-			m_pSocketUDPOut->connect( m_pSocketTCP->getConnectedIP(), m_usHostPort );
+			m_pSocketUDPOut->connect( ((BerkeleySocket*)m_pSocketTCP)->getConnectedIP(), m_usHostPort );
 
 			m_bConnected = true;
 		}

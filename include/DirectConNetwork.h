@@ -1,4 +1,4 @@
-﻿/*
+/*
 Object Oriented Communication Library
 Copyright (c) 2011 Jürgen Lorenz and Jörn Teuber
 
@@ -23,7 +23,7 @@ subject to the following restrictions:
 
 #include "MessageListener.h"
 #include "ServerSocket.h"
-#include "Socket.h"
+#include "BerkeleySocket.h"
 #include "Thread.h"
 #include "ExplicitMessages.h"
 

@@ -4,8 +4,8 @@ Copyright (c) 2011 Jürgen Lorenz and Jörn Teuber
 
 This software is provided 'as-is', without any express or implied warranty.
 In no event will the authors be held liable for any damages arising from the use of this software.
-Permission is granted to anyone to use this software for any purpose, 
-including commercial applications, and to alter it and redistribute it freely, 
+Permission is granted to anyone to use this software for any purpose,
+including commercial applications, and to alter it and redistribute it freely,
 subject to the following restrictions:
 
 1. The origin of this software must not be misrepresented; you must not claim that you wrote the original software. If you use this software in a product, an acknowledgment in the product documentation would be appreciated but is not required.
@@ -110,9 +110,9 @@ namespace oocl
 	/**
 	 * @fn	void MessageBroker::pumpMessage( Message* pMessage )
 	 *
-	 * @brief	Pump message.
+	 * @brief	Send a message to all registered listeners.
 	 *
-	 * @param [in,out]	pMessage	If non-null, the message.
+	 * @param [in]	pMessage	If non-null, the message to send.
 	 */
 	void MessageBroker::pumpMessage( Message* pMessage )
 	{
@@ -179,9 +179,6 @@ namespace oocl
 	 * @brief	Enables continuous processing of messages in the message passing thread.
 	 * 			
 	 * @note	synchronous messaging will be disabled when you enable continuous processing.
-	 *
-	 * @author	Jörn Teuber
-	 * @date	4/18/2012
 	 */
 	void MessageBroker::enableContinuousProcessing()
 	{
@@ -194,9 +191,6 @@ namespace oocl
 	 * @fn	void MessageBroker::disableContinuousProcessing()
 	 *
 	 * @brief	Disables continuous processing.
-	 *
-	 * @author	Jörn Teuber
-	 * @date	4/18/2012
 	 */
 	void MessageBroker::disableContinuousProcessing()
 	{
@@ -210,9 +204,6 @@ namespace oocl
 	 * @brief	Enables synchronous messaging, i.e. pumpMessage() will be blocking until all listeners got the message.
 	 * 			
 	 * @note	continuous processing will be disabled when you enable synchronous messaging.
-	 *
-	 * @author	Jörn Teuber
-	 * @date	4/18/2012
 	 */
 	void MessageBroker::enableSynchronousMessaging()
 	{
@@ -225,9 +216,6 @@ namespace oocl
 	 * @fn	void MessageBroker::disableSynchronousMessaging()
 	 *
 	 * @brief	Disables synchronous messaging.
-	 *
-	 * @author	Jörn Teuber
-	 * @date	4/18/2012
 	 */
 	void MessageBroker::disableSynchronousMessaging()
 	{
@@ -246,21 +234,26 @@ namespace oocl
 
 		while( m_bRunThread )
 		{
-			while( m_lMessageQueue.size() == 0 )
+			// wait for a new message
+			while( m_lMessageQueue.empty() )
 				Thread::sleep(0);
 
 			Message* pMessage = m_lMessageQueue.front();
 
+			// if no listener requested exclusive delivery, deliver the message to all listeners
 			if( !m_pExclusiveListener )
 			{
+				// build a stack of listeners that have not received the message yet
 				std::list< MessageListener* > lWaitList( m_lListeners.begin(), m_lListeners.end() );
 
 				for( std::list< MessageListener* >::iterator it = lWaitList.begin(); it != lWaitList.end(); it = lWaitList.erase( it ) )
 				{
+					// if the message can not be dealt with no, the listener should return false and will be pushed at the end of the listener stack
 					if( !(*it)->cbMessage( pMessage ) )
 						lWaitList.push_back( (*it) );
 				}
 			}
+			// else deliver the message only to the current exclusive listener
 			else
 			{
 				bool bRet = false;
@@ -271,6 +264,7 @@ namespace oocl
 
 			m_lMessageQueue.pop_front();
 			
+			// when the thread is not set to run the whole time, quit the thread if the message queue is empty
 			if( !m_bRunContinuously )
 				m_bRunThread = !m_lMessageQueue.empty();
 		}
