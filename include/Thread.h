@@ -35,7 +35,7 @@ namespace oocl
 	 * @brief	Thread.
 	 *
 	 * @author	Jörn Teuber
-	 * @date	11/23/2011
+	 * @date	23.11.2011
 	 */
 	class OOCL_EXPORTIMPORT Thread
 	{
@@ -66,12 +66,12 @@ namespace oocl
 		// getter
 		EPriority  getPriority() { return m_iThreadPriority;}
 		bool isAlive();
-
-	protected:
 		
 		// for calling from inside the thread
-		void sleep( int iMilliseconds = 0 );
-
+		static void sleep( int iMilliseconds = 0 );
+		 
+	protected:
+		
 		virtual void run() = 0;
 
 #ifdef linux

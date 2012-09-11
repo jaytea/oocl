@@ -219,7 +219,7 @@ namespace oocl
 		{
 			sendMessage( new DisconnectMessage() );
 
-			for( std::list<unsigned short>::iterator it = m_lusSubscribedMsgTypes.begin(); it != m_lusSubscribedMsgTypes.end(); it++ )
+			for( std::list<unsigned short>::iterator it = m_lusSubscribedMsgTypes.begin(); it != m_lusSubscribedMsgTypes.end(); ++it )
 				MessageBroker::getBrokerFor( (*it) )->unregisterListener( this );
 
 			m_pSocketTCP->close();

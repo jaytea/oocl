@@ -317,7 +317,7 @@ namespace oocl
 			}
 
 			char * buffer = new char[count];
-#ifdef _MSC_VER
+#ifdef WINDOWS
 			int fromlen = sizeof( sockaddr_in );
 #else
 			socklen_t fromlen = sizeof( sockaddr_in );

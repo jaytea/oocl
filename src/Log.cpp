@@ -19,7 +19,7 @@ subject to the following restrictions:
 namespace oocl
 {
 	std::map<std::string, Log*> Log::sm_mapLogs;
-	Log* Log::sm_pDefaultLog = getLog("default");
+	Log* Log::sm_pDefaultLog = NULL;
 
 
 	/**
@@ -80,6 +80,9 @@ namespace oocl
 	 */
 	Log* Log::getDefaultLog()
 	{
+		if( sm_pDefaultLog == NULL )
+			setDefaultLog("default");
+		
 		return sm_pDefaultLog;
 	}
 
@@ -127,10 +130,8 @@ namespace oocl
 
 		m_strLogText += strPrefix + strMessage + "\n";
 
-#ifdef _DEBUG
 		std::cout << m_strLogText;
 		flush();
-#endif
 
 		return true;
 	}
@@ -152,10 +153,8 @@ namespace oocl
 
 		m_strLogText += "INFO       : " + strInfo + "\n";
 
-#ifdef _DEBUG
 		std::cout << m_strLogText;
 		flush();
-#endif
 
 		return true;
 	}
@@ -177,10 +176,8 @@ namespace oocl
 
 		m_strLogText += "WARNING    : " + strWarning + "\n";
 
-#ifdef _DEBUG
 		std::cout << m_strLogText;
 		flush();
-#endif
 
 		return true;
 	}
@@ -202,10 +199,8 @@ namespace oocl
 
 		m_strLogText += "ERROR      : " + strError + "\n";
 
-#ifdef _DEBUG
 		std::cout << m_strLogText;
 		flush();
-#endif
 
 		return true;
 	}
@@ -227,10 +222,8 @@ namespace oocl
 
 		m_strLogText += "ERROR      : " + strError + "\n";
 
-#ifdef _DEBUG
 		std::cout << m_strLogText;
 		flush();
-#endif
 
 		return true;
 	}

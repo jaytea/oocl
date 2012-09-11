@@ -52,7 +52,7 @@ namespace oocl
 	 */
 	Peer2PeerNetwork::~Peer2PeerNetwork(void)
 	{
-		for( std::list<Peer*>::iterator it = m_lpPeers.begin(); it != m_lpPeers.end(); it++ )
+		for( std::list<Peer*>::iterator it = m_lpPeers.begin(); it != m_lpPeers.end(); ++it )
 		{
 			(*it)->disconnect();
 			delete (*it);
@@ -189,7 +189,7 @@ namespace oocl
 			FD_SET( m_pServerSocketUDP->getCSocket(), &selectSet );
 
 			// add all peer tcp sockets to the set
-			for( std::list<Peer*>::iterator it = m_lpPeers.begin(); it != m_lpPeers.end(); it++ )
+			for( std::list<Peer*>::iterator it = m_lpPeers.begin(); it != m_lpPeers.end(); ++it )
 			{
 				if( (*it)->isConnected() )
 				{
@@ -201,7 +201,7 @@ namespace oocl
 			}
 
 			// add all tcp sockets to the set that have not yet been assigned to a peer
-			for( std::list<Socket*>::iterator it = m_lpSocketsWithoutPeers.begin(); it != m_lpSocketsWithoutPeers.end(); it++ )
+			for( std::list<Socket*>::iterator it = m_lpSocketsWithoutPeers.begin(); it != m_lpSocketsWithoutPeers.end(); ++it )
 			{
 				if( (*it)->isConnected() )
 				{
@@ -280,7 +280,7 @@ namespace oocl
 						continue;
 				}
 
-				itPeers++;
+				++itPeers;
 			}
 
 			// check for connect messages on the sockets without peers
@@ -311,7 +311,7 @@ namespace oocl
 					}
 				}
 
-				it++;
+				++it;
 			}
 		}
 	}

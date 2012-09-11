@@ -217,7 +217,7 @@ namespace oocl
 	{
 		if( pListener )
 		{
-			for( std::list< MessageListener* >::iterator it = m_lListeners.begin(); it != m_lListeners.end(); it++ )
+			for( std::list< MessageListener* >::iterator it = m_lListeners.begin(); it != m_lListeners.end(); ++it )
 			{
 				if( (*it) == pListener )
 				{

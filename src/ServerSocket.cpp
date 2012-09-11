@@ -103,7 +103,6 @@ namespace oocl
 		::close(sockfd);
 #else
 		::closesocket(sockfd);
-		SocketStub::~SocketStub();
 #endif
 	}
 

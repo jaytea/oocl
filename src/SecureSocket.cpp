@@ -59,7 +59,8 @@ namespace oocl
 		std::stringstream ss;
 		char* cp = (char*)&uiHostIP;
 		ss << cp[0] << "." << cp[1] << "." << cp[2] << "." << cp[3] << ":" << usPort;
-		std::cout << ss << std::endl;
+		
+		oocl::Log::getLog("TweetForest")->logInfo( "SecureSocket: built address string out of IP: " + ss.str() );
 		
 		return connect( ss.str() );
 	}
@@ -74,14 +75,14 @@ namespace oocl
 			m_pSSL = SSL_new(sm_pCTX);
 			SSL_set_mode(m_pSSL, SSL_MODE_AUTO_RETRY);
 			
-			char* pTemp = new char[m_strHostPort.size()];
+			char* pTemp = new char[m_strHostPort.size()+1];
 			memcpy( pTemp, m_strHostPort.c_str(), m_strHostPort.size()+1 );
 			
 			BIO_set_conn_hostname( m_pBio, pTemp );
 		} 
 		else
 		{
-			char* pTemp = new char[m_strHostPort.size()];
+			char* pTemp = new char[m_strHostPort.size()+1];
 			memcpy( pTemp, m_strHostPort.c_str(), m_strHostPort.size()+1 );
 			
 			m_pBio = BIO_new_connect( pTemp );
@@ -125,6 +126,7 @@ namespace oocl
 	
 	bool SecureSocket::bind( unsigned short usPort )
 	{
+		return false;
 	}
 	
 
@@ -141,87 +143,121 @@ namespace oocl
 
 	std::string SecureSocket::read(int count)
 	{
-		if(count==0){
-			count = 10240;
+		if( m_bConnected )
+		{
+			if(count==0){
+				count = 10240;
+			}
+
+			int readCount = 0;
+			char* cpBuffer = readCA( count, &readCount );
+
+			if( cpBuffer == NULL )
+				return "";
+
+			return std::string( cpBuffer, readCount );
 		}
 		
-		int readCount;
-		char* cpBuffer = readCA( count, &readCount );
-		
-		if( cpBuffer == NULL )
-			return "";
-		
-		return std::string( cpBuffer, readCount );
+		return "";
 	}
 	
 	char SecureSocket::readC()
 	{
-		char* c;
-		c = readCA( 1 );
+		if( m_bConnected )
+		{
+			char *pc, c;
+			pc = readCA( 1 );
+
+			if( pc == NULL )
+				c = 0;
+			else
+				c = *pc;
+
+			delete pc;
+
+			return c;
+		}
 		
-		if( c == NULL )
-			return 0;
-		
-		return *c;
+		return 0;
 	}
 	
 	char* SecureSocket::readCA(int count, int * readCount)
 	{
-		if(count==0){
-			count = 1024;
-		}
-		char* cpBuffer = new char[count];
-		
-		int x = BIO_read(m_pBio, cpBuffer, count);
-		if(x == 0)
+		if( m_bConnected )
 		{
-			if( connect( m_strHostPort ) )
-			{
+			if(count==0){
+				count = 1024;
+			}
+			char* cpBuffer = new char[count];
+
+			int x = 0;
+			try {
 				x = BIO_read(m_pBio, cpBuffer, count);
-				if( x <= 0 )
-				{
-					m_bConnected = false;
-					return NULL;
-				}
 			}
-			else
+			catch(...)
 			{
-				m_bConnected = false;
-				return NULL;
-			}
-		}
-		else if(x < 0)
-		{
-			if(! BIO_should_retry(m_pBio))
-			{
-				/* Handle failed read here */
-				m_bConnected = false;
+				Log::getLog("oocl")->logWarning("read failed, aborting");
 				return NULL;
 			}
 
-			/* Do something to handle the retry */
-			if( connect( m_strHostPort ) )
+			if(x == 0)
 			{
-				x = BIO_read(m_pBio, cpBuffer, count);
-				if( x <= 0 ) 
+	//			close();
+	//			if( connect( m_strHostPort ) )
+	//			{
+	//				x = BIO_read(m_pBio, cpBuffer, count);
+	//					
+	//				if( x <= 0 )
+	//				{
+	//					m_bConnected = false;
+	//					return NULL;
+	//				}
+	//			}
+	//			else
+	//			{
+	//				m_bConnected = false;
+				return NULL;
+	//			}
+			}
+			else if(x == -1)
+			{
+				if(! BIO_should_retry(m_pBio))
+				{
+					/* Handle failed read here */
+					m_bConnected = false;
+					return NULL;
+				}
+
+				/* Do something to handle the retry */
+				if( connect( m_strHostPort ) )
+				{
+					x = BIO_read(m_pBio, cpBuffer, count);
+					if( x <= 0 ) 
+					{
+						m_bConnected = false;
+						return NULL;
+					}
+				}
+				else
 				{
 					m_bConnected = false;
 					return NULL;
 				}
 			}
-			else
+			else if( x == -2 )
 			{
-				m_bConnected = false;
 				return NULL;
 			}
+
+			if( readCount != NULL )
+			{
+				*readCount = x;
+			}
+
+			return cpBuffer;
 		}
 		
-		if( readCount != NULL )
-		{
-			*readCount = x;
-		}
-		
-		return cpBuffer;
+		return NULL;
 	}
 	
 
@@ -242,43 +278,54 @@ namespace oocl
 	
 	bool SecureSocket::writeCA(const char * in, int count)
 	{
-		if( BIO_write(m_pBio, in, count) <= 0 )
+		if( m_bConnected )
 		{
-			if(! BIO_should_retry(m_pBio))
+			if( BIO_write(m_pBio, in, count) <= 0 )
 			{
-				/* Handle failed write here */
-				m_bConnected = false;
-				return false;
-			}
+				if(! BIO_should_retry(m_pBio))
+				{
+					/* Handle failed write here */
+					m_bConnected = false;
+					return false;
+				}
 
-			/* Do something to handle the retry */
-			if( connect( m_strHostPort ) )
-			{
-				if( BIO_write(m_pBio, in, count) <= 0 ) 
+				/* Do something to handle the retry */
+				if( connect( m_strHostPort ) )
+				{
+					if( BIO_write(m_pBio, in, count) <= 0 ) 
+					{
+						m_bConnected = false;
+						return false;
+					}
+				}
+				else
 				{
 					m_bConnected = false;
 					return false;
 				}
 			}
-			else
-			{
-				m_bConnected = false;
-				return false;
-			}
+
+			return true;
 		}
 		
-		return true;
+		return false;
 	}
 	
 
 	bool SecureSocket::writeTo( std::string in, std::string host, unsigned short port )
 	{
+		return false;
 	}
 	
 
 	void SecureSocket::close()
 	{
-		BIO_reset(m_pBio);
+		try {
+			BIO_reset(m_pBio);
+		} catch(...) 
+		{
+			Log::getLog("oocl")->logWarning("OpenSSL reset threw an exception");
+		}
 		m_bConnected = false;
 	}
 }
