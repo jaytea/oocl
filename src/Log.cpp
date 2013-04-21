@@ -20,6 +20,8 @@ namespace oocl
 {
 	std::map<std::string, Log*> Log::sm_mapLogs;
 	Log* Log::sm_pDefaultLog = NULL;
+	
+	std::string Log::sm_astrLogLevelToPrefix[] = { "INFO       : ", "WARNING    : ", "ERROR      : ", "FATAL ERROR: " };
 
 
 	/**
@@ -29,8 +31,9 @@ namespace oocl
 	 *
 	 * @param	strLogName	Name of the log.
 	 */
-	Log::Log( std::string strLogName ) :
-		m_elLowestLoggedLevel( EL_INFO )
+	Log::Log( std::string strLogName ) 
+		: m_elLowestLoggedLevel( EL_INFO )
+		, m_elLastStreamLogLvl( EL_INFO )
 	{
 		m_fsLogFile.open( std::string(strLogName+std::string(".log")).c_str() );
 	}
@@ -69,10 +72,24 @@ namespace oocl
 		else
 			return it->second;
 	}
+	
+	/**
+	 * @fn	Log* Log::getLog( std::string strLogName )
+	 *
+	 * @brief	get a reference to the log with the given name.
+	 *
+	 * @param	strLogName	Name of the log.
+	 *
+	 * @return	null if it fails, else the log.
+	 */
+	Log& Log::getLogRef( std::string strLogName )
+	{	
+		return *getLog( strLogName );
+	}
 
 
 	/**
-	 * @fn	inline Log* Log::getDefaultLog()
+	 * @fn	Log* Log::getDefaultLog()
 	 *
 	 * @brief	Gets the default log.
 	 *
@@ -80,10 +97,19 @@ namespace oocl
 	 */
 	Log* Log::getDefaultLog()
 	{
-		if( sm_pDefaultLog == NULL )
-			setDefaultLog("default");
-		
 		return sm_pDefaultLog;
+	}
+
+	/**
+	 * @fn	Log* Log::getDefaultLogRef()
+	 *
+	 * @brief	Get a reference to the default log.
+	 *
+	 * @return	null if it fails, else the default log.
+	 */
+	Log& Log::getDefaultLogRef()
+	{
+		return *sm_pDefaultLog;
 	}
 
 
@@ -114,19 +140,10 @@ namespace oocl
 	 */
 	bool Log::logMessage( const std::string strMessage, EErrorLevel elErrorLevel )
 	{
-		if( elErrorLevel < m_elLowestLoggedLevel )
+		if( elErrorLevel < m_elLowestLoggedLevel || elErrorLevel > sm_uiMaxLogLevel )
 			return false;
 
-		std::string strPrefix;
-
-		switch(elErrorLevel)
-		{
-		case EL_INFO:			strPrefix = "INFO       : "; break;
-		case EL_WARNING:		strPrefix = "WARNING    : "; break;
-		case EL_ERROR:			strPrefix = "ERROR      : "; break;
-		case EL_FATAL_ERROR:	strPrefix = "FATAL ERROR: "; break;
-		default:	return false;
-		}
+		std::string strPrefix = sm_astrLogLevelToPrefix[elErrorLevel];
 
 		m_strLogText += strPrefix + strMessage + "\n";
 
@@ -163,7 +180,7 @@ namespace oocl
 	/**
 	 * @fn	inline bool Log::logWarning( const std::string strWarning )
 	 *
-	 * @brief	Same as logMessage(..., EL_WARNING), but faster and lazzier.
+	 * @brief	Same as logMessage(..., EL_WARNING), but faster and lazier.
 	 *
 	 * @param	strWarning	The warning.
 	 *
@@ -186,7 +203,7 @@ namespace oocl
 	/**
 	 * @fn	inline bool Log::logError( const std::string strError )
 	 *
-	 * @brief	Same as logMessage(..., EL_ERROR), but faster and lazzier.
+	 * @brief	Same as logMessage(..., EL_ERROR), but faster and lazier.
 	 *
 	 * @param	strError	The error message.
 	 *
@@ -209,7 +226,7 @@ namespace oocl
 	/**
 	 * @fn	inline bool Log::logFatalError( const std::string strError )
 	 *
-	 * @brief	Same as logMessage(..., EL_FATAL_ERROR), but faster and lazzier.
+	 * @brief	Same as logMessage(..., EL_FATAL_ERROR), but faster and lazier.
 	 *
 	 * @param	strError	The error message.
 	 *
@@ -220,7 +237,7 @@ namespace oocl
 		if( m_elLowestLoggedLevel > EL_FATAL_ERROR )
 			return false;
 
-		m_strLogText += "ERROR      : " + strError + "\n";
+		m_strLogText += "FATAL ERROR: " + strError + "\n";
 
 		std::cout << m_strLogText;
 		flush();
@@ -237,6 +254,7 @@ namespace oocl
 	void Log::flush()
 	{
 		m_fsLogFile << m_strLogText;
+		m_fsLogFile << m_ssLogStream.str();
 		m_fsLogFile.flush();
 
 		m_strLogText.clear();
@@ -257,5 +275,121 @@ namespace oocl
 	{
 		m_elLowestLoggedLevel = elLowestLoggedLevel; 
 	}
+	
+	/**
+	 * @brief	Inserts the error level prefix into the log "stream"
+	 * 
+     * @param	eLvl	error level to log in the subsequent stream operator calls
+	 * 
+     * @return	a reference to this log
+     */
+	Log& Log::operator << (const EErrorLevel eLvl)
+	{
+		if( eLvl <= sm_uiMaxLogLevel )
+		{
+			m_ssLogStream << sm_astrLogLevelToPrefix[eLvl];
+		}
+		
+		m_elLastStreamLogLvl = eLvl;
+		
+		return *this;
+	}
+	
+	/**
+	 * @brief	Stream operator for function pointers for the manipulators
+	 * 
+     * @param	logmanipulator	function pointer to the manipulator, i.e. oocl::endl
+	 * 
+     * @return	a reference to this log
+     */
+	Log& Log::operator << (Log& (*logmanipulator)(Log&) ) 
+	{ 
+		return logmanipulator(*this);
+	}
+	
+		
+	Log& Log::operator << (const char* pc)
+	{
+		m_ssLogStream << pc;
+		return *this;
+	}
+	
+	Log& Log::operator << (const std::string str)
+	{
+		m_ssLogStream << str;
+		return *this;
+	}
+	
 
+	Log& Log::operator << (const bool b)
+	{
+		m_ssLogStream << b;
+		return *this;
+	}
+	
+	Log& Log::operator << (const float f)
+	{
+		m_ssLogStream << f;
+		return *this;
+	}
+	
+	Log& Log::operator << (const double d)
+	{
+		m_ssLogStream << d;
+		return *this;
+	}
+	
+
+	Log& Log::operator << (const short int i)
+	{
+		m_ssLogStream << i;
+		return *this;
+	}
+	
+	Log& Log::operator << (const unsigned short int i)
+	{
+		m_ssLogStream << i;
+		return *this;
+	}
+	
+	Log& Log::operator << (const int i)
+	{
+		m_ssLogStream << i;
+		return *this;
+	}
+	
+	Log& Log::operator << (const unsigned int i)
+	{
+		m_ssLogStream << i;
+		return *this;
+	}
+	
+	Log& Log::operator << (const long long i)
+	{
+		m_ssLogStream << i;
+		return *this;
+	}
+	
+	Log& Log::operator << (const unsigned long long i)
+	{
+		m_ssLogStream << i;
+		return *this;
+	}
+	
+	
+	Log& endl(Log& log)
+	{ 
+		if( log.m_elLastStreamLogLvl >= log.m_elLowestLoggedLevel )
+		{
+			std::cout << log.m_ssLogStream.str() << std::endl;
+			log.m_ssLogStream << '\n';
+
+			log.flush();
+		}
+		
+		log.m_ssLogStream.str("");
+		log.m_ssLogStream.clear();
+		
+		return log; 
+	}
 }

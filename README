@@ -2,7 +2,7 @@ The OBJECT ORIENTED COMMUNICATION LIBRARY  (oocl)
 is intended to be a platform independent and easy to use c++ library for network communication.
 
 It is currently very much work in progress, so don't be surprised if something does not work.
-If you have suggestions feel free to contact me via github (https://github.com/jaytea).
+If you have suggestions you can contact me via github (https://github.com/jaytea).
 
 LICENSE:
 The library is released under the zlib-license! So feel free to do whatever you want with it, just give us credit if you use it.
@@ -14,6 +14,7 @@ DOCUMENTATION:
 DoxyGen documentation is available online at http://jaytea.org/oocl/
 
 DEPENDENCIES:
+OpenSSL
 - Linux: Curses (only for the Peer2PeerTest demo)
 - Windows: Ws2_32.lib
 

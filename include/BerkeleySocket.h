@@ -22,6 +22,8 @@ subject to the following restrictions:
 #include <sstream>
 #include <cstring>
 
+#include <unistd.h>
+
 /*
 #ifdef linux
 #	include <netinet/in.h>
@@ -58,29 +60,29 @@ namespace oocl
 		BerkeleySocket( int iSockType = SOCK_STREAM );
 		virtual ~BerkeleySocket();
 
-		bool connect( std::string host, unsigned short usPort );
-		bool connect( unsigned int uiHostIP, unsigned short usPort );
-		bool bind( unsigned short usPort );
+		virtual bool connect( std::string host, unsigned short usPort );
+		virtual bool connect( unsigned int uiHostIP, unsigned short usPort );
+		virtual bool bind( unsigned short usPort );
 
-		bool isValid();
-		bool isConnected();
+		virtual bool isValid();
+		virtual bool isConnected();
 
-		std::string read(int count = 0);
-		char		readC();
-		char*		readCA(int count, int * readCount = NULL);
+		virtual std::string read(int count = 0);
+		virtual char		readC();
+		virtual char*		readCA(int count, int * readCount = NULL);
 
-		std::string readFrom( int count = 0, unsigned int* hostIP = NULL );
+		virtual std::string readFrom( int count = 0, unsigned int* hostIP = NULL );
 
 
-		bool write(std::string in);
-		bool writeC(char in);
-		bool writeCA(const char * in, int count);
+		virtual bool write(std::string in);
+		virtual bool writeC(char in);
+		virtual bool writeCA(const char * in, int count);
 
-		bool writeTo( std::string in, std::string host, unsigned short port );
+		virtual bool writeTo( std::string in, std::string host, unsigned short port );
 
-		void close();
+		virtual void close();
 
-		int getCSocket() { return sockfd; }
+		virtual int getCSocket() { return sockfd; }
 		unsigned int getConnectedIP() { return m_addrData.sin_addr.s_addr; }
 
 	protected:

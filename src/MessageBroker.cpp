@@ -238,7 +238,9 @@ namespace oocl
 			while( m_lMessageQueue.empty() )
 				Thread::sleep(0);
 
+			// get the queues first element and instantly remove it from the queue so that it is not used twice
 			Message* pMessage = m_lMessageQueue.front();
+			m_lMessageQueue.pop_front();
 
 			// if no listener requested exclusive delivery, deliver the message to all listeners
 			if( !m_pExclusiveListener )
@@ -248,7 +250,7 @@ namespace oocl
 
 				for( std::list< MessageListener* >::iterator it = lWaitList.begin(); it != lWaitList.end(); it = lWaitList.erase( it ) )
 				{
-					// if the message can not be dealt with no, the listener should return false and will be pushed at the end of the listener stack
+					// if the message can not be dealt with now, the listener should return false and will be pushed at the end of the listener stack
 					if( !(*it)->cbMessage( pMessage ) )
 						lWaitList.push_back( (*it) );
 				}
@@ -262,7 +264,8 @@ namespace oocl
 				} while( !bRet );
 			}
 
-			m_lMessageQueue.pop_front();
+			// delete the message to prevent memory holes, the listeners should have finished processing the data
+			delete pMessage;
 			
 			// when the thread is not set to run the whole time, quit the thread if the message queue is empty
 			if( !m_bRunContinuously )

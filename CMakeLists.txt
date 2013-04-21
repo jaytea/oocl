@@ -12,7 +12,7 @@ find_package (Threads)
 find_package (Curses)
 find_package (OpenSSL)
 
-add_definitions ( "-D OOCL_EXPORT -D OPENSSL" )
+add_definitions ( "-D OOCL_EXPORT" )
 
 SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${oocl_SOURCE_DIR}/bin)
 

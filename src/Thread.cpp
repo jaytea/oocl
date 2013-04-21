@@ -38,11 +38,14 @@ namespace oocl
 	 */
 	void Thread::join()
 	{
+		if( m_bActive )
+		{
 #ifdef linux
-		pthread_join(m_iThreadID, NULL);
+			pthread_join(m_iThreadID, NULL);
 #else
-		WaitForSingleObject(m_hThread,INFINITE);
+			WaitForSingleObject(m_hThread,INFINITE);
 #endif
+		}
 	}
 
 

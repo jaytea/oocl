@@ -18,6 +18,7 @@ subject to the following restrictions:
 #define LOG_H
 
 #include <string>
+#include <sstream>
 #include <map>
 #include <fstream>
 #include <iostream>
@@ -25,7 +26,7 @@ subject to the following restrictions:
 #include "oocl_import_export.h"
 
 namespace oocl
-{
+{	
 	/**
 	 * @class	Log
 	 *
@@ -34,8 +35,10 @@ namespace oocl
 	 * @author	Jörn Teuber
 	 * @date	9/14/2011
 	 */
-	class OOCL_EXPORTIMPORT Log
+	class Log
 	{
+		friend Log& endl(Log& log);
+		
 	public:
 		/**
 		 * @enum	EErrorLevel
@@ -51,7 +54,10 @@ namespace oocl
 		};
 
 		static Log* getLog( std::string strLogName );
+		static Log& getLogRef( std::string strLogName );
+		
 		static Log* getDefaultLog();
+		static Log& getDefaultLogRef();
 
 		static void setDefaultLog( const std::string strDefaultLogName );
 
@@ -61,6 +67,24 @@ namespace oocl
 		bool logWarning( const std::string strMessage );
 		bool logError( const std::string strMessage );
 		bool logFatalError( const std::string strMessage );
+		
+		
+		Log& operator << (const EErrorLevel eLvl);
+		Log& operator << (Log& (*logmanipulator)(Log&) );
+		
+		Log& operator << (const char* pc);
+		Log& operator << (const std::string str);
+		
+		Log& operator << (const bool b);
+		Log& operator << (const float f);
+		Log& operator << (const double d);
+		
+		Log& operator << (const short int i);
+		Log& operator << (const unsigned short int i);
+		Log& operator << (const int i);
+		Log& operator << (const unsigned int i);
+		Log& operator << (const long long i);
+		Log& operator << (const unsigned long long i);
 
 		void flush();
 
@@ -71,14 +95,23 @@ namespace oocl
 		~Log(void);
 
 	private:
-		static std::map<std::string, Log*> sm_mapLogs;
-		static Log* sm_pDefaultLog;
-
 		EErrorLevel m_elLowestLoggedLevel;
+		EErrorLevel m_elLastStreamLogLvl;
 
 		std::string m_strLogText;
+		std::stringstream m_ssLogStream;
 		std::ofstream m_fsLogFile;
+		
+		
+		static std::map<std::string, Log*> sm_mapLogs;
+		static Log* sm_pDefaultLog;
+		
+		static std::string sm_astrLogLevelToPrefix[];
+		static const unsigned int sm_uiMaxLogLevel = 3;
 	};
+	
+	
+	Log& endl(Log& log);
 
 }
 
