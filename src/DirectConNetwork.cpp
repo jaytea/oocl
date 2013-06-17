@@ -1,6 +1,6 @@
 /*
 Object Oriented Communication Library
-Copyright (c) 2011 Jürgen Lorenz and Jörn Teuber
+Copyright (c) 2011 J��rgen Lorenz and J��rn Teuber
 
 This software is provided 'as-is', without any express or implied warranty.
 In no event will the authors be held liable for any damages arising from the use of this software.
@@ -49,7 +49,7 @@ namespace oocl
 
 	/**
 	 * @fn	bool DirectConNetwork::connect( std::string strHostname, unsigned short usPort,
-	 * 		int iProtocoll )
+	 * 		unsigned short usListeningPort )
 	 *
 	 * @brief	Connects with another process.
 	 *
@@ -66,22 +66,24 @@ namespace oocl
 			m_usHostPort = usHostPort;
 			m_usListeningPort = usListeningPort;
 			
-			m_pSocketUDPIn = new BerkeleySocket( SOCK_DGRAM );
-			m_pSocketUDPIn->bind( m_usListeningPort );
-
-			m_pSocketUDPOut = new BerkeleySocket( SOCK_DGRAM );
-			m_pSocketUDPOut->connect( strHostname, m_usHostPort );
-
-			m_pSocketTCP = new BerkeleySocket( SOCK_STREAM );
-			m_pSocketTCP->connect( strHostname, m_usHostPort );
-			
 			m_bConnected = true;
 
-			sendMessage( new ConnectMessage( m_usListeningPort ) );
+			m_pSocketUDPIn = new BerkeleySocket( SOCK_DGRAM );
+			m_bConnected &= m_pSocketUDPIn->bind( m_usListeningPort );
 
-			start();
+			m_pSocketUDPOut = new BerkeleySocket( SOCK_DGRAM );
+			m_bConnected &= m_pSocketUDPOut->connect( strHostname, m_usHostPort );
 
-			return true;
+			m_pSocketTCP = new BerkeleySocket( SOCK_STREAM );
+			m_bConnected &= m_pSocketTCP->connect( strHostname, m_usHostPort );
+
+			if( m_bConnected )
+			{
+				sendMessage( new ConnectMessage( m_usListeningPort ) );
+				start();
+			}
+
+			return m_bConnected;
 		}
 
 		return false;
@@ -114,7 +116,8 @@ namespace oocl
 			{
 				m_pSocketTCP = m_pServerSocket->accept();
 
-				std::string strMsg = m_pSocketTCP->read();
+				std::string strMsg;
+				m_pSocketTCP->read( strMsg );
 
 				Message* pMsg = Message::createFromString( strMsg.c_str() );
 
@@ -126,6 +129,8 @@ namespace oocl
 
 				m_usHostPort = ((ConnectMessage*)pMsg)->getPort();
 				m_pSocketUDPOut->connect( ((BerkeleySocket*)m_pSocketTCP)->getConnectedIP(), m_usHostPort );
+
+				sendMessage( new ConnectMessage( m_usListeningPort ) );
 
 				m_bConnected = true;
 			}
@@ -167,14 +172,22 @@ namespace oocl
 	 *
 	 * @return	true if it succeeds, false if it fails.
 	 */
-	bool DirectConNetwork::sendMessage( Message* pMessage )
+	bool DirectConNetwork::sendMessage( Message const * const pMessage )
 	{
 		if( pMessage && m_bConnected )
 		{
 			if( pMessage->getProtocoll() == SOCK_DGRAM )
+			{
 				m_pSocketUDPOut->write( pMessage->getMsgString() );
+			}
 			else if( pMessage->getProtocoll() == SOCK_STREAM )
+			{
+//				int flag = 0;
+//				setsockopt(m_pSocketTCP->getCSocket(), IPPROTO_TCP, TCP_NODELAY, (char *) &flag, sizeof(int));
 				m_pSocketTCP->write( pMessage->getMsgString() );
+//				flag = 1;
+//				setsockopt(m_pSocketTCP->getCSocket(), IPPROTO_TCP, TCP_NODELAY, (char *) &flag, sizeof(int));
+			}
 			else
 				Log::getLog("oocl")->logWarning("You tried to send a message over network that was not intended for that" );
 			
@@ -242,7 +255,8 @@ namespace oocl
 		{
 			m_pSocketTCP = m_pServerSocket->accept();
 
-			std::string strMsg = m_pSocketTCP->read();
+			std::string strMsg;
+			m_pSocketTCP->read( strMsg );
 
 			Message* pMsg = Message::createFromString( strMsg.c_str() );
 
@@ -253,7 +267,9 @@ namespace oocl
 			}
 
 			m_usHostPort = ((ConnectMessage*)pMsg)->getPort();
-			m_pSocketUDPOut->connect( ((BerkeleySocket*)m_pSocketTCP)->getConnectedIP(), m_usHostPort );
+			m_pSocketUDPOut->connect( m_pSocketTCP->getConnectedIP(), m_usHostPort );
+
+			sendMessage( new ConnectMessage( m_usListeningPort ) );
 
 			m_bConnected = true;
 		}
@@ -264,16 +280,16 @@ namespace oocl
 			iBiggestSocket = m_pSocketTCP->getCSocket();
 
 		fd_set selectSet;
-		FD_ZERO( &selectSet );
-
-		timeval tv;
-		tv.tv_sec = 0;
-		tv.tv_usec = 100000;
 
 		while( m_bConnected )
 		{
+			FD_ZERO( &selectSet );
 			FD_SET( m_pSocketUDPIn->getCSocket(), &selectSet );
 			FD_SET( m_pSocketTCP->getCSocket(), &selectSet );
+
+			timeval tv;
+			tv.tv_sec = 0;
+			tv.tv_usec = 500000;
 
 			int iRet = select( iBiggestSocket+1, &selectSet, NULL, NULL, &tv );
 #ifdef _MSC_VER
@@ -283,39 +299,58 @@ namespace oocl
 #endif
 			{
 				Log::getLog("oocl")->logError( "Selecting failed" );
+				continue;
 			}
+			else if( iRet == 0 )
+				continue;
 
 			if( FD_ISSET( m_pSocketTCP->getCSocket(), &selectSet ) )
 			{
-				std::string strMsg = m_pSocketTCP->read();
-				Message* pMsg = Message::createFromString( strMsg.c_str() );
-				if( !pMsg )
-					continue;
+				std::string strMsg;
+				m_pSocketTCP->read( strMsg );
 
-				if( pMsg->getType() == MT_DisconnectMessage )
+				while( !strMsg.empty() )
 				{
-					m_bConnected = false;
+					Message* pMsg = Message::createFromString( strMsg.c_str() );
+					if( pMsg == NULL )
+						break;
 
-					m_pSocketUDPIn->close();
-					m_pSocketUDPOut->close();
-					m_pSocketTCP->close();
-				}
+					if( strMsg.length() < pMsg->getBodyLength() + 4 )
+						Log::getLogRef("oocl") << Log::EL_WARNING << "read " << (int)strMsg.length() << " bytes while expected message is " << pMsg->getBodyLength() + 4 << " bytes long" << oocl::endl;
 
-				std::list< MessageListener* > lWaitList( m_lListeners );
+					strMsg = strMsg.substr( pMsg->getBodyLength() +4 );
 
-				for( std::list<MessageListener*>::iterator it = lWaitList.begin(); it != lWaitList.end(); it = lWaitList.erase( it ) )
-				{
-					if( !(*it)->cbMessage( pMsg ) )
-						lWaitList.push_back( (*it) );
+					if( pMsg->getType() == MT_DisconnectMessage )
+					{
+						m_bConnected = false;
+
+						m_pSocketUDPIn->close();
+						m_pSocketUDPOut->close();
+						m_pSocketTCP->close();
+					}
+
+					std::list< MessageListener* > lWaitList( m_lListeners );
+
+					for( std::list<MessageListener*>::iterator it = lWaitList.begin(); it != lWaitList.end(); it = lWaitList.erase( it ) )
+					{
+						if( !(*it)->cbMessage( pMsg ) )
+							lWaitList.push_back( (*it) );
+					}
+
+					MessageBroker::getBrokerFor(pMsg->getType())->pumpMessage( pMsg );
 				}
 			}
 
 			if( FD_ISSET( m_pSocketUDPIn->getCSocket(), &selectSet ) )
 			{
-				std::string strMsg = m_pSocketUDPIn->read();
+				std::string strMsg;
+				m_pSocketUDPIn->read( strMsg );
+
 				Message* pMsg = Message::createFromString( strMsg.c_str() );
-				if( !pMsg )
+				if( pMsg == NULL )
 					continue;
+
+				MessageBroker::getBrokerFor(pMsg->getType())->pumpMessage( pMsg );
 
 				std::list< MessageListener* > lWaitList( m_lListeners );
 

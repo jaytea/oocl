@@ -1,6 +1,6 @@
 /*
 Object Oriented Communication Library
-Copyright (c) 2011 Jürgen Lorenz and Jörn Teuber
+Copyright (c) 2011 J��rgen Lorenz and J��rn Teuber
 
 This software is provided 'as-is', without any express or implied warranty.
 In no event will the authors be held liable for any damages arising from the use of this software.
@@ -22,6 +22,7 @@ subject to the following restrictions:
 #include "oocl_import_export.h"
 
 #include "MessageListener.h"
+#include "MessageBroker.h"
 #include "ServerSocket.h"
 #include "BerkeleySocket.h"
 #include "Thread.h"
@@ -41,13 +42,13 @@ namespace oocl
 	{
 	public:
 		DirectConNetwork();
-		~DirectConNetwork();
+		virtual ~DirectConNetwork();
 
 		bool connect( std::string strHostname, unsigned short usHostPort, unsigned short usListeningPort );
 		bool listen( unsigned short usListeningPort, bool bBlocking = true );
 		bool disconnect();
 
-		bool sendMessage( Message* pMessage );
+		bool sendMessage( Message const * const pMessage );
 
 		bool registerListener( MessageListener* pListener );
 		bool unregisterListener( MessageListener* pListener );

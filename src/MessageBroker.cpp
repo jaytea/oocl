@@ -20,7 +20,7 @@ namespace oocl
 {
 
 	///< The list of all registered MessageBroker
-	std::vector< MessageBroker* > MessageBroker::sm_vBroker;
+	std::map< unsigned int, MessageBroker* > MessageBroker::sm_vBroker;
 
 
 	/**
@@ -29,11 +29,10 @@ namespace oocl
 	 * @brief	Default constructor.
 	 */
 	MessageBroker::MessageBroker(void)
-		: m_pExclusiveListener( NULL ),
-		m_iSequenceNumber( 0 ),
-		m_bRunThread( false ),
-		m_bRunContinuously( false ),
-		m_bSynchronous( false )
+		: m_pExclusiveListener( NULL )
+		, m_bRunThread( false )
+		, m_bRunContinuously( false )
+		, m_bSynchronous( false )
 	{
 	}
 
@@ -56,19 +55,11 @@ namespace oocl
 	 *
 	 * @param	usMessageType	Message type for which you need the broker.
 	 *
-	 * @return	The broker you need.
+	 * @return	The requested broker.
 	 */
 	MessageBroker* MessageBroker::getBrokerFor( unsigned short usMessageType )
 	{
-		if( usMessageType >= sm_vBroker.size() )
-		{
-			sm_vBroker.resize( usMessageType+1, NULL );
-
-			MessageBroker* pBroker = new MessageBroker();
-			sm_vBroker[usMessageType] = pBroker;
-			return pBroker;
-		}
-		else if( sm_vBroker[usMessageType] == NULL )
+		if( sm_vBroker.find( usMessageType ) == sm_vBroker.end() )
 		{
 			MessageBroker* pBroker = new MessageBroker();
 			sm_vBroker[usMessageType] = pBroker;
@@ -84,26 +75,34 @@ namespace oocl
 	 *
 	 * @brief	Registers the listener described by pListener.
 	 *
-	 * @param [in]	pListener	The listener you want to register with this brocker.
+	 * @param [in]	pListener	The listener to register with this brocker.
 	 */
 	void MessageBroker::registerListener( MessageListener* pListener )
 	{
-		if( pListener )
+		if( pListener != NULL )
+		{
+			m_mxListener.lock();
 			m_lListeners.push_back( pListener );
+			m_mxListener.unlock();
+		}
 	}
 
 
 	/**
 	 * @fn	void MessageBroker::unregisterListener( MessageListener* pListener )
 	 *
-	 * @brief	Unregisters the listener described by pListener.
+	 * @brief	Unregisters the listener given by pListener.
 	 *
-	 * @param [in]	pListener	The listener you want to unregister.
+	 * @param [in]	pListener	The listener to unregister.
 	 */
 	void MessageBroker::unregisterListener( MessageListener* pListener )
 	{
-		if( pListener )
+		if( pListener != NULL )
+		{
+			m_mxListener.lock();
 			m_lListeners.remove( pListener );
+			m_mxListener.unlock();
+		}
 	}
 
 
@@ -118,14 +117,21 @@ namespace oocl
 	{
 		if( !m_lListeners.empty() && pMessage != NULL )
 		{
-			m_lMessageQueue.push_back( pMessage );
-		
-			if( !m_bRunThread )
+			if( m_bSynchronous )
 			{
-				if( m_bSynchronous )
-					run();
-				else
+				deliverMessage( pMessage );
+			}
+			else
+			{
+				m_mxQueue.lock();
+				m_lMessageQueue.push( pMessage );
+				m_mxQueue.unlock();
+		
+				if( !m_bRunThread )
+				{
+					m_bRunThread = true;
 					start();
+				}
 			}
 		}
 	}
@@ -144,7 +150,10 @@ namespace oocl
 	{
 		if( !m_pExclusiveListener )
 		{
+			m_mxExclusiveListener.lock();
 			m_pExclusiveListener = pListener;
+			m_mxExclusiveListener.unlock();
+
 			return true;
 		}
 
@@ -165,7 +174,10 @@ namespace oocl
 	{
 		if( m_pExclusiveListener == pListener )
 		{
+			m_mxExclusiveListener.lock();
 			m_pExclusiveListener = NULL;
+			m_mxExclusiveListener.unlock();
+
 			return true;
 		}
 
@@ -235,34 +247,17 @@ namespace oocl
 		while( m_bRunThread )
 		{
 			// wait for a new message
-			while( m_lMessageQueue.empty() )
+			while( m_lMessageQueue.empty() && m_bRunThread )
 				Thread::sleep(0);
 
 			// get the queues first element and instantly remove it from the queue so that it is not used twice
+			m_mxQueue.lock();
 			Message* pMessage = m_lMessageQueue.front();
-			m_lMessageQueue.pop_front();
 
-			// if no listener requested exclusive delivery, deliver the message to all listeners
-			if( !m_pExclusiveListener )
-			{
-				// build a stack of listeners that have not received the message yet
-				std::list< MessageListener* > lWaitList( m_lListeners.begin(), m_lListeners.end() );
-
-				for( std::list< MessageListener* >::iterator it = lWaitList.begin(); it != lWaitList.end(); it = lWaitList.erase( it ) )
-				{
-					// if the message can not be dealt with now, the listener should return false and will be pushed at the end of the listener stack
-					if( !(*it)->cbMessage( pMessage ) )
-						lWaitList.push_back( (*it) );
-				}
-			}
-			// else deliver the message only to the current exclusive listener
-			else
-			{
-				bool bRet = false;
-				do {
-					bRet = m_pExclusiveListener->cbMessage( pMessage );
-				} while( !bRet );
-			}
+			deliverMessage( pMessage );
+			
+			m_lMessageQueue.pop();
+			m_mxQueue.unlock();
 
 			// delete the message to prevent memory holes, the listeners should have finished processing the data
 			delete pMessage;
@@ -270,6 +265,40 @@ namespace oocl
 			// when the thread is not set to run the whole time, quit the thread if the message queue is empty
 			if( !m_bRunContinuously )
 				m_bRunThread = !m_lMessageQueue.empty();
+		}
+	}
+
+
+	void MessageBroker::deliverMessage( Message* pMessage )
+	{
+		// if no listener requested exclusive delivery, deliver the message to all listeners
+		if( m_pExclusiveListener == NULL && !m_lListeners.empty() )
+		{
+			m_mxListener.lock();
+
+			// build a stack of listeners that have not received the message yet
+			std::list< MessageListener* > lWaitList( m_lListeners.begin(), m_lListeners.end() );
+
+			for( std::list< MessageListener* >::iterator it = lWaitList.begin(); it != lWaitList.end(); it = lWaitList.erase( it ) )
+			{
+				// if the message can not be dealt with now, the listener should return false and will be pushed to the end of the listener stack
+				if( !(*it)->cbMessage( pMessage ) )
+					lWaitList.push_back( (*it) );
+			}
+
+			m_mxListener.unlock();
+		}
+		// else deliver the message only to the current exclusive listener
+		else if( m_pExclusiveListener != NULL )
+		{
+			m_mxExclusiveListener.lock();
+
+			bool bRet = false;
+			do {
+				bRet = m_pExclusiveListener->cbMessage( pMessage );
+			} while( !bRet );
+
+			m_mxExclusiveListener.unlock();
 		}
 	}
 

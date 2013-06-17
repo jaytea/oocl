@@ -57,6 +57,8 @@ namespace oocl
 	 */
 	class OOCL_EXPORTIMPORT Message
 	{
+		friend class MessageBroker;
+
 	public:
 		static Message* createFromString( const char* cMsg );
 
@@ -67,16 +69,17 @@ namespace oocl
 		 *  |2 byte |2 byte |   |   .... 
 		 * => Length = length of the messageBody in bytes (as returned by getBodyLength() )
 		 */
-		virtual std::string		getMsgString()  	{ int i=0; return std::string( (char*)&i, 4 ); }
-		virtual unsigned short	getBodyLength() 	{ return 0; }
+		virtual std::string		getMsgString()  const	{ int i=0; return std::string( (char*)&i, 4 ); }
+		virtual unsigned short	getBodyLength() const	{ return 0; }
 
 		void setSenderID( unsigned int uiSenderID ) { m_uiSenderID = uiSenderID; }
+		void setProtocoll( int iProtocoll ) { m_iProtocoll = iProtocoll; }
 
 		/// @brief return the type id of the message object
-		virtual unsigned short  getType() 			{ return m_type; }
-		virtual int             getProtocoll() 		{ return m_iProtocoll; }
-		unsigned int			getSenderID() 		{ return m_uiSenderID; }
-		bool					isIncoming() 		{ return m_bIncoming; }
+		virtual unsigned short  getType()		const	{ return m_type; }
+		virtual int             getProtocoll() 	const	{ return m_iProtocoll; }
+		unsigned int			getSenderID() 	const	{ return m_uiSenderID; }
+		bool					isIncoming() 	const	{ return m_bIncoming; }
 
 	protected:
 		Message();

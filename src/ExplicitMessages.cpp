@@ -60,7 +60,7 @@ namespace oocl
 	 *
 	 * @return	The message string.
 	 */
-	std::string StandardMessage::getMsgString()
+	std::string StandardMessage::getMsgString() const
 	{
 		unsigned short usTemp[2];
 		usTemp[0] = m_type;
@@ -78,7 +78,7 @@ namespace oocl
 	 *
 	 * @return	The body length in byte.
 	 */
-	unsigned short StandardMessage::getBodyLength()
+	unsigned short StandardMessage::getBodyLength() const
 	{
 		return m_strMsgBody.length();
 	}
@@ -123,7 +123,7 @@ namespace oocl
 	 *
 	 * @return	The message as string.
 	 */
-	std::string SubscribeMessage::getMsgString()
+	std::string SubscribeMessage::getMsgString() const
 	{
 		unsigned short usMsg[3];
 		usMsg[0] = MT_SubscribeMessage;
@@ -141,7 +141,7 @@ namespace oocl
 	 *
 	 * @return	The body length in byte.
 	 */
-	unsigned short SubscribeMessage::getBodyLength()
+	unsigned short SubscribeMessage::getBodyLength() const
 	{
 		return sizeof(unsigned short);
 	}
@@ -188,7 +188,7 @@ namespace oocl
 	 *
 	 * @return	The message as string.
 	 */
-	std::string ConnectMessage::getMsgString()
+	std::string ConnectMessage::getMsgString() const
 	{
 		unsigned short usMsg[3];
 		usMsg[0] = MT_ConnectMessage;
@@ -206,7 +206,7 @@ namespace oocl
 	 *
 	 * @return	The body length in byte.
 	 */
-	unsigned short ConnectMessage::getBodyLength()
+	unsigned short ConnectMessage::getBodyLength() const
 	{
 		return sizeof(short)+sizeof(int);
 	}
@@ -252,7 +252,7 @@ namespace oocl
 	 *
 	 * @return	The message as string.
 	 */
-	std::string DisconnectMessage::getMsgString()
+	std::string DisconnectMessage::getMsgString() const
 	{
 		unsigned short usMsg[2];
 		usMsg[0] = MT_DisconnectMessage;
@@ -269,7 +269,7 @@ namespace oocl
 	 *
 	 * @return	The body length in byte.
 	 */
-	unsigned short DisconnectMessage::getBodyLength()
+	unsigned short DisconnectMessage::getBodyLength() const
 	{
 		return 0;
 	}

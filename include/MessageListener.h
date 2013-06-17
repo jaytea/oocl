@@ -62,7 +62,7 @@ namespace oocl
 		 *
 		 * @return	return true if you have processed the data, false if you want to be called later with the same message.
 		 */
-		virtual bool cbMessage( Message* pMessage ) = 0;
+		virtual bool cbMessage( Message const * const pMessage ) = 0;
 	};
 
 }

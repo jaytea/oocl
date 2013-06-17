@@ -1,6 +1,6 @@
 /*
 Object Oriented Communication Library
-Copyright (c) 2011 Jürgen Lorenz and Jörn Teuber
+Copyright (c) 2011 J��rgen Lorenz and J��rn Teuber
 
 This software is provided 'as-is', without any express or implied warranty.
 In no event will the authors be held liable for any damages arising from the use of this software.
@@ -24,8 +24,11 @@ namespace oocl
 	std::vector<Message* (*)(const char*)> Message::sm_msgTypeList;
 
 
-	Message::Message() :
-		m_bIncoming( false )
+	Message::Message()
+		: m_type( 0 )
+		, m_iProtocoll( 0 )
+		, m_uiSenderID( 0 )
+		, m_bIncoming( false )
 	{
 	}
 
@@ -51,9 +54,7 @@ namespace oocl
 		}
 		else
 		{
-			std::ostringstream os;
-			os << "No message class for message type " << usType << " registered";
-			Log::getLog("oocl")->logError( os.str() );
+			Log::getLogRef("oocl") << Log::EL_ERROR << "No message class for message type " << usType << " registered" << oocl::endl;
 		}
 
 		return pReturn;
@@ -68,7 +69,7 @@ namespace oocl
 	 * @note	has to be called from the message implementation before it can be recognized by
 	 * 			the network.
 	 *
-	 * @author	J�rn Teuber
+	 * @author	Jörn Teuber
 	 * @date	3/1/2012
 	 *
 	 * @param	usType		  	The type.

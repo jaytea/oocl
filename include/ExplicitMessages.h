@@ -52,10 +52,10 @@ namespace oocl
 		StandardMessage( const char * cMsgBody, unsigned short length );
 		StandardMessage( std::string strMsgBody );
 
-		virtual std::string getMsgString();
-		virtual unsigned short getBodyLength();
+		virtual std::string getMsgString() const;
+		virtual unsigned short getBodyLength() const;
 
-		std::string getBody() { return m_strMsgBody; }
+		std::string getBody() const { return m_strMsgBody; }
 		void setProtocoll( int iProtocoll ) { m_iProtocoll = iProtocoll; }
 
 	protected:
@@ -88,11 +88,11 @@ namespace oocl
 
 		SubscribeMessage( unsigned short usTypeToSubscribe );
 
-		virtual std::string getMsgString();
-		virtual unsigned short getBodyLength();
+		virtual std::string getMsgString() const;
+		virtual unsigned short getBodyLength() const;
 
 		// getter
-		unsigned short getTypeToSubscribe() { return m_usTypeToSubscribe; }
+		unsigned short getTypeToSubscribe() const { return m_usTypeToSubscribe; }
 
 	protected:
 		static Message* create(const char * in);
@@ -124,11 +124,11 @@ namespace oocl
 
 		ConnectMessage( unsigned short usMyPort, unsigned int uiPeerID = 0 );
 
-		virtual std::string getMsgString();
-		virtual unsigned short getBodyLength();
+		virtual std::string getMsgString() const;
+		virtual unsigned short getBodyLength() const;
 
-		unsigned short getPort() { return m_usPort; }
-		unsigned int getPeerID() { return m_uiPeerID; }
+		unsigned short getPort() const { return m_usPort; }
+		unsigned int getPeerID() const { return m_uiPeerID; }
 
 	protected:
 		static Message* create(const char * in);
@@ -161,8 +161,8 @@ namespace oocl
 
 		DisconnectMessage();
 
-		virtual std::string getMsgString();
-		virtual unsigned short getBodyLength();
+		virtual std::string getMsgString() const;
+		virtual unsigned short getBodyLength() const;
 
 	protected:
 		static Message* create(const char * in);
@@ -191,7 +191,7 @@ namespace oocl
 
 		NewPeerMessage( Peer* pPeer );
 		
-		Peer* getPeer() { return m_pPeer; }
+		Peer* getPeer() const { return m_pPeer; }
 
 	protected:
 		static Message* create(const char * in);

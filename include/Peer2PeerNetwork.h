@@ -1,6 +1,6 @@
 /*
 Object Oriented Communication Library
-Copyright (c) 2011 Jürgen Lorenz and Jörn Teuber
+Copyright (c) 2011 J��rgen Lorenz and J��rn Teuber
 
 This software is provided 'as-is', without any express or implied warranty.
 In no event will the authors be held liable for any damages arising from the use of this software.
@@ -18,11 +18,12 @@ subject to the following restrictions:
 #define PEER2PEERNETWORK_H
 
 #include <list>
+#include <map>
 
+#include "Peer.h"
 #include "Thread.h"
 #include "MessageBroker.h"
 #include "ExplicitMessages.h"
-#include "Peer.h"
 #include "ServerSocket.h"
 
 namespace oocl
@@ -41,14 +42,19 @@ namespace oocl
 	{
 	public:
 		Peer2PeerNetwork( unsigned short usListeningPort, PeerID uiPeerID ); 
-		~Peer2PeerNetwork(void);
+		virtual ~Peer2PeerNetwork(void);
 
 		Peer* addPeer( std::string strHostname, unsigned short usPeerPort );
 		Peer* addPeer( unsigned int uiIP, unsigned short usPeerPort );
 
+		void subPeer( PeerID uiPeerID );
+		void disconnect();
+
 		// getter
 		Peer*				getPeerByID( PeerID uiPeerID );
+		unsigned int		getPeersIP( PeerID uiPeerID );
 		std::list<Peer*>*	getPeerList() { return &m_lpPeers; }
+		unsigned int		getUserID() { return m_uiUserID; }
 		
 	protected:
 		virtual void run();
@@ -63,6 +69,8 @@ namespace oocl
 
 		Socket*			m_pServerSocketUDP;
 		ServerSocket*	m_pServerSocketTCP;
+
+		Mutex		m_mxPeers;
 
 		bool			m_bActive;
 		unsigned short	m_usListeningPort;

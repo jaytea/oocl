@@ -17,12 +17,14 @@ subject to the following restrictions:
 #ifndef MESSAGEBROKER_H_INCLUDED
 #define MESSAGEBROKER_H_INCLUDED
 
-#include <vector>
+#include <map>
 #include <list>
+#include <queue>
 
 #include "oocl_import_export.h"
 
 #include "Thread.h"
+#include "Mutex.h"
 #include "MessageListener.h"
 
 namespace oocl
@@ -68,20 +70,25 @@ namespace oocl
 	private:
 		virtual void run();
 
+		void deliverMessage( Message* pMessage );
+
 		MessageBroker(void);
 		~MessageBroker(void);
 
 	private:
-		unsigned int m_iSequenceNumber;
 		MessageListener*	m_pExclusiveListener;
 		std::list< MessageListener* > m_lListeners;
-		std::list< Message* > m_lMessageQueue;
+		std::queue< Message* > m_lMessageQueue;
 
 		bool m_bRunThread;
 		bool m_bRunContinuously;
 		bool m_bSynchronous;
 
-		static std::vector< MessageBroker* > sm_vBroker;
+		Mutex m_mxQueue;
+		Mutex m_mxListener;
+		Mutex m_mxExclusiveListener;
+
+		static std::map< unsigned int, MessageBroker* > sm_vBroker;
 	};
 
 }

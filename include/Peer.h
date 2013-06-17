@@ -23,7 +23,9 @@ subject to the following restrictions:
 #include "MessageBroker.h"
 #include "ExplicitMessages.h"
 #include "BerkeleySocket.h"
+#include "Mutex.h"
 
+// #define SIM_DELAY
 
 namespace oocl
 {
@@ -46,17 +48,20 @@ namespace oocl
 
 	public:
 		// will be send to the peer
-		bool sendMessage( Message* pMessage );
+		bool sendMessage( Message const * const pMessage );
 		bool subscribe( unsigned short usType );
 
 		// was sent by the peer
 		bool receiveMessage( Message* pMessage );
 
 		// getter
-		bool	isConnected()	{ return m_ucConnectStatus == 2; }
+		bool	isConnected();
 		PeerID	getPeerID()		{ return m_uiPeerID; }
 
-		virtual bool cbMessage( Message* pMessage );
+		unsigned int	getIP();
+		unsigned short 	getListeningPort();
+
+		virtual bool cbMessage( Message const * const pMessage );
 
 	private:
 		Peer( std::string strHostname, unsigned short usPeerPort );
@@ -65,7 +70,24 @@ namespace oocl
 		
 		bool connect( unsigned short usListeningPort, PeerID uiUserID  );
 		bool connected( Socket* pTCPSocket, ConnectMessage* pMsg, unsigned short usListeningPort, PeerID uiUserID );
-		bool disconnect();
+		bool disconnect( bool bSendMessage = true );
+		bool connectSockets();
+
+		void deactivate();
+
+#ifdef SIM_DELAY
+		class MessageDelayer : public Thread
+		{
+		public:
+			MessageDelayer( Message* pMessage );
+
+		protected:
+			void run();
+
+		private:
+			Message* m_pMessage;
+		};
+#endif
 
 	private:
 		unsigned char m_ucConnectStatus;
@@ -78,7 +100,13 @@ namespace oocl
 		std::string		m_strHostname;
 		unsigned int	m_uiIP;
 		unsigned short	m_usPort;
-		PeerID			m_uiPeerID;
+		PeerID			m_uiPeerID; ///< the ID of the peer this object refers to
+		PeerID			m_uiUserID; ///< the ID of the peer running this instance
+		bool 			m_bActive;
+
+		Mutex	m_mxSockets;
+
+		static unsigned int sm_uiNumPeers;
 	};
 
 }
