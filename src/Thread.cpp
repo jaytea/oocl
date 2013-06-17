@@ -25,9 +25,23 @@ namespace oocl
 	 *
 	 * @brief	Default constructor.
 	 */
-	Thread::Thread() :
-		m_bActive( false )
+	Thread::Thread()
+		: m_iThreadPriority( TP_Normal )
+		, m_bActive( false )
+#ifdef USE_CPP11
+		, m_pThread( NULL )
+#endif
 	{
+	}
+
+
+	Thread::~Thread()
+	{
+#if defined USE_CPP11
+		delete m_pThread;
+#elif defined USE_WINTHREADS
+		CloseHandle(m_hThread);
+#endif
 	}
 
 
@@ -40,7 +54,9 @@ namespace oocl
 	{
 		if( m_bActive )
 		{
-#ifdef linux
+#if defined USE_CPP11
+			m_pThread->join();
+#elif defined linux
 			pthread_join(m_iThreadID, NULL);
 #else
 			WaitForSingleObject(m_hThread,INFINITE);
@@ -90,7 +106,17 @@ namespace oocl
 	 */
 	bool Thread::start()
 	{
-#ifdef linux
+#if defined USE_CPP11
+		try {
+			m_pThread = new std::thread( Thread::entryPoint, this );
+			return true;
+		}
+		catch( std::system_error& e )
+		{
+			Log::getLogRef("oocl") << Log::EL_ERROR << "Unable to start thread: " << e.what() << endl;
+			return false;
+		}
+#elif defined linux
 		return !pthread_create(&m_iThreadID, NULL, Thread::entryPoint, this);
 #else
 		m_hThread = CreateThread( NULL, 0, Thread::entryPoint, this, 0, &m_iThreadID);
@@ -98,7 +124,9 @@ namespace oocl
 #endif
 	}
 
-#ifdef linux
+#if defined USE_CPP11
+	int Thread::entryPoint(Thread* pthis)
+#elif defined linux
 	void * Thread::entryPoint(void * pthis)
 #else
 	DWORD WINAPI Thread::entryPoint(LPVOID pthis)
@@ -116,13 +144,16 @@ namespace oocl
 	 *
 	 * @brief	Sets a new thread priority.
 	 *
+	 * @note 	Has no effect when USE_CPP11 is defined
+	 *
 	 * @param	iPriority	the new priority.
 	 */
 	void Thread::setPriority( EPriority iPriority )
 	{
 		m_iThreadPriority = iPriority;
-	
-#ifdef linux
+
+#ifndef USE_CPP11
+#	ifdef linux
 		struct sched_param sp;
 		memset(&sp, 0, sizeof(struct sched_param));
 	
@@ -133,8 +164,9 @@ namespace oocl
 		sp.sched_priority = iAvg + ( iPriority * (iMax - iMin) ) / 4;
 
 		pthread_setschedparam(m_iThreadID, SCHED_RR, &sp);
-#else
+#	else
 		SetThreadPriority(&m_hThread, iPriority);
+#	endif
 #endif
 	}
 

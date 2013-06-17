@@ -17,15 +17,23 @@ subject to the following restrictions:
 #ifndef THREAD_H_INCLUDED
 #define THREAD_H_INCLUDED
 
-#ifdef linux
-	#include <pthread.h>
-	#include <unistd.h>
-	#include <string.h>
+#if defined USE_CPP11
+#	include <thread>
+#elif defined linux
+#	include <pthread.h>
+#	include <unistd.h>
+#	include <string.h>
+#	define USE_PTHREADS
 #else
-	#include <windows.h>
+#	define USE_WINTHREADS
+#endif
+
+#ifdef WIN32
+#	include <windows.h>
 #endif
 
 #include "oocl_import_export.h"
+#include "Log.h"
 
 namespace oocl
 {
@@ -56,6 +64,7 @@ namespace oocl
 		};
 
 		Thread();
+		virtual ~Thread();
 
 		bool start();
 		void join();
@@ -73,15 +82,19 @@ namespace oocl
 	protected:
 		
 		virtual void run() = 0;
-
-#ifdef linux
+		
+#if defined USE_CPP11
+		static int entryPoint(Thread* pthis);
+#elif defined linux
 		static void * entryPoint(void* pthis);
 #else
 		static DWORD WINAPI entryPoint(LPVOID runnableInstance);
 #endif
 
 	private:
-#ifdef linux
+#if defined USE_CPP11
+		std::thread* m_pThread;
+#elif defined linux
 		///< Identifier for the thread
 		pthread_t m_iThreadID;
 #else
