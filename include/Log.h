@@ -22,6 +22,7 @@ subject to the following restrictions:
 #include <map>
 #include <fstream>
 #include <iostream>
+#include <time.h>
 
 #include "oocl_import_export.h"
 
@@ -94,6 +95,8 @@ namespace oocl
 		Log( std::string strLogName );
 		~Log(void);
 
+		std::string getTime();
+
 	private:
 		EErrorLevel m_elLowestLoggedLevel;
 		EErrorLevel m_elLastStreamLogLvl;
@@ -101,6 +104,8 @@ namespace oocl
 		std::string m_strLogText;
 		std::stringstream m_ssLogStream;
 		std::ofstream m_fsLogFile;
+
+		bool m_bFlushing;
 		
 		
 		static std::map<std::string, Log*> sm_mapLogs;

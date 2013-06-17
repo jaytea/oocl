@@ -21,7 +21,7 @@ namespace oocl
 	std::map<std::string, Log*> Log::sm_mapLogs;
 	Log* Log::sm_pDefaultLog = NULL;
 	
-	std::string Log::sm_astrLogLevelToPrefix[] = { "INFO       : ", "WARNING    : ", "ERROR      : ", "FATAL ERROR: " };
+	std::string Log::sm_astrLogLevelToPrefix[] = { " INFO       : ", " WARNING    : ", " ERROR      : ", " FATAL ERROR: " };
 
 
 	/**
@@ -34,6 +34,7 @@ namespace oocl
 	Log::Log( std::string strLogName ) 
 		: m_elLowestLoggedLevel( EL_INFO )
 		, m_elLastStreamLogLvl( EL_INFO )
+		, m_bFlushing( false )
 	{
 		m_fsLogFile.open( std::string(strLogName+std::string(".log")).c_str() );
 	}
@@ -168,7 +169,7 @@ namespace oocl
 		if( m_elLowestLoggedLevel > EL_INFO )
 			return false;
 
-		m_strLogText += "INFO       : " + strInfo + "\n";
+		m_strLogText += getTime() + " INFO       : " + strInfo + "\n";
 
 		std::cout << m_strLogText;
 		flush();
@@ -191,7 +192,7 @@ namespace oocl
 		if( m_elLowestLoggedLevel > EL_WARNING )
 			return false;
 
-		m_strLogText += "WARNING    : " + strWarning + "\n";
+		m_strLogText += getTime() + " WARNING    : " + strWarning + "\n";
 
 		std::cout << m_strLogText;
 		flush();
@@ -214,7 +215,7 @@ namespace oocl
 		if( m_elLowestLoggedLevel > EL_ERROR )
 			return false;
 
-		m_strLogText += "ERROR      : " + strError + "\n";
+		m_strLogText += getTime() + " ERROR      : " + strError + "\n";
 
 		std::cout << m_strLogText;
 		flush();
@@ -237,7 +238,7 @@ namespace oocl
 		if( m_elLowestLoggedLevel > EL_FATAL_ERROR )
 			return false;
 
-		m_strLogText += "FATAL ERROR: " + strError + "\n";
+		m_strLogText += getTime() + " FATAL ERROR: " + strError + "\n";
 
 		std::cout << m_strLogText;
 		flush();
@@ -253,8 +254,9 @@ namespace oocl
 	 */
 	void Log::flush()
 	{
+		std::cout.flush();
+
 		m_fsLogFile << m_strLogText;
-		m_fsLogFile << m_ssLogStream.str();
 		m_fsLogFile.flush();
 
 		m_strLogText.clear();
@@ -287,7 +289,7 @@ namespace oocl
 	{
 		if( eLvl <= sm_uiMaxLogLevel )
 		{
-			m_ssLogStream << sm_astrLogLevelToPrefix[eLvl];
+			m_ssLogStream << getTime() + sm_astrLogLevelToPrefix[eLvl];
 		}
 		
 		m_elLastStreamLogLvl = eLvl;
@@ -310,85 +312,112 @@ namespace oocl
 		
 	Log& Log::operator << (const char* pc)
 	{
-		m_ssLogStream << pc;
+		if( m_elLastStreamLogLvl <= sm_uiMaxLogLevel )
+			m_ssLogStream << pc;
 		return *this;
 	}
 	
 	Log& Log::operator << (const std::string str)
 	{
-		m_ssLogStream << str;
+		if( m_elLastStreamLogLvl <= sm_uiMaxLogLevel )
+			m_ssLogStream << str;
 		return *this;
 	}
 	
 
 	Log& Log::operator << (const bool b)
 	{
-		m_ssLogStream << b;
+		if( m_elLastStreamLogLvl <= sm_uiMaxLogLevel )
+			m_ssLogStream << b;
 		return *this;
 	}
 	
 	Log& Log::operator << (const float f)
 	{
-		m_ssLogStream << f;
+		if( m_elLastStreamLogLvl <= sm_uiMaxLogLevel )
+			m_ssLogStream << f;
 		return *this;
 	}
 	
 	Log& Log::operator << (const double d)
 	{
-		m_ssLogStream << d;
+		if( m_elLastStreamLogLvl <= sm_uiMaxLogLevel )
+			m_ssLogStream << d;
 		return *this;
 	}
 	
 
 	Log& Log::operator << (const short int i)
 	{
-		m_ssLogStream << i;
+		if( m_elLastStreamLogLvl <= sm_uiMaxLogLevel )
+			m_ssLogStream << i;
 		return *this;
 	}
 	
 	Log& Log::operator << (const unsigned short int i)
 	{
-		m_ssLogStream << i;
+		if( m_elLastStreamLogLvl <= sm_uiMaxLogLevel )
+			m_ssLogStream << i;
 		return *this;
 	}
 	
 	Log& Log::operator << (const int i)
 	{
-		m_ssLogStream << i;
+		if( m_elLastStreamLogLvl <= sm_uiMaxLogLevel )
+			m_ssLogStream << i;
 		return *this;
 	}
 	
 	Log& Log::operator << (const unsigned int i)
 	{
-		m_ssLogStream << i;
+		if( m_elLastStreamLogLvl <= sm_uiMaxLogLevel )
+			m_ssLogStream << i;
 		return *this;
 	}
 	
 	Log& Log::operator << (const long long i)
 	{
-		m_ssLogStream << i;
+		if( m_elLastStreamLogLvl <= sm_uiMaxLogLevel )
+			m_ssLogStream << i;
 		return *this;
 	}
 	
 	Log& Log::operator << (const unsigned long long i)
 	{
-		m_ssLogStream << i;
+		if( m_elLastStreamLogLvl <= sm_uiMaxLogLevel )
+			m_ssLogStream << i;
 		return *this;
 	}
 	
 	
+	std::string Log::getTime()
+	{
+		char acTime[9];
+		time_t timeval = time(NULL);
+		tm* pTM = gmtime( &timeval );
+		strftime( acTime, 9, "%H:%M:%S", pTM );
+		return std::string( acTime );
+	}
+
+
 	Log& endl(Log& log)
 	{ 
+		while( log.m_bFlushing );
+		log.m_bFlushing = true;
+
 		if( log.m_elLastStreamLogLvl >= log.m_elLowestLoggedLevel )
 		{
-			std::cout << log.m_ssLogStream.str() << std::endl;
 			log.m_ssLogStream << '\n';
+			std::cout << log.m_ssLogStream.str();
+			log.m_strLogText += log.m_ssLogStream.str();
+
+			log.m_ssLogStream.str("");
+			log.m_ssLogStream.clear();
 
 			log.flush();
 		}
-		
-		log.m_ssLogStream.str("");
-		log.m_ssLogStream.clear();
+
+		log.m_bFlushing = false;
 		
 		return log; 
 	}
