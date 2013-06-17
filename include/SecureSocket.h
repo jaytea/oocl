@@ -33,16 +33,16 @@ namespace oocl
 		virtual bool isValid();
 		virtual bool isConnected();
 
-		virtual std::string read(int count = 0);
-		virtual char		readC();
-		virtual char*		readCA(int count, int * readCount = NULL);
+		virtual bool read( std::string& str, int count = 0 );
+		virtual bool read( char& c );
+		virtual bool read( char* pcBuf, int& count );
 
-		virtual std::string readFrom( int count = 0, unsigned int* hostIP = NULL );
+		virtual bool readFrom( std::string& str, int count = 0, unsigned int* hostIP = NULL );
 
 
 		virtual bool write(std::string in);
-		virtual bool writeC(char in);
-		virtual bool writeCA(const char * in, int count);
+		virtual bool write(char in);
+		virtual bool write(const char * in, int count);
 
 		virtual bool writeTo( std::string in, std::string host, unsigned short port );
 
@@ -50,6 +50,8 @@ namespace oocl
 		
 		virtual int getCSocket() { return 0; }
 		
+		virtual unsigned int getConnectedIP() { return *((unsigned int*)BIO_get_conn_ip(m_pBio)); }
+
 	private:
 		BIO* m_pBio;
 		SSL* m_pSSL;

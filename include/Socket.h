@@ -53,20 +53,22 @@ namespace oocl
 		virtual bool isValid() = 0;
 		virtual bool isConnected() = 0;
 
-		virtual std::string read(int count = 0) = 0;
-		virtual char		readC() = 0;
-		virtual char*		readCA(int count, int * readCount = NULL) = 0;
+		virtual bool read( std::string& str, int count = 0 ) = 0;
+		virtual bool read( char& c ) = 0;
+		virtual bool read( char* pcBuf, int& count ) = 0;
 
-		virtual std::string readFrom( int count = 0, unsigned int* hostIP = NULL ) = 0;
+		virtual bool readFrom( std::string& str, int count = 0, unsigned int* hostIP = NULL ) = 0;
 
 
 		virtual bool write(std::string in) = 0;
-		virtual bool writeC(char in) = 0;
-		virtual bool writeCA(const char * in, int count) = 0;
+		virtual bool write(char in) = 0;
+		virtual bool write(const char * in, int count) = 0;
 
 		virtual bool writeTo( std::string in, std::string host, unsigned short port ) = 0;
 
 		virtual void close() = 0;
+
+		virtual unsigned int getConnectedIP() = 0;
 	};
 
 }

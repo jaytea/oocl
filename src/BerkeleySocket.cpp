@@ -1,26 +1,24 @@
 /*
-Object Oriented Communication Library
-Copyright (c) 2011 Jürgen Lorenz and Jörn Teuber
+ Object Oriented Communication Library
+ Copyright (c) 2011 Jürgen Lorenz and Jörn Teuber
 
-This software is provided 'as-is', without any express or implied warranty.
-In no event will the authors be held liable for any damages arising from the use of this software.
-Permission is granted to anyone to use this software for any purpose,
-including commercial applications, and to alter it and redistribute it freely,
-subject to the following restrictions:
+ This software is provided 'as-is', without any express or implied warranty.
+ In no event will the authors be held liable for any damages arising from the use of this software.
+ Permission is granted to anyone to use this software for any purpose,
+ including commercial applications, and to alter it and redistribute it freely,
+ subject to the following restrictions:
 
-1. The origin of this software must not be misrepresented; you must not claim that you wrote the original software. If you use this software in a product, an acknowledgment in the product documentation would be appreciated but is not required.
-2. Altered source versions must be plainly marked as such, and must not be misrepresented as being the original software.
-3. This notice may not be removed or altered from any source distribution.
-*/
+ 1. The origin of this software must not be misrepresented; you must not claim that you wrote the original software. If you use this software in a product, an acknowledgment in the product documentation would be appreciated but is not required.
+ 2. Altered source versions must be plainly marked as such, and must not be misrepresented as being the original software.
+ 3. This notice may not be removed or altered from any source distribution.
+ */
 // This file was written by J�rgen Lorenz and J�rn Teuber
-
 #include "BerkeleySocket.h"
 
 namespace oocl
 {
 
-	int BerkeleySocket::iSocketCounter = 0;
-
+	int BerkeleySocket::sm_iSocketCounter = 0;
 
 	/**
 	 * @fn	BerkeleySocket::BerkeleySocket(int socket, struct sockaddr_in sock_addr)
@@ -30,16 +28,21 @@ namespace oocl
 	 * @param	socket   	The c socket.
 	 * @param	sock_addr	The address as returned by accept.
 	 */
-	BerkeleySocket::BerkeleySocket(int socket, struct sockaddr_in sock_addr)
-		: Socket(),
-		bValid( true ),
-		bConnected( true ),
-		bufferSize( 1024 ),
-		sockfd( socket ),
-		m_addrData( sock_addr )
+	BerkeleySocket::BerkeleySocket( int socket, struct sockaddr_in sock_addr )
+		: 	Socket()
+		, m_addrData( sock_addr )
+		, m_iSockFD( socket )
+		, m_iSockType( 0 )
+		, m_bValid( true )
+		, m_bConnected( true )
 	{
+#ifdef WIN32
+		int iLength = sizeof(int);
+#else
+		unsigned int iLength = sizeof(int);
+#endif
+		getsockopt( m_iSockFD, SOL_SOCKET, SO_TYPE, (char*) &m_iSockType, &iLength );
 	}
-
 
 	/**
 	 * @fn	BerkeleySocket::BerkeleySocket( int iSockType )
@@ -49,30 +52,29 @@ namespace oocl
 	 * @param	iSockType	Protocoll used by the socket, TCP = SOCK_STREAM, UDP = SOCK_DGRAM.
 	 */
 	BerkeleySocket::BerkeleySocket( int iSockType )
-		: Socket(),
-		bConnected( false ),
-		bValid( true ),
-		bufferSize( 1024 )
+		: 	Socket()
+		, m_iSockType( iSockType )
+		, m_bValid( true )
+		, m_bConnected( false )
 	{
 
 		if( iSockType != SOCK_STREAM && iSockType != SOCK_DGRAM )
 		{
-			Log::getLog("oocl")->logWarning("Socket got invalid protocoll type; defaults to TCP" );
+			Log::getLog( "oocl" )->logWarning( "Socket got invalid protocoll type; defaults to TCP" );
 			iSockType = SOCK_STREAM;
 		}
 
-		sockfd = socket(AF_INET, iSockType, 0);
+		m_iSockFD = socket( AF_INET, iSockType, 0 );
 #ifdef linux
-		if (sockfd < 0)
+		if( m_iSockFD < 0 )
 #else
-		if( sockfd == INVALID_SOCKET )
+		if( m_iSockFD == INVALID_SOCKET )
 #endif
 		{
-    		bValid = false;
-			Log::getLog("oocl")->logError("Creating socket failed");
+			m_bValid = false;
+			Log::getLog( "oocl" )->logError( "Creating socket failed" );
 		}
 	}
-
 
 	/**
 	 * @fn	bool BerkeleySocket::connect( std::string host, unsigned short usPort )
@@ -89,7 +91,6 @@ namespace oocl
 		return connect( getAddrFromString( host.c_str() ), usPort );
 	}
 
-
 	/**
 	 * @fn	bool BerkeleySocket::connect( unsigned int uiHostIP, unsigned short usPort )
 	 *
@@ -102,46 +103,45 @@ namespace oocl
 	 */
 	bool BerkeleySocket::connect( unsigned int uiHostIP, unsigned short usPort )
 	{
-		if( bValid && !bConnected )
+		if( m_bValid && !m_bConnected )
 		{
 			m_addrData.sin_addr.s_addr = uiHostIP;
 			m_addrData.sin_family = AF_INET;
-			m_addrData.sin_port = htons(usPort);
-			
-			int result = ::connect(sockfd,(struct sockaddr *) &m_addrData, sizeof(m_addrData));
+			m_addrData.sin_port = htons( usPort );
+
+			int result = ::connect( m_iSockFD, (struct sockaddr *) &m_addrData, sizeof(m_addrData) );
 #ifdef linux
-			if( result < 0)
+			if( result < 0 )
 			{
 				std::ostringstream os;
 				os << "Connecting socket to " << m_addrData.sin_addr.s_addr << ":" << usPort << " failed";
 #else
-			if( result == SOCKET_ERROR )
-			{
-				std::ostringstream os;
-				os << "Connecting socket to " << m_addrData.sin_addr.s_net << "." << m_addrData.sin_addr.s_host << "." << m_addrData.sin_addr.s_lh << "." << m_addrData.sin_addr.s_impno << ":" << usPort << " failed";
+				if( result == SOCKET_ERROR )
+				{
+					std::ostringstream os;
+					os << "Connecting socket to " << (int)m_addrData.sin_addr.s_net << "." << (int)m_addrData.sin_addr.s_host << "." << (int)m_addrData.sin_addr.s_lh << "." << (int)m_addrData.sin_addr.s_impno << ":" << usPort << " failed";
 #endif
-				Log::getLog("oocl")->logError( os.str() );
+				Log::getLog( "oocl" )->logError( os.str() );
 
-    			close();
+				close();
 				return false;
 			}
 
-			bConnected = true;
+			m_bConnected = true;
 
 			return true;
 		}
-		
+
 		std::ostringstream os;
 #ifdef linux
 		os << "Connecting to " << m_addrData.sin_addr.s_addr << ":" << usPort << " failed due to invalid socket";
 #else
-		os << "Connecting to " << m_addrData.sin_addr.s_net << "." << m_addrData.sin_addr.s_host << "." << m_addrData.sin_addr.s_lh << "." << m_addrData.sin_addr.s_impno << ":" << usPort << " failed due to invalid socket";
+		os << "Connecting to " << (int)m_addrData.sin_addr.s_net << "." << (int)m_addrData.sin_addr.s_host << "." << (int)m_addrData.sin_addr.s_lh << "." << (int)m_addrData.sin_addr.s_impno << ":" << usPort << " failed due to invalid socket";
 #endif
-		Log::getLog("oocl")->logError( os.str() );
+		Log::getLog( "oocl" )->logError( os.str() );
 
 		return false;
 	}
-
 
 	/**
 	 * @fn	bool BerkeleySocket::bind( unsigned short usPort )
@@ -154,35 +154,34 @@ namespace oocl
 	 */
 	bool BerkeleySocket::bind( unsigned short usPort )
 	{
-		if( bValid && !bConnected )
+		if( m_bValid && !m_bConnected )
 		{
 			m_addrData.sin_family = AF_INET;
-			m_addrData.sin_port = htons(usPort);
+			m_addrData.sin_port = htons( usPort );
 			m_addrData.sin_addr.s_addr = INADDR_ANY;
 
-			int result = ::bind(sockfd, (struct sockaddr *)&m_addrData, sizeof(m_addrData));
+			int result = ::bind( m_iSockFD, (struct sockaddr *) &m_addrData, sizeof(m_addrData) );
 #ifdef linux
-			if( result < 0)
+			if( result < 0 )
 #else
 			if( result == SOCKET_ERROR )
 #endif
 			{
 				std::ostringstream os;
 				os << "Binding socket to port " << usPort << " failed";
-				Log::getLog("oocl")->logError( os.str() );
+				Log::getLog( "oocl" )->logError( os.str() );
 
-    			close();
+				close();
 				return false;
 			}
 
-			bConnected = true;
+			m_bConnected = true;
 
 			return true;
 		}
 
 		return false;
 	}
-
 
 	/**
 	 * @fn	BerkeleySocket::~BerkeleySocket()
@@ -194,7 +193,6 @@ namespace oocl
 		close();
 	}
 
-
 	/**
 	 * @fn	bool BerkeleySocket::isValid()
 	 *
@@ -204,9 +202,8 @@ namespace oocl
 	 */
 	bool BerkeleySocket::isValid()
 	{
-		return bValid;
+		return m_bValid;
 	}
-
 
 	/**
 	 * @fn	bool BerkeleySocket::isConnected()
@@ -217,9 +214,26 @@ namespace oocl
 	 */
 	bool BerkeleySocket::isConnected()
 	{
-		return bConnected;
-	}
+		// if this socket seems to be connected and is a tcp socket, check it on the c socket
+		if( m_bConnected && m_iSockType == SOCK_STREAM )
+		{
+			int iStatus = 0;
+#ifdef WIN32
+			int iLength = sizeof(int);
+#else
+			unsigned int iLength = sizeof(int);
+#endif
+			getsockopt( m_iSockFD, SOL_SOCKET, SO_ERROR, (char*) &iStatus, &iLength );
 
+			if( iStatus > 0 )
+			{
+				Log::getLogRef( "oocl" ) << Log::EL_ERROR << "Socket discovered an error. ErrNo: " << iStatus << endl;
+				close();
+			}
+		}
+
+		return m_bConnected;
+	}
 
 	/**
 	 * @fn	std::string BerkeleySocket::read(int count)
@@ -230,20 +244,21 @@ namespace oocl
 	 *
 	 * @return	The received bytes as string.
 	 */
-	std::string BerkeleySocket::read(int count)
+	bool BerkeleySocket::read( std::string& str, int count )
 	{
-		if(count==0){
-			count = bufferSize;
-		}
-		int readCount = 0;
-		char * in = readCA(count,&readCount);
-		if(in!=NULL){
-			return std::string(in,readCount);
-		}
+		if( count == 0 )
+			count = MAX_BUFFER_SIZE;
 
-		return std::string();
+		int readCount = count;
+		char* in = new char[count];
+
+		bool bRet = read( in, readCount );
+		if( bRet )
+			str = std::string( in, readCount );
+
+		delete[] in;
+		return bRet;
 	}
-
 
 	/**
 	 * @fn	char BerkeleySocket::readC()
@@ -252,51 +267,41 @@ namespace oocl
 	 *
 	 * @return	The received byte.
 	 */
-	char BerkeleySocket::readC()
+	bool BerkeleySocket::read( char& c )
 	{
-		char * in = readCA(1);
-		if(in!=NULL){
-			return in[0];
-		}
-
-		return 0;
+		int count = 1;
+		return read( &c, count );
 	}
 
-
 	/**
-	 * @fn	char * BerkeleySocket::readCA(int count, int * readCount)
+	 * @fn	bool BerkeleySocket::readCA( char* pcBuf, int& count )
 	 *
 	 * @brief	Receives a package with max count size, returns a char array and stores the number of actually received bytes in readCount.
 	 *
-	 * @param	count			 	Maximum number of bytes to read.
-	 * @param [out]		readCount	If non-null, contains the number of actually received bytes.
+	 * @param	pcBuf			Pre-allocated buffer in which the received data will be written.
+	 * @param [in/out] count	The size of the buffer, will be set to the number of actually received bytes.
 	 *
-	 * @return	null if it fails, else the ca.
+	 * @return	false if encountered any errors, else true.
 	 */
-	char * BerkeleySocket::readCA(int count, int * readCount)
+	bool BerkeleySocket::read( char* pcBuf, int& count )
 	{
-		if(bConnected && count>0)
+		if( m_bConnected && count > 0 )
 		{
-    		char * buffer = new char[count];
-			int rc = ::recv(sockfd,buffer,count,0);
-			if(readCount != NULL)
-			{
-				*readCount = rc;
-			}
+			int rc = ::recv( m_iSockFD, pcBuf, count, 0 );
+			count = rc;
 
-			if(rc > 0)
+			if( rc > 0 )
 			{
-				return buffer;
+				return true;
 			}
-			else if(rc < 0)
+			else if( rc < 0 )
 			{
-				Log::getLog("oocl")->logError( "receiving on connected socket failed" );
+				Log::getLog( "oocl" )->logError( "receiving on connected socket failed" );
 				close();
 			}
 		}
-		return NULL;
+		return false;
 	}
-
 
 	/**
 	 * @fn	std::string BerkeleySocket::readFrom( int count, unsigned int* hostIP )
@@ -308,41 +313,40 @@ namespace oocl
 	 *
 	 * @return	The received bytes as string.
 	 */
-	std::string BerkeleySocket::readFrom( int count, unsigned int* hostIP )
+	bool BerkeleySocket::readFrom( std::string& str, int count, unsigned int* hostIP )
 	{
-		if( bValid && !bConnected )
+		if( m_bValid && !m_bConnected )
 		{
-			if(count==0){
-				count = bufferSize;
-			}
+			if( count == 0 )
+				count = MAX_BUFFER_SIZE;
 
 			char * buffer = new char[count];
-#ifdef WINDOWS
+#ifdef WIN32
 			int fromlen = sizeof( sockaddr_in );
 #else
-			socklen_t fromlen = sizeof( sockaddr_in );
+			socklen_t fromlen = sizeof(sockaddr_in);
 #endif
 			struct sockaddr_in addr;
 
-			int rc = ::recvfrom( sockfd,buffer,count,0, (sockaddr*)&addr, &fromlen);
+			int rc = ::recvfrom( m_iSockFD, buffer, count, 0, (sockaddr*) &addr, &fromlen );
 
-			if(rc > 0)
+			if( rc > 0 )
 			{
 				if( hostIP != NULL )
 					*hostIP = addr.sin_addr.s_addr;
-				return std::string(buffer, rc);
+				str = std::string( buffer, rc );
+				return true;
 			}
-			else if(rc < 0)
+			else if( rc < 0 )
 			{
-				Log::getLog("oocl")->logError( "receiving on connectionless socket failed" );
+				Log::getLog( "oocl" )->logError( "receiving on connectionless socket failed" );
 				close();
-				return std::string();
+				return false;
 			}
 		}
 
-		return std::string();
+		return false;
 	}
-
 
 	/**
 	 * @fn	bool BerkeleySocket::write(std::string in)
@@ -353,11 +357,10 @@ namespace oocl
 	 *
 	 * @return	true if it succeeds, false if it fails.
 	 */
-	bool BerkeleySocket::write(std::string in)
+	bool BerkeleySocket::write( std::string in )
 	{
-		return writeCA(in.c_str(),in.length());
+		return write( in.c_str(), in.length() );
 	}
-
 
 	/**
 	 * @fn	bool BerkeleySocket::writeC(char in)
@@ -368,11 +371,10 @@ namespace oocl
 	 *
 	 * @return	true if it succeeds, false if it fails.
 	 */
-	bool BerkeleySocket::writeC(char in)
+	bool BerkeleySocket::write( char in )
 	{
-		return writeCA(&in,1);
+		return write( &in, 1 );
 	}
-
 
 	/**
 	 * @fn	bool BerkeleySocket::writeCA(const char * in, int count)
@@ -384,30 +386,35 @@ namespace oocl
 	 *
 	 * @return	true if it succeeds, false if it fails.
 	 */
-	bool BerkeleySocket::writeCA(const char * in, int count)
+	bool BerkeleySocket::write( const char * in, int count )
 	{
-		if( bConnected && count>0 )
+		if( m_bConnected && count > 0 )
 		{
-			int rc = ::send(sockfd,in,count,0);
-			if(rc < 0)
+			unsigned int iBytesSent = 0;
+			while( iBytesSent < count )
 			{
-				std::ostringstream os;
-				os << "Sending failed: " << count << ":" << rc << ":" << in;
-				Log::getLog("oocl")->logError( os.str() );
-				close();
-				// TODO: implement failcount, close connection after n failed sendings
+				int rc = ::send( m_iSockFD, in + iBytesSent, count - iBytesSent, 0 );
+				if( rc < 0 )
+				{
+					std::ostringstream os;
+					os << "Sending failed: " << count << ":" << rc << ":" << in;
+					Log::getLog( "oocl" )->logError( os.str() );
+					close();
+					// TODO: implement fail-count, close connection after n failed sends
 
-				return false;
+					return false;
+				}
+
+				iBytesSent += rc;
 			}
 
 			return true;
 		}
 
-		Log::getLog("oocl")->logWarning( "Sending failed due to unconnected socket" );
+		Log::getLog( "oocl" )->logWarning( "Sending failed due to unconnected socket" );
 
 		return false;
 	}
-
 
 	/**
 	 * @fn	bool BerkeleySocket::writeTo( std::string in, std::string host, unsigned short port )
@@ -422,15 +429,15 @@ namespace oocl
 	 */
 	bool BerkeleySocket::writeTo( std::string in, std::string host, unsigned short port )
 	{
-		// TODO!: this is totally wrong! It can only connect once, the second call of this won't send anything
 		if( connect( host, port ) )
 		{
-			return write( in );
+			bool ret = write( in );
+			close();
+			return ret;
 		}
 
 		return false;
 	}
-
 
 	/**
 	 * @fn	void BerkeleySocket::close()
@@ -439,14 +446,14 @@ namespace oocl
 	 */
 	void BerkeleySocket::close()
 	{
-		bConnected = false;
+		m_bConnected = false;
 #ifdef linux
-		::close(sockfd);
+		shutdown( m_iSockFD, 2 );
+//		::close(sockfd);
 #else
-		::closesocket(sockfd);
+		::closesocket(m_iSockFD);
 #endif
 	}
-
 
 	/**
 	 * @fn	unsigned int BerkeleySocket::getAddrFromString(const char* hostnameOrIp)
@@ -457,20 +464,20 @@ namespace oocl
 	 *
 	 * @return	The address from string.
 	 */
-	unsigned int BerkeleySocket::getAddrFromString(const char* hostnameOrIp)
+	unsigned int BerkeleySocket::getAddrFromString( const char* hostnameOrIp )
 	{
 		unsigned long ip;
 		hostent* he;
 
 		/* Parameter pr�fen */
-		if(hostnameOrIp==NULL)
+		if( hostnameOrIp == NULL )
 			return 0;
 
 		/* eine IP in hostnameOrIp ? */
-		ip=inet_addr(hostnameOrIp);
+		ip = inet_addr( hostnameOrIp );
 
 		/* bei einem fehler liefert inet_addr den R�ckgabewert INADDR_NONE */
-		if(ip!=INADDR_NONE)
+		if( ip != INADDR_NONE )
 		{
 			return ip;
 		}
@@ -478,16 +485,16 @@ namespace oocl
 		{
 			struct sockaddr_in addr;
 
-			/* Hostname in hostnameOrIp aufl�sen */
-			he = gethostbyname(hostnameOrIp);
-			if(he==NULL)
+			/* Hostname in hostnameOrIp auflösen */
+			he = gethostbyname( hostnameOrIp );
+			if( he == NULL )
 			{
 				return 0;
 			}
 			else
 			{
 				/*die 4 Bytes der IP von he nach addr kopieren */
-				std::memcpy(&(addr.sin_addr),he->h_addr_list[0],4);
+				std::memcpy( &(addr.sin_addr), he->h_addr_list[0], 4 );
 			}
 
 			return addr.sin_addr.s_addr;

@@ -30,6 +30,7 @@ subject to the following restrictions:
 #	include <sys/types.h>
 #	include <sys/socket.h>
 #	include <arpa/inet.h>
+#	include <netinet/tcp.h>
 #	include <netdb.h>
 #else
 #	include <windows.h>
