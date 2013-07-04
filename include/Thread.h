@@ -38,8 +38,6 @@ subject to the following restrictions:
 namespace oocl
 {
 	/**
-	 * @class	Thread
-	 *
 	 * @brief	Wrapper class for threads on different platforms.
 	 *
 	 * @note	If USE_CPP11 is defined it uses the c++11 std::thread, else a platform specific implementation.
@@ -52,8 +50,6 @@ namespace oocl
 	public:
 
 		/**
-		 * @enum	EPriority
-		 *
 		 * @brief	Values that represent the thread priority.
 		 */
 		enum EPriority
@@ -85,8 +81,6 @@ namespace oocl
 		
 
 		/**
-		 * @fn	void Thread::run()
-		 *
 		 * @brief	This is the method called inside the thread.
 		 *
 		 * @note	Overwrite this with your thread code.

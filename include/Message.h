@@ -48,12 +48,10 @@ namespace oocl
 
 #define MT_InvalidMessage 0
 	/**
-	 * @class	Message
-	 *
 	 * @brief	Interface and manager for all message classes.
 	 *
 	 * @author	Jörn Teuber
-	 * @date	3/1/2012
+	 * @date	1.3.2012
 	 */
 	class OOCL_EXPORTIMPORT Message
 	{

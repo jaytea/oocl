@@ -24,8 +24,6 @@ namespace oocl
 
 
 	/**
-	 * @fn	MessageBroker::MessageBroker(void)
-	 *
 	 * @brief	Default constructor.
 	 */
 	MessageBroker::MessageBroker(void)
@@ -38,8 +36,6 @@ namespace oocl
 
 
 	/**
-	 * @fn	MessageBroker::~MessageBroker(void)
-	 *
 	 * @brief	Destructor.
 	 */
 	MessageBroker::~MessageBroker(void)
@@ -49,8 +45,6 @@ namespace oocl
 
 
 	/**
-	 * @fn	MessageBroker* MessageBroker::getBrokerFor( unsigned short usMessageType )
-	 *
 	 * @brief	Returns the broker for the given message type.
 	 *
 	 * @param	usMessageType	Message type for which you need the broker.
@@ -71,8 +65,6 @@ namespace oocl
 
 
 	/**
-	 * @fn	void MessageBroker::registerListener( MessageListener* pListener )
-	 *
 	 * @brief	Registers the listener described by pListener.
 	 *
 	 * @param [in]	pListener	The listener to register with this brocker.
@@ -89,8 +81,6 @@ namespace oocl
 
 
 	/**
-	 * @fn	void MessageBroker::unregisterListener( MessageListener* pListener )
-	 *
 	 * @brief	Unregisters the listener given by pListener.
 	 *
 	 * @param [in]	pListener	The listener to unregister.
@@ -107,8 +97,6 @@ namespace oocl
 
 
 	/**
-	 * @fn	void MessageBroker::pumpMessage( Message* pMessage )
-	 *
 	 * @brief	Send a message to all registered listeners.
 	 *
 	 * @param [in]	pMessage	If non-null, the message to send.
@@ -138,8 +126,6 @@ namespace oocl
 
 
 	/**
-	 * @fn	bool MessageBroker::requestExclusiveMessaging( MessageListener* pListener )
-	 *
 	 * @brief	Request exclusive messaging, so that only the given MessageListener gets messages until discarded.
 	 *
 	 * @param [in]	pListener	The listener that needs full attention.
@@ -162,8 +148,6 @@ namespace oocl
 
 
 	/**
-	 * @fn	bool MessageBroker::discardExclusiveMessaging( MessageListener* pListener )
-	 *
 	 * @brief	Discard exclusive messaging.
 	 *
 	 * @param [in]	pListener	The listener.
@@ -186,8 +170,6 @@ namespace oocl
 
 
 	/**
-	 * @fn	void MessageBroker::enableContinuousProcessing()
-	 *
 	 * @brief	Enables continuous processing of messages in the message passing thread.
 	 * 			
 	 * @note	synchronous messaging will be disabled when you enable continuous processing.
@@ -200,8 +182,6 @@ namespace oocl
 
 
 	/**
-	 * @fn	void MessageBroker::disableContinuousProcessing()
-	 *
 	 * @brief	Disables continuous processing.
 	 */
 	void MessageBroker::disableContinuousProcessing()
@@ -211,8 +191,6 @@ namespace oocl
 
 
 	/**
-	 * @fn	void MessageBroker::enableSynchronousMessaging()
-	 *
 	 * @brief	Enables synchronous messaging, i.e. pumpMessage() will be blocking until all listeners got the message.
 	 * 			
 	 * @note	continuous processing will be disabled when you enable synchronous messaging.
@@ -225,8 +203,6 @@ namespace oocl
 
 
 	/**
-	 * @fn	void MessageBroker::disableSynchronousMessaging()
-	 *
 	 * @brief	Disables synchronous messaging.
 	 */
 	void MessageBroker::disableSynchronousMessaging()
@@ -236,8 +212,6 @@ namespace oocl
 
 
 	/**
-	 * @fn	void MessageBroker::run()
-	 *
 	 * @brief	Distributes the messages in the message queue of this broker.
 	 */
 	void MessageBroker::run()
@@ -269,6 +243,11 @@ namespace oocl
 	}
 
 
+	/**
+	 * @brief 	Helper methods to deliver the given message to all listeners.
+	 *
+	 * @param pMessage	The message to deliver.
+	 */
 	void MessageBroker::deliverMessage( Message* pMessage )
 	{
 		// if no listener requested exclusive delivery, deliver the message to all listeners

@@ -31,12 +31,10 @@ subject to the following restrictions:
 namespace oocl
 {
 	/**
-	 * @class	DirectConNetwork
-	 *
 	 * @brief	Class for connecting with one other process to send and receive messages.
 	 *
 	 * @author	Jörn Teuber
-	 * @date	9/14/2011
+	 * @date	14.9.2011
 	 */
 	class OOCL_EXPORTIMPORT DirectConNetwork : public Thread
 	{
@@ -54,7 +52,7 @@ namespace oocl
 		bool unregisterListener( MessageListener* pListener );
 
 		// getter
-		bool isConnected() { return m_bConnected; }
+		bool isConnected();
 
 	protected:
 		virtual void run();

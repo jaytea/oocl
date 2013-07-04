@@ -24,8 +24,6 @@ subject to the following restrictions:
 namespace oocl
 {
 	/**
-	 * @class	Socket
-	 *
 	 * @brief	Interface for all sockets.
 	 *
 	 * @author	Jörn Teuber
@@ -40,8 +38,6 @@ namespace oocl
 		virtual ~Socket() {}
 
 		/**
-		 * @fn	bool Socket::connect( std::string host, unsigned short usPort )
-		 *
 		 * @brief	Connect the socket to the host with given hostname on given port.
 		 *
 		 * @return	True if it succeeds, false if not.
@@ -49,8 +45,6 @@ namespace oocl
 		virtual bool connect( std::string host, unsigned short usPort ) = 0;
 
 		/**
-		 * @fn	bool Socket::connect( unsigned int uiHostIP, unsigned short usPort )
-		 *
 		 * @brief	Connect the socket to the host with given IP on given port.
 		 *
 		 * @return	True if it succeeds, false if not.
@@ -58,8 +52,6 @@ namespace oocl
 		virtual bool connect( unsigned int uiHostIP, unsigned short usPort ) = 0;
 
 		/**
-		 * @fn	bool Socket::bind( unsigned short usPort )
-		 *
 		 * @brief	Binds the socket to the given port.
 		 *
 		 * @param	usPort	The port.
@@ -70,8 +62,6 @@ namespace oocl
 
 
 		/**
-		 * @fn	bool Socket::isValid()
-		 *
 		 * @brief	Check whether the socket was created successfully.
 		 *
 		 * @return	True if this socket is valid, i.e. was created successfully, false if not.
@@ -79,8 +69,6 @@ namespace oocl
 		virtual bool isValid() = 0;
 
 		/**
-		 * @fn	bool Socket::isConnected()
-		 *
 		 * @brief	Check whether the socket was successfully connected.
 		 *
 		 * @return	True if this socket is connected, false if not.
@@ -88,8 +76,6 @@ namespace oocl
 		virtual bool isConnected() = 0;
 
 		/**
-		 * @fn	bool Socket::read( std::string& str, int count )
-		 *
 		 * @brief	Receives a package of maximum length count and stores it in a given string.
 		 *
 		 * @param	str		The string to write the received bytes into.
@@ -100,8 +86,6 @@ namespace oocl
 		virtual bool read( std::string& str, int count = 0 ) = 0;
 
 		/**
-		 * @fn	bool Socket::read( char& c )
-		 *
 		 * @brief	Receive exactly one byte.
 		 *
 		 * @param	c	The reference to the read byte.
@@ -111,8 +95,6 @@ namespace oocl
 		virtual bool read( char& c ) = 0;
 
 		/**
-		 * @fn	bool Socket::read( char* pcBuf, int& count )
-		 *
 		 * @brief	Receives a package with max count size, returns a char array and stores the number of actually received bytes in readCount.
 		 *
 		 * @param	pcBuf	Pre-allocated buffer in which the received data will be written.
@@ -123,8 +105,6 @@ namespace oocl
 		virtual bool read( char* pcBuf, int& count ) = 0;
 
 		/**
-		 * @fn	bool Socket::readFrom( std::string& str, int count, unsigned int* hostIP )
-		 *
 		 * @brief	Receives from an unconnected socket, i.e. UDP.
 		 *
 		 * @param 	str		The received bytes as string.
@@ -137,8 +117,6 @@ namespace oocl
 
 
 		/**
-		 * @fn	bool Socket::write(std::string in)
-		 *
 		 * @brief	Send a package to the connected process.
 		 *
 		 * @param	in	The package as string.
@@ -148,8 +126,6 @@ namespace oocl
 		virtual bool write(std::string in) = 0;
 
 		/**
-		 * @fn	bool Socket::write(char in)
-		 *
 		 * @brief	Sends one byte to the connected process.
 		 *
 		 * @param	in	The byte to send.
@@ -159,8 +135,6 @@ namespace oocl
 		virtual bool write(char in) = 0;
 
 		/**
-		 * @fn	bool Socket::write(const char * in, int count)
-		 *
 		 * @brief	Sends a byte array to the connected process.
 		 *
 		 * @param	in   	The byte array.
@@ -171,8 +145,6 @@ namespace oocl
 		virtual bool write(const char * in, int count) = 0;
 
 		/**
-		 * @fn	bool Socket::writeTo( std::string in, std::string host, unsigned short port )
-		 *
 		 * @brief	Sends a package .
 		 *
 		 * @param	in  	The package to send as string.
@@ -185,15 +157,11 @@ namespace oocl
 
 
 		/**
-		 * @fn	void Socket::close()
-		 *
 		 * @brief	Closes this socket.
 		 */
 		virtual void close() = 0;
 
 		/**
-		 * @fn	unsigned int Socket::getConnectedIP()
-		 *
 		 * @brief	Get the IP this socket is connected to.
 		 *
 		 * @return	The IP this socket is connected to.

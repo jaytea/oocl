@@ -118,8 +118,6 @@ namespace oocl
 
 
 	/**
-	 * @fn	Message* Message::createFromString( const char* cMsg )
-	 *
 	 * @brief	Creates an object of an implementation of message from a received byte buffer.
 	 *
 	 * @param	cMsg	The message as byte buffer.
@@ -146,18 +144,13 @@ namespace oocl
 
 
 	/**
-	 * @fn	void Message::registerMsg( unsigned short usType, Message* (*create)(const char*) )
-	 *
 	 * @brief	registers a message imlementation with the system, so that it can be created when received
 	 * 			
 	 * @note	has to be called from the message implementation before it can be recognized by
 	 * 			the network.
 	 *
-	 * @author	Jörn Teuber
-	 * @date	3/1/2012
-	 *
 	 * @param	usType		  	The type.
-	 * @param [in]	create	a pointer to a function that receives a byte buffer and returns a pointer to a newly created object of your message implementation.
+	 * @param	create [in]		a pointer to a function that receives a byte buffer and returns a pointer to a newly created object of your message implementation.
 	 */
 	void Message::registerMsg( unsigned short usType, Message* (*create)(const char*)  )
 	{

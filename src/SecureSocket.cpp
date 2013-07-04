@@ -1,9 +1,18 @@
-/* 
- * File:   SecureSocket.cpp
- * Author: jay
- * 
- * Created on May 17, 2012, 1:34 AM
- */
+/*
+Object Oriented Communication Library
+Copyright (c) 2011 Jürgen Lorenz and Jörn Teuber
+
+This software is provided 'as-is', without any express or implied warranty.
+In no event will the authors be held liable for any damages arising from the use of this software.
+Permission is granted to anyone to use this software for any purpose,
+including commercial applications, and to alter it and redistribute it freely,
+subject to the following restrictions:
+
+1. The origin of this software must not be misrepresented; you must not claim that you wrote the original software. If you use this software in a product, an acknowledgment in the product documentation would be appreciated but is not required.
+2. Altered source versions must be plainly marked as such, and must not be misrepresented as being the original software.
+3. This notice may not be removed or altered from any source distribution.
+*/
+// This file was written by Jörn Teuber
 #include "SecureSocket.h"
 
 namespace oocl
@@ -12,8 +21,6 @@ namespace oocl
 	SSL_CTX* SecureSocket::sm_pCTX = NULL;
 
 	/**
-	 * @fn	SecureSocket::SecureSocket( bool bSecure )
-	 *
 	 * @brief	Public constructor for a new, clean and unconnected secure socket.
 	 *
 	 * @param 	bSecure		If true, a socket with SSL properties will be created.
@@ -73,8 +80,6 @@ namespace oocl
 	}
 
 	/**
-	 * @fn	bool SecureSocket::connect( std::string strHostPort )
-	 *
 	 * @brief	Connects the socket to the given hostname and port in the format "hostname:port".
 	 *
 	 * @param	strHostPort	The hostname and port to connect to.

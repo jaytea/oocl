@@ -26,18 +26,6 @@
 #	include <unistd.h>
 #endif
 
-/*
- #ifdef linux
- #	include <netinet/in.h>
- #	include <arpa/inet.h>
- #	include <sys/socket.h>
- #	include <netdb.h>
- #else
- #	include <Windows.h>
- #	include <WinSock2.h>
- #endif
- */
-
 #include "oocl_import_export.h"
 
 #include "Socket.h"
@@ -49,8 +37,6 @@ namespace oocl
 #define MAX_BUFFER_SIZE 1024
 
 	/**
-	 * @class	BerkeleySocket
-	 *
 	 * @brief	Socket class for simple unencrypted berkeley sockets.
 	 *
 	 * @author	Jörn Teuber

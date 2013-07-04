@@ -40,12 +40,10 @@ subject to the following restrictions:
 namespace oocl
 {
 	/**
-	 * @class	SocketStub
-	 *
 	 * @brief	Socket stub that holds features needed by Socket and ServerSocket.
 	 *
 	 * @author	Jörn Teuber
-	 * @date	3/2/2012
+	 * @date	2.3.2012
 	 */
 	class OOCL_EXPORTIMPORT SocketStub
 	{
@@ -55,8 +53,6 @@ namespace oocl
 
 
 		/**
-		 * @fn	int SocketStub::getCSocket()
-		 *
 		 * @brief	Get the sockets underlying C or Berkeley socket.
 		 *
 		 * @note	Needs to be properly implemented in order for the socket to be used in the Peer2PeerNetwork and DirektConNetwork.

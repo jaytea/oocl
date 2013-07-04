@@ -22,9 +22,6 @@ namespace oocl
 	// ******************** StandardMessage *********************
 
 	/**
-	 * @fn	StandardMessage::StandardMessage( const char * cMsgBody,
-	 * 		unsigned short length ) : m_strMsgBody( std::string(cMsgBody, length) )
-	 *
 	 * @brief	Constructor for c-style strings.
 	 *
 	 * @param	cMsgBody	The message body.
@@ -39,8 +36,6 @@ namespace oocl
 
 
 	/**
-	 * @fn	StandardMessage::StandardMessage( std::string strMsgBody )
-	 *
 	 * @brief	Constructor for c++ strings.
 	 *
 	 * @param	strMsgBody	The message body.
@@ -54,8 +49,6 @@ namespace oocl
 
 
 	/**
-	 * @fn	std::string StandardMessage::getMsgString()
-	 *
 	 * @brief	Returns the message as string.
 	 *
 	 * @return	The message string.
@@ -72,8 +65,6 @@ namespace oocl
 
 
 	/**
-	 * @fn	unsigned short StandardMessage::getBodyLength()
-	 *
 	 * @brief	Returns the size in bytes of the message body (message without header).
 	 *
 	 * @return	The body length in byte.
@@ -85,8 +76,6 @@ namespace oocl
 
 
 	/**
-	 * @fn	Message* StandardMessage::create(const char * in)
-	 *
 	 * @brief	Creates this message out of the received byte array.
 	 *
 	 * @param	in	The incoming byte buffer.
@@ -102,8 +91,6 @@ namespace oocl
 	// ******************** SubscribeMessage *********************
 
 	/**
-	 * @fn	SubscribeMessage::SubscribeMessage( unsigned short usTypeToSubscribe )
-	 *
 	 * @brief	Constructor.
 	 *
 	 * @param	usTypeToSubscribe	The type to subscribe.
@@ -117,8 +104,6 @@ namespace oocl
 
 
 	/**
-	 * @fn	std::string SubscribeMessage::getMsgString()
-	 *
 	 * @brief	Returns the message as string.
 	 *
 	 * @return	The message as string.
@@ -135,8 +120,6 @@ namespace oocl
 
 
 	/**
-	 * @fn	unsigned short SubscribeMessage::getBodyLength()
-	 *
 	 * @brief	Returns the size in bytes of the message body (message without header).
 	 *
 	 * @return	The body length in byte.
@@ -148,8 +131,6 @@ namespace oocl
 
 
 	/**
-	 * @fn	Message* SubscribeMessage::create(const char * in)
-	 *
 	 * @brief	Creates this message out of the received byte array.
 	 *
 	 * @param	in	The incoming byte buffer.
@@ -165,8 +146,6 @@ namespace oocl
 	// ******************** ConnectMessage *********************
 
 	/**
-	 * @fn	ConnectMessage::ConnectMessage( unsigned short usMyPort, unsigned int uiPeerID )
-	 *
 	 * @brief	Constructor.
 	 *
 	 * @param	usMyPort	my port.
@@ -182,8 +161,6 @@ namespace oocl
 
 
 	/**
-	 * @fn	std::string ConnectMessage::getMsgString()
-	 *
 	 * @brief	Returns the message as string.
 	 *
 	 * @return	The message as string.
@@ -200,8 +177,6 @@ namespace oocl
 
 
 	/**
-	 * @fn	unsigned short ConnectMessage::getBodyLength()
-	 *
 	 * @brief	Returns the size in bytes of the message body (message without header).
 	 *
 	 * @return	The body length in byte.
@@ -213,8 +188,6 @@ namespace oocl
 
 
 	/**
-	 * @fn	Message* ConnectMessage::create(const char * in)
-	 *
 	 * @brief	Creates this message out of the received byte array.
 	 *
 	 * @param	in	The incoming byte buffer.
@@ -234,8 +207,6 @@ namespace oocl
 	// ******************** DisconnectMessage *********************
 
 	/**
-	 * @fn	DisconnectMessage::DisconnectMessage()
-	 *
 	 * @brief	Default constructor.
 	 */
 	DisconnectMessage::DisconnectMessage()
@@ -246,8 +217,6 @@ namespace oocl
 
 
 	/**
-	 * @fn	std::string DisconnectMessage::getMsgString()
-	 *
 	 * @brief	Returns the message as string.
 	 *
 	 * @return	The message as string.
@@ -263,8 +232,6 @@ namespace oocl
 
 
 	/**
-	 * @fn	unsigned short DisconnectMessage::getBodyLength()
-	 *
 	 * @brief	Returns the size in bytes of the message body (message without header).
 	 *
 	 * @return	The body length in byte.
@@ -276,8 +243,6 @@ namespace oocl
 
 
 	/**
-	 * @fn	Message* DisconnectMessage::create(const char * in)
-	 *
 	 * @brief	Creates this message out of the received byte array.
 	 *
 	 * @param	in	The incoming byte buffer.
@@ -294,8 +259,6 @@ namespace oocl
 	// ******************** NewPeerMessage *********************
 
 	/**
-	 * @fn	NewPeerMessage::NewPeerMessage( Peer* pPeer )
-	 *
 	 * @brief	Constructor.
 	 *
 	 * @param [in,out]	pPeer	If non-null, the peer.
@@ -309,8 +272,6 @@ namespace oocl
 
 
 	/**
-	 * @fn	Message* NewPeerMessage::create(const char * in)
-	 *
 	 * @brief	Should create a new NewPeerMessage but as this message is just for internal use always returns NULL.
 	 *
 	 * @param	in	The incoming byte buffer.

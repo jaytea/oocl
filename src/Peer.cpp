@@ -431,6 +431,7 @@ namespace oocl
 
 	/**
 	 * @brief	Get this peers PeerID.
+	 *
 	 * @return	This peers PeerID.
 	 */
 	PeerID	Peer::getPeerID()

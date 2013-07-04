@@ -229,6 +229,7 @@ namespace oocl
 
 	/**
 	 * @brief	Returns the connection status of this connection.
+	 *
 	 * @return	True, if this is connected, false if not.
 	 */
 	bool DirectConNetwork::isConnected()

@@ -24,34 +24,26 @@ subject to the following restrictions:
 namespace oocl
 {
 	/**
-	 * @class	MessageListener
-	 *
 	 * @brief	Interface for all classes that need to receive messages of any type.
 	 *
 	 * @author	Jörn Teuber
-	 * @date	11/25/2011
+	 * @date	25.11.2011
 	 */
 	class OOCL_EXPORTIMPORT MessageListener
 	{
 	public:
 
 		/**
-		 * @fn	MessageListener::MessageListener(void)
-		 *
 		 * @brief	Default constructor.
 		 */
 		MessageListener(void) {}
 
 		/**
-		 * @fn	virtual MessageListener::~MessageListener(void)
-		 *
 		 * @brief	Destructor.
 		 */
 		virtual ~MessageListener(void) {};
 
 		/**
-		 * @fn	virtual bool MessageListener::cbMessage( Message* pMessage ) = 0;
-		 *
 		 * @brief	This is the callback method for the messages.
 		 * 			
 		 * @note	Please note that every message type has its own thread to deliver the messages.

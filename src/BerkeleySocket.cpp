@@ -12,7 +12,7 @@
  2. Altered source versions must be plainly marked as such, and must not be misrepresented as being the original software.
  3. This notice may not be removed or altered from any source distribution.
  */
-// This file was written by J�rgen Lorenz and J�rn Teuber
+// This file was written by Jürgen Lorenz and Jörn Teuber
 #include "BerkeleySocket.h"
 
 namespace oocl
@@ -21,8 +21,6 @@ namespace oocl
 	int BerkeleySocket::sm_iSocketCounter = 0;
 
 	/**
-	 * @fn	BerkeleySocket::BerkeleySocket(int socket, struct sockaddr_in sock_addr)
-	 *
 	 * @brief	Private socket constructor for the server socket, uses an existing c socket.
 	 *
 	 * @param	socket   	The c socket.
@@ -45,8 +43,6 @@ namespace oocl
 	}
 
 	/**
-	 * @fn	BerkeleySocket::BerkeleySocket( int iSockType )
-	 *
 	 * @brief	Public constructor for a new, clean and unconnected socket.
 	 *
 	 * @param	iSockType	Protocoll used by the socket, TCP = SOCK_STREAM, UDP = SOCK_DGRAM.
@@ -77,8 +73,6 @@ namespace oocl
 	}
 
 	/**
-	 * @fn	bool BerkeleySocket::connect( std::string host, unsigned short usPort )
-	 *
 	 * @brief	Connects the socket to the given Peer.
 	 *
 	 * @param	host  	The host.
@@ -92,8 +86,6 @@ namespace oocl
 	}
 
 	/**
-	 * @fn	bool BerkeleySocket::connect( unsigned int uiHostIP, unsigned short usPort )
-	 *
 	 * @brief	Connects the socket to the given Peer.
 	 *
 	 * @param	uiHostIP	The host ip.
@@ -144,8 +136,6 @@ namespace oocl
 	}
 
 	/**
-	 * @fn	bool BerkeleySocket::bind( unsigned short usPort )
-	 *
 	 * @brief	Binds the socket to the given port, used for UDP listening.
 	 *
 	 * @param	usPort	The port.
@@ -184,8 +174,6 @@ namespace oocl
 	}
 
 	/**
-	 * @fn	BerkeleySocket::~BerkeleySocket()
-	 *
 	 * @brief	Destructor.
 	 */
 	BerkeleySocket::~BerkeleySocket()
@@ -194,8 +182,6 @@ namespace oocl
 	}
 
 	/**
-	 * @fn	bool BerkeleySocket::isValid()
-	 *
 	 * @brief	Query if this socket is valid, i.e. the C socket could be created.
 	 *
 	 * @return	true if valid, false if not.
@@ -206,8 +192,6 @@ namespace oocl
 	}
 
 	/**
-	 * @fn	bool BerkeleySocket::isConnected()
-	 *
 	 * @brief	Query if this socket is connected.
 	 *
 	 * @return	true if connected, false if not.
@@ -236,8 +220,6 @@ namespace oocl
 	}
 
 	/**
-	 * @fn	bool BerkeleySocket::read( std::string& str, int count )
-	 *
 	 * @brief	Receives a package of maximum length count and stores it in a given string.
 	 *
 	 * @param	str		The string to write the received bytes into.
@@ -262,8 +244,6 @@ namespace oocl
 	}
 
 	/**
-	 * @fn	bool BerkeleySocket::read( char& c )
-	 *
 	 * @brief	Receive exactly one byte.
 	 *
 	 * @param	c	The reference to the read byte.
@@ -349,8 +329,6 @@ namespace oocl
 	}
 
 	/**
-	 * @fn	bool BerkeleySocket::write(std::string in)
-	 *
 	 * @brief	Send a package to the connected process.
 	 *
 	 * @param	in	The package as string.
@@ -363,8 +341,6 @@ namespace oocl
 	}
 
 	/**
-	 * @fn	bool BerkeleySocket::write(char in)
-	 *
 	 * @brief	Sends one byte to the connected process.
 	 *
 	 * @param	in	The byte to send.
@@ -377,8 +353,6 @@ namespace oocl
 	}
 
 	/**
-	 * @fn	bool BerkeleySocket::write(const char * in, int count)
-	 *
 	 * @brief	Sends a byte array to the connected process.
 	 *
 	 * @param	in   	The byte array.
@@ -417,8 +391,6 @@ namespace oocl
 	}
 
 	/**
-	 * @fn	bool BerkeleySocket::writeTo( std::string in, std::string host, unsigned short port )
-	 *
 	 * @brief	Sends a package .
 	 *
 	 * @param	in  	The package to send as string.
@@ -440,8 +412,6 @@ namespace oocl
 	}
 
 	/**
-	 * @fn	void BerkeleySocket::close()
-	 *
 	 * @brief	Closes this socket.
 	 */
 	void BerkeleySocket::close()
@@ -457,8 +427,6 @@ namespace oocl
 
 
 	/**
-	 * @fn	int BerkeleySocket::getCSocket()
-	 *
 	 * @brief	Get the sockets underlying C or Berkeley socket.
 	 *
 	 * @return	The Sockets underlying CSocket.
@@ -469,8 +437,6 @@ namespace oocl
 	}
 
 	/**
-	 * @fn	unsigned int BerkeleySocket::getConnectedIP()
-	 *
 	 * @brief	Get the IP this socket is connected to.
 	 *
 	 * @return	The IP this socket is connected to.
@@ -482,27 +448,25 @@ namespace oocl
 
 
 	/**
-	 * @fn	unsigned int BerkeleySocket::getAddrFromString(const char* hostnameOrIp)
-	 *
 	 * @brief	Gets the IP from a string, this can be an IP as string or a domain name.
 	 *
 	 * @param	hostnameOrIp	The hostname or ip.
 	 *
 	 * @return	The address from string.
 	 */
-	unsigned int BerkeleySocket::getAddrFromString( const char* hostnameOrIp )
+	unsigned int BerkeleySocket::getAddrFromString( const char* hostnameOrIP )
 	{
 		unsigned long ip;
 		hostent* he;
 
-		/* Parameter pr�fen */
-		if( hostnameOrIp == NULL )
+		// check parameter
+		if( hostnameOrIP == NULL )
 			return 0;
 
-		/* eine IP in hostnameOrIp ? */
-		ip = inet_addr( hostnameOrIp );
+		// IP inside hostnameOrIP
+		ip = inet_addr( hostnameOrIP );
 
-		/* bei einem fehler liefert inet_addr den R�ckgabewert INADDR_NONE */
+		// on error, inet_addr returns INADDR_NONE
 		if( ip != INADDR_NONE )
 		{
 			return ip;
@@ -511,15 +475,15 @@ namespace oocl
 		{
 			struct sockaddr_in addr;
 
-			/* Hostname in hostnameOrIp auflösen */
-			he = gethostbyname( hostnameOrIp );
+			// resolve the hostname in hostnameOrIP
+			he = gethostbyname( hostnameOrIP );
 			if( he == NULL )
 			{
 				return 0;
 			}
 			else
 			{
-				/*die 4 Bytes der IP von he nach addr kopieren */
+				// copy the 4 bytes of the IP into addr
 				std::memcpy( &(addr.sin_addr), he->h_addr_list[0], 4 );
 			}
 

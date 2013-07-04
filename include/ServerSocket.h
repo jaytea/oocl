@@ -24,12 +24,10 @@ subject to the following restrictions:
 namespace oocl
 {
 	/**
-	 * @class	ServerSocket
-	 *
 	 * @brief	Specialized server socket for receiving incoming connections.
 	 *
 	 * @author	Jörn Teuber
-	 * @date	3/1/2012
+	 * @date	1.3.2012
 	 */
 	class OOCL_EXPORTIMPORT ServerSocket : public SocketStub
 	{

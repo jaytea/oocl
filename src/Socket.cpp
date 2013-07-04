@@ -19,8 +19,6 @@ subject to the following restrictions:
 namespace oocl
 {
 	/**
-	 * @fn	Socket::Socket()
-	 *
 	 * @brief	Public constructor for a new, clean and unconnected socket.
 	 */
 	Socket::Socket()

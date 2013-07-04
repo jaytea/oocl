@@ -31,12 +31,10 @@ namespace oocl
 	
 #define MT_StandardMessage 1
 	/**
-	 * @class	StandardMessage
-	 *
 	 * @brief	A basic message which just holds a string as body.
 	 *
 	 * @author	Jörn Teuber
-	 * @date	3/1/2012
+	 * @date	1.3.2012
 	 */
 	class OOCL_EXPORTIMPORT StandardMessage : public Message
 	{
@@ -68,8 +66,6 @@ namespace oocl
 	
 #define MT_SubscribeMessage 2
 	/**
-	 * @class	SubscribeMessage
-	 *
 	 * @brief	Message for subscribing a given message type at the receiver.
 	 *
 	 * @author	Jörn Teuber
@@ -104,8 +100,6 @@ namespace oocl
 	
 #define MT_ConnectMessage 3
 	/**
-	 * @class	ConnectMessage
-	 *
 	 * @brief	Message that contains all necessary information for connecting.
 	 *
 	 * @author	Jörn Teuber
@@ -141,8 +135,6 @@ namespace oocl
 	
 #define MT_DisconnectMessage 4
 	/**
-	 * @class	DisconnectMessage
-	 *
 	 * @brief	Say goodbye to the receiver.
 	 *
 	 * @author	Jörn Teuber
@@ -171,8 +163,6 @@ namespace oocl
 	class Peer;
 #define MT_NewPeerMessage 5
 	/**
-	 * @class	NewPeerMessage
-	 *
 	 * @brief	In client message that gets sent whenever a new peer has connected.
 	 *
 	 * @author	Jörn Teuber

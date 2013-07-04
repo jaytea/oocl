@@ -32,7 +32,7 @@ namespace oocl
 	 * @brief	a simple logger class with multiple log support.
 	 *
 	 * @author	Jörn Teuber
-	 * @date	9/14/2011
+	 * @date	14.9.2011
 	 */
 	class Log
 	{

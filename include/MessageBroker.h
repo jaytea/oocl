@@ -38,8 +38,6 @@ EXPIMP_TEMPLATE template class OOCL_EXPORTIMPORT std::vector<oocl::MessageBroker
 namespace oocl
 {
 	/**
-	 * @class	MessageBroker
-	 *
 	 * @brief	Manages the delivery of messages to all listeners who subscribed for it.
 	 * 			
 	 * @note	To subscribe for a specific message type call MessageBroker::getBrokerFor(messageType)->registerListener(this). 

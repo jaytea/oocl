@@ -41,7 +41,7 @@ namespace oocl
 	 * @note	To create a peer call Peer2PeerNetwork::addPeer(...).
 	 *
 	 * @author	Jörn Teuber
-	 * @date	12/9/2011
+	 * @date	9.12.2011
 	 */
 	class OOCL_EXPORTIMPORT Peer : public MessageListener
 	{
@@ -57,7 +57,7 @@ namespace oocl
 
 		// getter
 		bool	isConnected();
-		PeerID	getPeerID()		{ return m_uiPeerID; }
+		PeerID	getPeerID();
 
 		unsigned int	getIP();
 		unsigned short 	getListeningPort();

@@ -29,19 +29,17 @@ subject to the following restrictions:
 namespace oocl
 {
 	/**
-	 * @class	Peer2PeerNetwork
-	 *
 	 * @brief	Manager class for a message based peer2peer network.
 	 * 			
 	 * @note	sends message: NewPeerMessage
 	 *
 	 * @author	Jörn Teuber
-	 * @date	12/8/2011
+	 * @date	8.12.2011
 	 */
 	class OOCL_EXPORTIMPORT Peer2PeerNetwork : public Thread
 	{
 	public:
-		Peer2PeerNetwork( unsigned short usListeningPort, PeerID uiPeerID ); 
+		Peer2PeerNetwork( unsigned short usListeningPort, PeerID uiUserID );
 		virtual ~Peer2PeerNetwork(void);
 
 		Peer* addPeer( std::string strHostname, unsigned short usPeerPort );
