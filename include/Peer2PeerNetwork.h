@@ -53,8 +53,8 @@ namespace oocl
 		// getter
 		Peer*				getPeerByID( PeerID uiPeerID );
 		unsigned int		getPeersIP( PeerID uiPeerID );
-		std::list<Peer*>*	getPeerList() { return &m_lpPeers; }
-		unsigned int		getUserID() { return m_uiUserID; }
+		std::list<Peer*>*	getPeerList();
+		unsigned int		getUserID();
 		
 	protected:
 		virtual void run();

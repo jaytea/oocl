@@ -12,21 +12,16 @@ subject to the following restrictions:
 2. Altered source versions must be plainly marked as such, and must not be misrepresented as being the original software.
 3. This notice may not be removed or altered from any source distribution.
 */
-// This file was written by J�rgen Lorenz and J�rn Teuber
+// This file was written by Jörgen Lorenz and Jörn Teuber
 
 #include "Socket.h"
 
 namespace oocl
 {
 	/**
-	 * @fn	Socket::Socket( int iSockType )
+	 * @fn	Socket::Socket()
 	 *
 	 * @brief	Public constructor for a new, clean and unconnected socket.
-	 *
-	 * @author	J�rn Teuber
-	 * @date	3/2/2012
-	 *
-	 * @param	iSockType	Protocoll used by the socket, TCP = SOCK_STREAM, UDP = SOCK_DGRAM.
 	 */
 	Socket::Socket()
 		: SocketStub()

@@ -30,11 +30,12 @@ subject to the following restrictions:
 namespace oocl
 {
 
+	/**
+	 * @brief	typedef for the unique IDs of peers.
+	 */
 	typedef unsigned int PeerID;
 
 	/**
-	 * @class	Peer
-	 *
 	 * @brief	This class manages one peer in the peer 2 peer network.
 	 * 			
 	 * @note	To create a peer call Peer2PeerNetwork::addPeer(...).

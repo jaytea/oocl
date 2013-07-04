@@ -9,7 +9,11 @@
 
 namespace oocl
 {
-
+	/**
+	 * @fn	Mutex::Mutex()
+	 *
+	 * @brief	Constructor.
+	 */
 	Mutex::Mutex()
 		: m_bLocked( false )
 	{
@@ -20,6 +24,12 @@ namespace oocl
 #endif
 	}
 
+
+	/**
+	 * @fn	Mutex::~Mutex()
+	 *
+	 * @brief	Destructor.
+	 */
 	Mutex::~Mutex()
 	{
 		m_bLocked = false;
@@ -27,6 +37,11 @@ namespace oocl
 	}
 
 
+	/**
+	 * @fn	Mutex::lock()
+	 *
+	 * @brief	Locks the mutex, blocks if it is already locked at the moment.
+	 */
 	void Mutex::lock()
 	{
 #if defined USE_CPP11
@@ -39,6 +54,13 @@ namespace oocl
 		m_bLocked = true;
 	}
 
+	/**
+	 * @fn	Mutex::try_lock()
+	 *
+	 * @brief	If the mutex is not locked, locks the mutex and returns true, else returns immediatly without locking and returns false.
+	 *
+	 * @return 	True if the mutex is successfully locked, true if it was already locked.
+	 */
 	bool Mutex::try_lock()
 	{
 		if( !m_bLocked )
@@ -52,6 +74,11 @@ namespace oocl
 #endif
 	}
 
+	/**
+	 * @fn	Mutex::unlock()
+	 *
+	 * @brief	Unlocks the mutex.
+	 */
 	void Mutex::unlock()
 	{
 #if defined USE_CPP11

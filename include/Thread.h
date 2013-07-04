@@ -40,7 +40,9 @@ namespace oocl
 	/**
 	 * @class	Thread
 	 *
-	 * @brief	Thread.
+	 * @brief	Wrapper class for threads on different platforms.
+	 *
+	 * @note	If USE_CPP11 is defined it uses the c++11 std::thread, else a platform specific implementation.
 	 *
 	 * @author	Jörn Teuber
 	 * @date	23.11.2011
@@ -73,7 +75,7 @@ namespace oocl
 		void setPriority( EPriority iPriority );
 
 		// getter
-		EPriority  getPriority() { return m_iThreadPriority;}
+		EPriority  getPriority();
 		bool isAlive();
 		
 		// for calling from inside the thread
@@ -81,6 +83,14 @@ namespace oocl
 		 
 	protected:
 		
+
+		/**
+		 * @fn	void Thread::run()
+		 *
+		 * @brief	This is the method called inside the thread.
+		 *
+		 * @note	Overwrite this with your thread code.
+		 */
 		virtual void run() = 0;
 		
 #if defined USE_CPP11

@@ -25,8 +25,6 @@ namespace oocl
 
 
 	/**
-	 * @fn	Log::Log( std::string strLogName )
-	 *
 	 * @brief	Constructor.
 	 *
 	 * @param	strLogName	Name of the log.
@@ -41,8 +39,6 @@ namespace oocl
 
 
 	/**
-	 * @fn	Log::~Log(void)
-	 *
 	 * @brief	Destructor.
 	 */
 	Log::~Log(void)
@@ -53,8 +49,6 @@ namespace oocl
 
 
 	/**
-	 * @fn	Log* Log::getLog( std::string strLogName )
-	 *
 	 * @brief	get the log with the given name.
 	 *
 	 * @param	strLogName	Name of the log.
@@ -75,8 +69,6 @@ namespace oocl
 	}
 	
 	/**
-	 * @fn	Log* Log::getLog( std::string strLogName )
-	 *
 	 * @brief	get a reference to the log with the given name.
 	 *
 	 * @param	strLogName	Name of the log.
@@ -90,8 +82,6 @@ namespace oocl
 
 
 	/**
-	 * @fn	Log* Log::getDefaultLog()
-	 *
 	 * @brief	Gets the default log.
 	 *
 	 * @return	null if it fails, else the default log.
@@ -102,8 +92,6 @@ namespace oocl
 	}
 
 	/**
-	 * @fn	Log* Log::getDefaultLogRef()
-	 *
 	 * @brief	Get a reference to the default log.
 	 *
 	 * @return	null if it fails, else the default log.
@@ -115,8 +103,6 @@ namespace oocl
 
 
 	/**
-	 * @fn	void Log::setDefaultLogName( const std::string strDefaultLogName )
-	 *
 	 * @brief	Sets the name of the default log.
 	 *
 	 * @param	strDefaultLogName	The name of the default log.
@@ -128,14 +114,12 @@ namespace oocl
 
 
 	/**
-	 * @fn	bool Log::logMessage( const std::string strMessage, int iErrorLevel = 0 )
-	 *
 	 * @brief	Logs a message as info if no second parameter is given.
 	 * 			
 	 * @note	in debug mode every message will be written to the standard output and directly to the logfile.
 	 *
-	 * @param	strMessage 	Message to log
-	 * @param	iErrorLevel	(optional) error level.
+	 * @param	strMessage 		Message to log
+	 * @param	elErrorLevel	(optional) error level.
 	 *
 	 * @return	true if the message was logged, false if not.
 	 */
@@ -156,8 +140,6 @@ namespace oocl
 
 
 	/**
-	 * @fn	bool Log::logInfo( const std::string strInfo )
-	 *
 	 * @brief	Same as logMessage(strInfo) but possibly a little bit faster.
 	 *
 	 * @param	strInfo	The info.
@@ -179,8 +161,6 @@ namespace oocl
 
 
 	/**
-	 * @fn	inline bool Log::logWarning( const std::string strWarning )
-	 *
 	 * @brief	Same as logMessage(..., EL_WARNING), but faster and lazier.
 	 *
 	 * @param	strWarning	The warning.
@@ -202,8 +182,6 @@ namespace oocl
 	
 
 	/**
-	 * @fn	inline bool Log::logError( const std::string strError )
-	 *
 	 * @brief	Same as logMessage(..., EL_ERROR), but faster and lazier.
 	 *
 	 * @param	strError	The error message.
@@ -225,8 +203,6 @@ namespace oocl
 	
 
 	/**
-	 * @fn	inline bool Log::logFatalError( const std::string strError )
-	 *
 	 * @brief	Same as logMessage(..., EL_FATAL_ERROR), but faster and lazier.
 	 *
 	 * @param	strError	The error message.
@@ -248,8 +224,6 @@ namespace oocl
 
 
 	/**
-	 * @fn	bool Log::flush()
-	 *
 	 * @brief	writes the current log to the file so that it is safe.
 	 */
 	void Log::flush()
@@ -264,8 +238,6 @@ namespace oocl
 
 
 	/**
-	 * @fn	void Log::setLogLevel( EErrorLevel elLowestLoggedLevel )
-	 *
 	 * @brief	Sets the lowest message level that will still be logged.
 	 * 			
 	 * @note	This call effects all subsequent calls of the logging methods. 
@@ -298,25 +270,39 @@ namespace oocl
 	}
 	
 	/**
-	 * @brief	Stream operator for function pointers for the manipulators
+	 * @brief	Stream operator for function pointers for the manipulators.
 	 * 
-     * @param	logmanipulator	function pointer to the manipulator, i.e. oocl::endl
+     * @param	logmanipulator	function pointer to the manipulator, i.e. oocl::endl.
 	 * 
-     * @return	a reference to this log
+     * @return	a reference to this log.
      */
 	Log& Log::operator << (Log& (*logmanipulator)(Log&) ) 
 	{ 
 		return logmanipulator(*this);
 	}
 	
-		
+
+	/**
+	 * @brief	Stream operator for inserting char arrays into the log.
+	 *
+     * @param	pc	pointer to a char array to insert into the log.
+	 *
+     * @return	a reference to this log.
+     */
 	Log& Log::operator << (const char* pc)
 	{
 		if( m_elLastStreamLogLvl <= sm_uiMaxLogLevel )
 			m_ssLogStream << pc;
 		return *this;
 	}
-	
+
+	/**
+	 * @brief	Stream operator for inserting strings into the log.
+	 *
+     * @param	str		a string to insert into the log.
+	 *
+     * @return	a reference to this log.
+     */
 	Log& Log::operator << (const std::string str)
 	{
 		if( m_elLastStreamLogLvl <= sm_uiMaxLogLevel )
@@ -325,20 +311,41 @@ namespace oocl
 	}
 	
 
+	/**
+	 * @brief	Stream operator for inserting boolean values into the log.
+	 *
+     * @param	b	a bool to insert into the log.
+	 *
+     * @return	a reference to this log.
+     */
 	Log& Log::operator << (const bool b)
 	{
 		if( m_elLastStreamLogLvl <= sm_uiMaxLogLevel )
 			m_ssLogStream << b;
 		return *this;
 	}
-	
+
+	/**
+	 * @brief	Stream operator for inserting floating point values into the log.
+	 *
+     * @param	f	a float to insert into the log.
+	 *
+     * @return	a reference to this log.
+     */
 	Log& Log::operator << (const float f)
 	{
 		if( m_elLastStreamLogLvl <= sm_uiMaxLogLevel )
 			m_ssLogStream << f;
 		return *this;
 	}
-	
+
+	/**
+	 * @brief	Stream operator for inserting double precision floats into the log.
+	 *
+     * @param	d	a double to insert into the log.
+	 *
+     * @return	a reference to this log.
+     */
 	Log& Log::operator << (const double d)
 	{
 		if( m_elLastStreamLogLvl <= sm_uiMaxLogLevel )
@@ -347,41 +354,83 @@ namespace oocl
 	}
 	
 
+	/**
+	 * @brief	Stream operator for inserting short integers into the log.
+	 *
+     * @param	i	a short int to insert into the log.
+	 *
+     * @return	a reference to this log.
+     */
 	Log& Log::operator << (const short int i)
 	{
 		if( m_elLastStreamLogLvl <= sm_uiMaxLogLevel )
 			m_ssLogStream << i;
 		return *this;
 	}
-	
+
+	/**
+	 * @brief	Stream operator for inserting short unsigned integers into the log.
+	 *
+     * @param	i	a short unsigned int to insert into the log.
+	 *
+     * @return	a reference to this log.
+     */
 	Log& Log::operator << (const unsigned short int i)
 	{
 		if( m_elLastStreamLogLvl <= sm_uiMaxLogLevel )
 			m_ssLogStream << i;
 		return *this;
 	}
-	
+
+	/**
+	 * @brief	Stream operator for inserting signed integers into the log.
+	 *
+     * @param	i	a signed integer to insert into the log.
+	 *
+     * @return	a reference to this log.
+     */
 	Log& Log::operator << (const int i)
 	{
 		if( m_elLastStreamLogLvl <= sm_uiMaxLogLevel )
 			m_ssLogStream << i;
 		return *this;
 	}
-	
+
+	/**
+	 * @brief	Stream operator for inserting unsigned integers into the log.
+	 *
+     * @param	i	an unsigned integer to insert into the log.
+	 *
+     * @return	a reference to this log.
+     */
 	Log& Log::operator << (const unsigned int i)
 	{
 		if( m_elLastStreamLogLvl <= sm_uiMaxLogLevel )
 			m_ssLogStream << i;
 		return *this;
 	}
-	
+
+	/**
+	 * @brief	Stream operator for inserting long (64bit) integers into the log.
+	 *
+     * @param	i	a long integer to insert into the log.
+	 *
+     * @return	a reference to this log.
+     */
 	Log& Log::operator << (const long long i)
 	{
 		if( m_elLastStreamLogLvl <= sm_uiMaxLogLevel )
 			m_ssLogStream << i;
 		return *this;
 	}
-	
+
+	/**
+	 * @brief	Stream operator for inserting long unsigned integers into the log.
+	 *
+     * @param	i	a long unsigned integers to insert into the log.
+	 *
+     * @return	a reference to this log.
+     */
 	Log& Log::operator << (const unsigned long long i)
 	{
 		if( m_elLastStreamLogLvl <= sm_uiMaxLogLevel )
@@ -389,7 +438,12 @@ namespace oocl
 		return *this;
 	}
 	
-	
+
+	/**
+	 * @brief	Get the current time stamp to insert into the log.
+	 *
+     * @return	A string containing the current time stamp.
+     */
 	std::string Log::getTime()
 	{
 		char acTime[9];
@@ -400,6 +454,13 @@ namespace oocl
 	}
 
 
+	/**
+	 * @brief	Inserts a new-line into the current log stream and flushes it.
+	 *
+	 * @param log	Affected log. As this is a manipulator, it is designed to be used without any arguments in conjunction with the "<<" operators.
+	 *
+	 * @return	The log.
+	 */
 	Log& endl(Log& log)
 	{ 
 		while( log.m_bFlushing );

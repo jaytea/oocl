@@ -53,6 +53,16 @@ namespace oocl
 		SocketStub();
 		virtual ~SocketStub();
 
+
+		/**
+		 * @fn	int SocketStub::getCSocket()
+		 *
+		 * @brief	Get the sockets underlying C or Berkeley socket.
+		 *
+		 * @note	Needs to be properly implemented in order for the socket to be used in the Peer2PeerNetwork and DirektConNetwork.
+		 *
+		 * @return	The Sockets underlying CSocket.
+		 */
 		virtual int getCSocket() = 0;
 		
 	private:

@@ -21,8 +21,6 @@ namespace oocl
 	unsigned int Peer::sm_uiNumPeers = 0;
 
 	/**
-	 * @fn	Peer::Peer( std::string strHostname, unsigned short usPeerPort )
-	 *
 	 * @brief	Constructor.
 	 *
 	 * @param	strHostname	The hostname.
@@ -43,8 +41,6 @@ namespace oocl
 
 
 	/**
-	 * @fn	Peer::Peer( unsigned int uiIP, unsigned short usPeerPort )
-	 *
 	 * @brief	Constructor.
 	 *
 	 * @param	uiIP	  	The ip.
@@ -65,8 +61,6 @@ namespace oocl
 
 
 	/**
-	 * @fn	Peer::~Peer(void)
-	 *
 	 * @brief	Destructor.
 	 */
 	Peer::~Peer(void)
@@ -84,8 +78,6 @@ namespace oocl
 
 
 	/**
-	 * @fn	bool Peer::connect( unsigned short usListeningPort, unsigned int uiPeerID )
-	 *
 	 * @brief	Connects.
 	 *
 	 * @param	usListeningPort	The listening port.
@@ -152,9 +144,6 @@ namespace oocl
 
 
 	/**
-	 * @fn	bool Peer::connected( Socket* pTCPSocket, ConnectMessage* pMsg,
-	 * 		unsigned short usListeningPort, PeerID uiUserID )
-	 *
 	 * @brief	Called when someone connects.
 	 *
 	 * @param [in]	pTCPSocket		The connected tcp socket.
@@ -214,8 +203,6 @@ namespace oocl
 
 
 	/**
-	 * @fn	bool Peer::disconnect()
-	 *
 	 * @brief	Disconnects this peer.
 	 *
 	 * @return	true if it succeeds, false if it fails.
@@ -244,7 +231,11 @@ namespace oocl
 		return true;
 	}
 
-
+	/**
+	 * @brief	Connects the sockets with the data known from calls to one of the connect methods.
+	 *
+	 * @return	true if it succeeds, false if it fails.
+	 */
 	bool Peer::connectSockets()
 	{
 		bool bUDPConnected = false, bTCPConnected = false;
@@ -279,11 +270,9 @@ namespace oocl
 
 
 	/**
-	 * @fn	bool Peer::cbMessage( Message* pMessage )
-	 *
 	 * @brief	Gets the messages to which the peer has subscribed.
 	 *
-	 * @param [in]	pMessage	The incoming message.
+	 * @param	pMessage [in]	The incoming message.
 	 *
 	 * @return	true if it succeeds, false if it fails.
 	 */
@@ -302,11 +291,9 @@ namespace oocl
 
 
 	/**
-	 * @fn	bool Peer::sendMessage( Message* pMessage )
-	 *
 	 * @brief	Sends a message to the connected peer.
 	 *
-	 * @param [in]	pMessage	The message to send.
+	 * @param	pMessage [in]	The message to send.
 	 *
 	 * @return	true if it succeeds, false if it fails.
 	 */
@@ -360,8 +347,6 @@ namespace oocl
 
 
 	/**
-	 * @fn	bool Peer::subscribe( unsigned short usType )
-	 *
 	 * @brief	Subscribe a message type at the connected peer.
 	 *
 	 * @param	usType	The type.
@@ -375,11 +360,9 @@ namespace oocl
 
 
 	/**
-	 * @fn	bool Peer::receiveMessage( Message* pMessage )
-	 *
 	 * @brief	Called when a message of the connected peer was received.
 	 *
-	 * @param [in]	pMessage	The received message.
+	 * @param	pMessage [in]	The received message.
 	 *
 	 * @return	true if it succeeds, false if it fails.
 	 */
@@ -426,6 +409,11 @@ namespace oocl
 		return true;
 	}
 
+	/**
+	 * @brief	Checks whether the peer is truly connected and returns the status.
+	 *
+	 * @return	True if the peer is connected, false if not.
+	 */
 	bool Peer::isConnected()
 	{
 		if( m_ucConnectStatus == 2 )
@@ -441,6 +429,20 @@ namespace oocl
 		return false;
 	}
 
+	/**
+	 * @brief	Get this peers PeerID.
+	 * @return	This peers PeerID.
+	 */
+	PeerID	Peer::getPeerID()
+	{
+		return m_uiPeerID;
+	}
+
+	/**
+	 * @brief	Get the IP with which this peer is connected.
+	 *
+	 * @return	The peers IP.
+	 */
 	unsigned int Peer::getIP()
 	{
 		if( m_pSocketTCP != NULL )
@@ -449,12 +451,20 @@ namespace oocl
 		return 0;
 	}
 
+	/**
+	 * @brief	Get the port this peer is listening for UDP messages.
+	 *
+	 * @return	This peers listening port.
+	 */
 	unsigned short Peer::getListeningPort()
 	{
 		return m_usPort;
 	}
 
 
+	/**
+	 * @brief	Deactivate this peer and prevent it from sending and receiving messages.
+	 */
 	void Peer::deactivate()
 	{
 		m_mxSockets.lock();

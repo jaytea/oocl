@@ -69,17 +69,17 @@ namespace oocl
 		 *  |2 byte |2 byte |   |   .... 
 		 * => Length = length of the messageBody in bytes (as returned by getBodyLength() )
 		 */
-		virtual std::string		getMsgString()  const	{ int i=0; return std::string( (char*)&i, 4 ); }
-		virtual unsigned short	getBodyLength() const	{ return 0; }
+		virtual std::string		getMsgString()  const;
+		virtual unsigned short	getBodyLength() const;
 
-		void setSenderID( unsigned int uiSenderID ) { m_uiSenderID = uiSenderID; }
-		void setProtocoll( int iProtocoll ) { m_iProtocoll = iProtocoll; }
+		void setSenderID( unsigned int uiSenderID );
+		void setProtocoll( int iProtocol );
 
 		/// @brief return the type id of the message object
-		virtual unsigned short  getType()		const	{ return m_type; }
-		virtual int             getProtocoll() 	const	{ return m_iProtocoll; }
-		unsigned int			getSenderID() 	const	{ return m_uiSenderID; }
-		bool					isIncoming() 	const	{ return m_bIncoming; }
+		virtual unsigned short  getType()		const;
+		virtual int             getProtocoll() 	const;
+		unsigned int			getSenderID() 	const;
+		bool					isIncoming() 	const;
 
 	protected:
 		Message();

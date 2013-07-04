@@ -19,8 +19,6 @@ subject to the following restrictions:
 namespace oocl
 {
 	/**
-	 * @fn	DirectConNetwork::DirectConNetwork()
-	 *
 	 * @brief	Default constructor.
 	 */
 	DirectConNetwork::DirectConNetwork() :
@@ -31,8 +29,6 @@ namespace oocl
 	}
 
 	/**
-	 * @fn	DirectConNetwork::~DirectConNetwork()
-	 *
 	 * @brief	Destructor.
 	 */
 	DirectConNetwork::~DirectConNetwork()
@@ -48,14 +44,11 @@ namespace oocl
 	}
 
 	/**
-	 * @fn	bool DirectConNetwork::connect( std::string strHostname, unsigned short usPort,
-	 * 		unsigned short usListeningPort )
-	 *
-	 * @brief	Connects with another process.
+	 * @brief	Connects with another host with given name and port.
 	 *
 	 * @param	strHostname		The hostname as string (URL or IP).
 	 * @param	usHostPort	   	The port to connect to.
-	 * @param	usListeningPort The port on which the udp socket listens.
+	 * @param	usListeningPort The port on which the UDP socket listens on this machine.
 	 *
 	 * @return	true if it succeeds, false if it fails.
 	 */
@@ -90,8 +83,6 @@ namespace oocl
 	}
 
 	/**
-	 * @fn	bool DirectConNetwork::listen( unsigned short usListeningPort )
-	 *
 	 * @brief	Waits for a client to connect.
 	 *
 	 * @param	usListeningPort	The listening port.
@@ -144,8 +135,6 @@ namespace oocl
 	}
 
 	/**
-	 * @fn	bool DirectConNetwork::disconnect()
-	 *
 	 * @brief	Disconnects from the other process.
 	 *
 	 * @return	true if it succeeds, false if it fails.
@@ -164,8 +153,6 @@ namespace oocl
 	}
 
 	/**
-	 * @fn	bool DirectConNetwork::sendMessage( Message* pMessage )
-	 *
 	 * @brief	Sends a message to the connected process either over the standard protocoll or the protocoll specified in the message.
 	 *
 	 * @param [in]	pMessage	The message that you want to send.
@@ -198,8 +185,6 @@ namespace oocl
 	}
 
 	/**
-	 * @fn	bool DirectConNetwork::registerListener( MessageListener* pListener )
-	 *
 	 * @brief	Registers the listener described by pListener to this network so that the listener will receive all further messages.
 	 *
 	 * @param [in]	pListener	The object that you want to receive messages from the network.
@@ -218,8 +203,6 @@ namespace oocl
 	}
 
 	/**
-	 * @fn	bool DirectConNetwork::unregisterListener( MessageListener* pListener )
-	 *
 	 * @brief	Unregisters the specified listener.
 	 *
 	 * @param [in]	pListener	The listener that you want to unregister.
@@ -243,9 +226,18 @@ namespace oocl
 		return false;
 	}
 
+
 	/**
-	 * @fn	void DirectConNetwork::run()
-	 *
+	 * @brief	Returns the connection status of this connection.
+	 * @return	True, if this is connected, false if not.
+	 */
+	bool DirectConNetwork::isConnected()
+	{
+		return m_bConnected;
+	}
+
+
+	/**
 	 * @brief	implementation of the Thread run-method, listens for incoming messages.
 	 */
 	void DirectConNetwork::run()

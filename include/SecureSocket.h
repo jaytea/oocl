@@ -18,7 +18,12 @@
 
 namespace oocl
 {
-	
+	/**
+	 * @brief	Socket that uses OpenSSL to establish a secure connection.
+	 *
+	 * @author	Jörn Teuber
+	 * @date	7/4/2013
+	 */
 	class SecureSocket : public Socket
 	{
 	public:

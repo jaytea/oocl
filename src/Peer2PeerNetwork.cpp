@@ -19,9 +19,6 @@ subject to the following restrictions:
 namespace oocl
 {
 	/**
-	 * @fn	Peer2PeerNetwork::Peer2PeerNetwork( unsigned short usListeningPort,
-	 * 		unsigned int uiPeerID )
-	 *
 	 * @brief	Constructor.
 	 *
 	 * @param	usListeningPort	The port on which we are listening for new messages.
@@ -46,8 +43,6 @@ namespace oocl
 
 
 	/**
-	 * @fn	Peer2PeerNetwork::~Peer2PeerNetwork(void)
-	 *
 	 * @brief	Destructor.
 	 */
 	Peer2PeerNetwork::~Peer2PeerNetwork(void)
@@ -66,8 +61,6 @@ namespace oocl
 
 
 	/**
-	 * @fn	Peer* Peer2PeerNetwork::addPeer( std::string strHostname, unsigned short usPeerPort )
-	 *
 	 * @brief	Adds a peer to the network.
 	 *
 	 * @param	strHostname	The hostname.
@@ -87,8 +80,6 @@ namespace oocl
 
 
 	/**
-	 * @fn	Peer* Peer2PeerNetwork::addPeer( unsigned int uiIP, unsigned short usPeerPort )
-	 *
 	 * @brief	Adds a peer to the network.
 	 *
 	 * @param	uiIP	  	The ip.
@@ -108,8 +99,6 @@ namespace oocl
 
 
 	/**
-	 * @fn	void Peer2PeerNetwork::subPeer( PeerID uiPeerID )
-	 *
 	 * @brief	Disconnects a peer and removes it from the network.
 	 *
 	 * @param [in]	uiPeerID	The PeerID of the peer to remove.
@@ -128,8 +117,6 @@ namespace oocl
 
 
 	/**
-	 * @fn	void Peer2PeerNetwork::disconnect()
-	 *
 	 * @brief	Disconnects from all peers currently in the network and stops accepting incoming messages.
 	 */
 	void Peer2PeerNetwork::disconnect()
@@ -153,8 +140,6 @@ namespace oocl
 
 
 	/**
-	 * @fn	bool Peer2PeerNetwork::connectAndInsertPeer( Peer* pPeer )
-	 *
 	 * @brief	Connects an and insert peer, used by the addPeer methods.
 	 *
 	 * @param [in]	pPeer	The peer.
@@ -180,8 +165,6 @@ namespace oocl
 
 
 	/**
-	 * @fn	Peer* Peer2PeerNetwork::getPeerByID( unsigned int uiPeerID )
-	 *
 	 * @brief	Gets a peer by identifier.
 	 *
 	 * @param	uiPeerID	Identifier for the peer.
@@ -198,8 +181,6 @@ namespace oocl
 	}
 
 	/**
-	 * @fn	Peer* Peer2PeerNetwork::getPeersIP( unsigned int uiPeerID )
-	 *
 	 * @brief	Returns the IP of the Peer identified by the given ID.
 	 *
 	 * @param	uiPeerID	Identifier for the peer.
@@ -217,8 +198,28 @@ namespace oocl
 
 
 	/**
-	 * @fn	void Peer2PeerNetwork::run()
+	 * @brief	Returns the list of connected peers.
 	 *
+	 * @return	pointer to the list of connected peers.
+	 */
+	std::list<Peer*>* Peer2PeerNetwork::getPeerList()
+	{
+		return &m_lpPeers;
+	}
+
+
+	/**
+	 * @brief	Returns the PeerID of this user.
+	 *
+	 * @return	The PeerID of this user.
+	 */
+	unsigned int Peer2PeerNetwork::getUserID()
+	{
+		return m_uiUserID;
+	}
+
+
+	/**
 	 * @brief	Thread for managing incoming messages and connections.
 	 */
 	void Peer2PeerNetwork::run()
@@ -316,7 +317,6 @@ namespace oocl
 			// messages from the udp receiving socket will be pushed on the appropriate MessageBroker
 			if( FD_ISSET( m_pServerSocketUDP->getCSocket(), &selectSet ) )
 			{
-//				Log::getLog("oocl")->logInfo( "got message over udp" );
 				std::string strMsg;
 				if( !m_pServerSocketUDP->read( strMsg ) )
 				{

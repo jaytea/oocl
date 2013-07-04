@@ -29,8 +29,6 @@ subject to the following restrictions:
 namespace oocl
 {	
 	/**
-	 * @class	Log
-	 *
 	 * @brief	a simple logger class with multiple log support.
 	 *
 	 * @author	Jörn Teuber

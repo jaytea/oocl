@@ -236,13 +236,14 @@ namespace oocl
 	}
 
 	/**
-	 * @fn	std::string BerkeleySocket::read(int count)
+	 * @fn	bool BerkeleySocket::read( std::string& str, int count )
 	 *
-	 * @brief	Receives a package of count length at max and returns it as string.
+	 * @brief	Receives a package of maximum length count and stores it in a given string.
 	 *
+	 * @param	str		The string to write the received bytes into.
 	 * @param	count	The number of bytes to receive.
 	 *
-	 * @return	The received bytes as string.
+	 * @return	false if encountered any errors, else true.
 	 */
 	bool BerkeleySocket::read( std::string& str, int count )
 	{
@@ -261,11 +262,13 @@ namespace oocl
 	}
 
 	/**
-	 * @fn	char BerkeleySocket::readC()
+	 * @fn	bool BerkeleySocket::read( char& c )
 	 *
 	 * @brief	Receive exactly one byte.
 	 *
-	 * @return	The received byte.
+	 * @param	c	The reference to the read byte.
+	 *
+	 * @return	false if encountered any errors, else true.
 	 */
 	bool BerkeleySocket::read( char& c )
 	{
@@ -274,12 +277,10 @@ namespace oocl
 	}
 
 	/**
-	 * @fn	bool BerkeleySocket::readCA( char* pcBuf, int& count )
-	 *
 	 * @brief	Receives a package with max count size, returns a char array and stores the number of actually received bytes in readCount.
 	 *
-	 * @param	pcBuf			Pre-allocated buffer in which the received data will be written.
-	 * @param [in/out] count	The size of the buffer, will be set to the number of actually received bytes.
+	 * @param	pcBuf	Pre-allocated buffer in which the received data will be written.
+	 * @param  	count	The size of the buffer, will be set to the number of actually received bytes.
 	 *
 	 * @return	false if encountered any errors, else true.
 	 */
@@ -304,14 +305,13 @@ namespace oocl
 	}
 
 	/**
-	 * @fn	std::string BerkeleySocket::readFrom( int count, unsigned int* hostIP )
-	 *
 	 * @brief	Receives from an unconnected, i.e. UDP socket.
 	 *
-	 * @param	count		  	Maximum number of bytes to read.
-	 * @param [out]		hostIP	If non-null, the ip of the peer that sent the package.
+	 * @param	str		[out] The received bytes as string.
+	 * @param	count	Maximum number of bytes to read.
+	 * @param 	hostIP	If non-null, the ip of the peer that sent the package.
 	 *
-	 * @return	The received bytes as string.
+	 * @return	false if encountered any errors, else true.
 	 */
 	bool BerkeleySocket::readFrom( std::string& str, int count, unsigned int* hostIP )
 	{
@@ -363,7 +363,7 @@ namespace oocl
 	}
 
 	/**
-	 * @fn	bool BerkeleySocket::writeC(char in)
+	 * @fn	bool BerkeleySocket::write(char in)
 	 *
 	 * @brief	Sends one byte to the connected process.
 	 *
@@ -377,7 +377,7 @@ namespace oocl
 	}
 
 	/**
-	 * @fn	bool BerkeleySocket::writeCA(const char * in, int count)
+	 * @fn	bool BerkeleySocket::write(const char * in, int count)
 	 *
 	 * @brief	Sends a byte array to the connected process.
 	 *
@@ -454,6 +454,32 @@ namespace oocl
 		::closesocket(m_iSockFD);
 #endif
 	}
+
+
+	/**
+	 * @fn	int BerkeleySocket::getCSocket()
+	 *
+	 * @brief	Get the sockets underlying C or Berkeley socket.
+	 *
+	 * @return	The Sockets underlying CSocket.
+	 */
+	int BerkeleySocket::getCSocket()
+	{
+		return m_iSockFD;
+	}
+
+	/**
+	 * @fn	unsigned int BerkeleySocket::getConnectedIP()
+	 *
+	 * @brief	Get the IP this socket is connected to.
+	 *
+	 * @return	The IP this socket is connected to.
+	 */
+	unsigned int BerkeleySocket::getConnectedIP()
+	{
+		return m_addrData.sin_addr.s_addr;
+	}
+
 
 	/**
 	 * @fn	unsigned int BerkeleySocket::getAddrFromString(const char* hostnameOrIp)

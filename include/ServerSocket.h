@@ -41,16 +41,16 @@ namespace oocl
 
 		Socket * accept();
 
-		bool isValid() { return bValid; }
-		int getCSocket() { return sockfd; }
+		bool isValid();
+		int getCSocket();
 		
 	private:
-		struct sockaddr_in addr;
+		struct sockaddr_in m_sSockAddr;
 		//struct sockaddr_in6 addr6;
-		int sockfd;
+		int m_iSockFD;
 
-		bool bValid;
-		bool bBound;
+		bool m_bValid;
+		bool m_bBound;
 	};
 
 }

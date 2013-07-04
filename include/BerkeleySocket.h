@@ -85,15 +85,8 @@ namespace oocl
 
 		virtual void close();
 
-		virtual int getCSocket()
-		{
-			return m_iSockFD;
-		}
-
-		virtual unsigned int getConnectedIP()
-		{
-			return m_addrData.sin_addr.s_addr;
-		}
+		virtual int getCSocket();
+		virtual unsigned int getConnectedIP();
 
 	protected:
 		BerkeleySocket( int socket, struct sockaddr_in sock_addr );

@@ -11,6 +11,13 @@ namespace oocl
 	unsigned int SecureSocket::sm_uiSocketCounter = 0;
 	SSL_CTX* SecureSocket::sm_pCTX = NULL;
 
+	/**
+	 * @fn	SecureSocket::SecureSocket( bool bSecure )
+	 *
+	 * @brief	Public constructor for a new, clean and unconnected secure socket.
+	 *
+	 * @param 	bSecure		If true, a socket with SSL properties will be created.
+	 */
 	SecureSocket::SecureSocket( bool bSecure )
 			: 	m_pBio( NULL ),
 				m_bSecure( bSecure ),
@@ -65,6 +72,13 @@ namespace oocl
 		return connect( ss.str() );
 	}
 
+	/**
+	 * @fn	bool SecureSocket::connect( std::string strHostPort )
+	 *
+	 * @brief	Connects the socket to the given hostname and port in the format "hostname:port".
+	 *
+	 * @param	strHostPort	The hostname and port to connect to.
+	 */
 	bool SecureSocket::connect( std::string strHostPort )
 	{
 		m_strHostPort = strHostPort;

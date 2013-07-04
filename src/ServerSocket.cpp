@@ -19,52 +19,48 @@ subject to the following restrictions:
 namespace oocl
 {
 	/**
-	 * @fn	ServerSocket::ServerSocket()
-	 *
 	 * @brief	Default constructor.
 	 */
 	ServerSocket::ServerSocket()
 		: SocketStub(),
-		bValid( true ),
-		bBound( false )
+		m_bValid( true ),
+		m_bBound( false )
 	{
 		// create socket
-		sockfd = socket(AF_INET, SOCK_STREAM, 0);
+		m_iSockFD = socket(AF_INET, SOCK_STREAM, 0);
 #ifdef linux
-		if(sockfd < 0) {
+		if(m_iSockFD < 0) {
 			Log::getLog("oocl")->logError("ERROR opening socket");
-			bValid = false;
+			m_bValid = false;
 		}
 #else
-		if(sockfd == INVALID_SOCKET) {
+		if(m_iSockFD == INVALID_SOCKET) {
 			std::ostringstream os;
 			os << "ERROR opening socket! Error code: " << WSAGetLastError();
 			Log::getLog("oocl")->logError( os.str() );
-			bValid = false;
+			m_bValid = false;
 		}
 #endif
 	}
 
 
 	/**
-	 * @fn	bool ServerSocket::bind( unsigned short port )
-	 *
 	 * @brief	Binds the socket to the given port.
 	 *
-	 * @param	port	The port.
+	 * @param	port	The port this socket will be binded to.
 	 *
 	 * @return	true if it succeeds, false if it fails.
 	 */
 	bool ServerSocket::bind( unsigned short port )
 	{
-		if( bValid && !bBound )
+		if( m_bValid && !m_bBound )
 		{
-			addr.sin_family = AF_INET;
-			addr.sin_addr.s_addr = INADDR_ANY;
-			addr.sin_port = htons(port);
+			m_sSockAddr.sin_family = AF_INET;
+			m_sSockAddr.sin_addr.s_addr = INADDR_ANY;
+			m_sSockAddr.sin_port = htons(port);
 
 			// bind socket to port
-			int result = ::bind( sockfd, (struct sockaddr *) &addr, sizeof(addr) );
+			int result = ::bind( m_iSockFD, (struct sockaddr *) &m_sSockAddr, sizeof(m_sSockAddr) );
 #ifdef linux
 			if( result < 0 ){
 				Log::getLog("oocl")->logError("ERROR on binding");
@@ -81,7 +77,7 @@ namespace oocl
 #endif
 		
 			// start listening
-			listen(sockfd,10);
+			listen(m_iSockFD,10);
 
 			bBound = true;
 			return true;
@@ -92,15 +88,13 @@ namespace oocl
 
 
 	/**
-	 * @fn	ServerSocket::~ServerSocket()
-	 *
 	 * @brief	Destructor.
 	 */
 	ServerSocket::~ServerSocket()
 	{
-		bBound = false;
+		m_bBound = false;
 #ifdef linux
-		::close(sockfd);
+		::close(m_iSockFD);
 #else
 		::closesocket(sockfd);
 #endif
@@ -108,15 +102,13 @@ namespace oocl
 
 
 	/**
-	 * @fn	Socket * ServerSocket::accept()
-	 *
 	 * @brief	Waits for another process to connect.
 	 *
 	 * @return	A connected TCP socket.
 	 */
 	Socket * ServerSocket::accept()
 	{
-		if( bBound )
+		if( m_bBound )
 		{
 			struct sockaddr_in cli_addr;
 #ifdef linux
@@ -125,7 +117,7 @@ namespace oocl
 			int clilen = sizeof(cli_addr);
 #endif
 
-			int newsockfd = ::accept(sockfd, (struct sockaddr *) &cli_addr, &clilen);
+			int newsockfd = ::accept(m_iSockFD, (struct sockaddr *) &cli_addr, &clilen);
 #ifdef linux
 			if(newsockfd < 0) {
 				Log::getLog("oocl")->logError("ERROR on accept");
@@ -143,6 +135,28 @@ namespace oocl
 		}
 
 		return NULL;
+	}
+
+
+	/**
+	 * @brief	Check whether this socket was created successfully.
+	 *
+	 * @return	True if the socket is valid, false if not.
+	 */
+	bool ServerSocket::isValid()
+	{
+		return m_bValid;
+	}
+
+
+	/**
+	 * @brief	Get the sockets underlying C or Berkeley socket.
+	 *
+	 * @return	The Sockets underlying CSocket.
+	 */
+	int ServerSocket::getCSocket()
+	{
+		return m_iSockFD;
 	}
 
 }

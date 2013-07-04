@@ -69,8 +69,6 @@ namespace oocl
 	 * @fn	void Thread::sleep( int iMilliseconds )
 	 *
 	 * @brief	Blocks the thread for a specified time.
-	 * 			
-	 * @note	Only call this from _inside_ the thread method!
 	 *
 	 * @param	iMilliseconds	milliseconds to sleep or 0 to pass the current CPU timeslot to the next thread or process.
 	 */
@@ -81,6 +79,21 @@ namespace oocl
 #else
 		Sleep(iMilliseconds);
 #endif
+	}
+
+
+	/**
+	 * @fn	EPriority Thread::getPriority()
+	 *
+	 * @brief	Get the threads priority.
+	 *
+	 * @note	A Thread built with USE_CPP11 will always return TP_Normal, as std::threads do not have a priority.
+	 *
+	 * @return	The threads current priority.
+	 */
+	Thread::EPriority Thread::getPriority()
+	{
+		return m_iThreadPriority;
 	}
 
 
